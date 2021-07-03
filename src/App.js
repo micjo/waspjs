@@ -7,6 +7,7 @@ import 'bootstrap/dist/js/bootstrap.min';
 
 import {Rbs} from './pages/rbs.js'
 import {Dashboard} from "./pages/dashboard";
+import {Aml} from "./pages/aml";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -21,6 +22,14 @@ export default function App() {
     );
 }
 
+function NavLi(props) {
+    return (
+        <li className="nav-item ms-2 me-2 flex-nowrap">
+            <NavLink exact to={props.url} href={props.url} className="nav-link">{props.body}</NavLink>
+        </li>
+    );
+}
+
 function NavigationBar() {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark navbar-sm">
@@ -32,12 +41,9 @@ function NavigationBar() {
                 </button>
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item ms-2 me-2 flex-nowrap">
-                            <NavLink exact to="/" href="/" className="nav-link">Dashboard</NavLink>
-                        </li>
-                        <li className="nav-item ms-2 me-2 flex-nowrap">
-                            <NavLink exact to="/rbs" href="/rbs" className="nav-link">RBS</NavLink>
-                        </li>
+                        <NavLi url="/" body="Dashboard"/>
+                        <NavLi url="/rbs" body="RBS"/>
+                        <NavLi url="/aml" body="AML"/>
                     </ul>
                 </div>
             </div>
@@ -50,6 +56,11 @@ function PageContent() {
         <div className="fluid-container ms-3 me-3 mb-3">
             <Switch>
                 <Route path="/rbs"><Rbs /></Route>
+                <Route path="/aml"><Aml
+                    url="http://localhost:8000/api/aml_x_y"
+                    names={["X", "Y"]}
+
+                /></Route>
                 <Route path="/"> <Dashboard /></Route>
             </Switch>
         </div>);

@@ -8,9 +8,7 @@ import {onChangeSetInt} from "../conversions";
 export function AmlCard(props) {
     const [data, setData] = useState({});
     useEffect(() => {
-        const interval = setInterval(async () => {
-            setData(await getJson(props.url))
-        }, 1000);
+        const interval = setInterval(async () => {setData(await getJson(props.url))}, 1000);
         return () => clearInterval(interval);
     }, [props.url]);
 

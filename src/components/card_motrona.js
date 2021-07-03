@@ -29,7 +29,6 @@ export default function MotronaCard(props) {
             <TableRow items={["Target Charge (nC)", data["target_charge(nC)"],
                 <InputButton text ="Set" onInputChange={onTargetChange} callback={async() => {
                     let json_response = await sendRequest(props.url, {"target_charge": targetInput})
-                    console.log(json_response);
                     setData(json_response);
                     }
                     }/>

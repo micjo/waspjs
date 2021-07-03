@@ -8,5 +8,4 @@ export default function RbsCard(props) {
         <RootCard title="RBS" prefix="rbs" brief_status="brief_status" HwResponse={data} active={false}
                   sanity_status="brief" url={props.url}>
         </RootCard>);
-
 }
