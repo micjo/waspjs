@@ -43,7 +43,9 @@ function NavigationBar() {
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <NavLi url="/" body="Dashboard"/>
                         <NavLi url="/rbs" body="RBS"/>
-                        <NavLi url="/aml" body="AML"/>
+                        <NavLi url="/aml_x_y" body="AML X Y"/>
+                        <NavLi url="/aml_phi_zeta" body="AML Phi Zeta"/>
+                        <NavLi url="/aml_det_theta" body="AML Det Theta"/>
                     </ul>
                 </div>
             </div>
@@ -53,14 +55,21 @@ function NavigationBar() {
 
 function PageContent() {
     return (
-        <div className="fluid-container ms-3 me-3 mb-3">
+        <div className="fluid-container mt-3 ms-3 me-3 mb-3">
             <Switch>
                 <Route path="/rbs"><Rbs /></Route>
-                <Route path="/aml"><Aml
+                <Route path="/aml_x_y"><Aml
                     url="http://localhost:8000/api/aml_x_y"
-                    names={["X", "Y"]}
-
-                /></Route>
+                    names={["X", "Y"]}/>
+                </Route>
+                <Route path="/aml_phi_zeta"><Aml
+                    url="http://localhost:8000/api/aml_phi_zeta"
+                    names={["Phi", "Zeta"]}/>
+                </Route>
+                <Route path="/aml_det_theta"><Aml
+                    url="http://localhost:8000/api/aml_det_theta"
+                    names={["Detector", "Theta"]}/>
+                </Route>
                 <Route path="/"> <Dashboard /></Route>
             </Switch>
         </div>);

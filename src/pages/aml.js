@@ -1,7 +1,17 @@
 import {TableHeader, TableRow} from "../components/table_elements";
-import {ButtonSpinner, IntInputButton, SwitchSpinner} from "../components/button_spinner";
+import {ButtonSpinner, IntInputButton, Toggle} from "../components/button_spinner";
 import {getJson, sendRequest} from "../http_helper";
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function doNothing() {
+    console.log('Taking a break...');
+    await sleep(2000);
+    console.log('Two seconds later, showing sleep in a loop...');
+}
 
 
 function FirstPositionRow(props) {
@@ -10,8 +20,8 @@ function FirstPositionRow(props) {
             [
                 props.name,
                 props.value,
-                <IntInputButton text="Set" value={props.value} callback={async () => {
-                    await sendRequest(props.url, {"set_m1_target_position": props.value})
+                <IntInputButton text="Set" value={props.valueSet} callback={async () => {
+                    await sendRequest(props.url, {"set_m1_target_position": props.valueSet})
                 }}/>
             ]}
         />);
@@ -23,8 +33,8 @@ function SecondPositionRow(props) {
             [
                 props.name,
                 props.value,
-                <IntInputButton text="Set" value={props.value} callback={async () => {
-                    await sendRequest(props.url, {"set_m2_target_position": props.value})
+                <IntInputButton text="Set" value={props.valueSet} callback={async () => {
+                    await sendRequest(props.url, {"set_m2_target_position": props.valueSet})
                 }}/>
             ]}
         />);
@@ -75,12 +85,53 @@ function ContinueButton(props) {
     );
 }
 
-function FirstControl(props) {
-
+function SecondControl(props) {
     const [newStepCounter, setNewStepCounter] = useState('');
     const [newMotorPosition, setNewMotorPosition] = useState('');
     const [newOffset, setNewOffset] = useState('');
+    return (
+        <>
+            <TableRow items={["Temperature", props.data["second_temperature"],
+                <ButtonSpinner text="Get Temperature" style="btn-sm float-end" callback={async () => {
+                    await sendRequest(props.url, {"get_m2_temperature": true})
+                }}/>]}/>
 
+            <TableRow items={["Position", props.data["motor_2_position"],
+                <ButtonSpinner text="Get Position" style="btn-sm float-end" callback={async () => {
+                    await sendRequest(props.url, {"get_m2_position": true})
+                }}/>]}/>
+            <TableRow items={["Redefine Step Counter", props.data["motor_2_steps"],
+                <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}
+                                callback={async () => {
+                                    await sendRequest(props.url, {"set_m2_step_counter": newStepCounter});
+                                }}/>
+            ]}/>
+            <TableRow items={["Redefine offset", props.data["motor_2_offset"],
+                <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
+                                callback={async () => {
+                                    await sendRequest(props.url, {"set_m2_offset": newOffset});
+                                }}/>
+            ]}/>
+            <TableRow items={["Redefine Motor Position", props.data["motor_2_position"],
+                <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
+                                callback={async () => {
+                                    await sendRequest(props.url, {"set_m2_position": newMotorPosition});
+                                }}/>
+            ]}/>
+            <TableRow items={["Updating Position", props.data["motor_2_updating_position"] ? "True" : "False",
+                <Toggle data={props.data} url={props.url} keyGet="motor_2_updating_position"
+                        keySet="toggle_get_m2_position" setData={props.setData}/>]}/>
+            <TableRow items={["Updating Temperature", props.data["motor_2_updating_temperature"]? "True":"False",
+                <Toggle data={props.data} url={props.url} keyGet="motor_2_updating_temperature"
+                        keySet="toggle_get_m2_temperature" setData={props.setData}/>]}/>
+        </>
+    );
+}
+
+function FirstControl(props) {
+    const [newStepCounter, setNewStepCounter] = useState('');
+    const [newMotorPosition, setNewMotorPosition] = useState('');
+    const [newOffset, setNewOffset] = useState('');
     return (
         <>
             <TableRow items={["Temperature", props.data["first_temperature"],
@@ -91,31 +142,33 @@ function FirstControl(props) {
             <TableRow items={["Position", props.data["motor_1_position"],
                 <ButtonSpinner text="Get Position" style="btn-sm float-end" callback={async () => {
                     await sendRequest(props.url, {"get_m1_position": true})
-        }}/>]}/>
+                }}/>]}/>
             <TableRow items={["Redefine Step Counter", props.data["motor_1_steps"],
                 <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}
-                                callback={ async() => {
+                                callback={async () => {
                                     await sendRequest(props.url, {"set_m1_step_counter": newStepCounter});
                                 }}/>
-                ]}/>
+            ]}/>
             <TableRow items={["Redefine offset", props.data["motor_1_offset"],
                 <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
-                                callback={ async() => {
+                                callback={async () => {
                                     await sendRequest(props.url, {"set_m1_offset": newOffset});
                                 }}/>
             ]}/>
             <TableRow items={["Redefine Motor Position", props.data["motor_1_position"],
                 <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
-                                callback={ async() => {
+                                callback={async () => {
                                     await sendRequest(props.url, {"set_m1_position": newMotorPosition});
                                 }}/>
             ]}/>
-            <TableRow items={["Updating Position", props.data["motor_1_updating_position"],
-                <SwitchSpinner text="Update Position"/>]}/>
-            <TableRow items={["Updating Temperature", props.data["motor_1_updating_temperature"], ""]}/>
+            <TableRow items={["Updating Position", props.data["motor_1_updating_position"] ? "True" : "False",
+                <Toggle data={props.data} url={props.url} keyGet="motor_1_updating_position"
+                        keySet="toggle_get_m1_position" setData={props.setData}/>]}/>
+            <TableRow items={["Updating Temperature", props.data["motor_1_updating_temperature"]? "True":"False",
+            <Toggle data={props.data} url={props.url} keyGet="motor_1_updating_temperature"
+                    keySet="toggle_get_m1_temperature" setData={props.setData}/>]}/>
         </>
     );
-
 }
 
 export function Aml(props) {
@@ -148,11 +201,11 @@ export function Aml(props) {
                 <TableHeader items={["Identifier", "Value", "Control"]}/>
                 <tbody>
                 <TableRow items={["Request acknowledge", data["request_id"], ""]}/>
-                <TableRow items={["Request Finished", data["request_finished"], ""]}/>
+                <TableRow items={["Request Finished", data["request_finished"] ? "True" : "False", ""]}/>
                 <TableRow items={["Error", data["error"], ""]}/>
                 <TableRow items={["Expiry Date", data["expiry_date"], ""]}/>
-                <FirstPositionRow name={props.names[0]} value={firstTarget} url={props.url}/>
-                <SecondPositionRow name={props.names[1]} value={secondTarget} url={props.url}/>
+                <FirstPositionRow name={props.names[0]} value={data["motor_1_position"]} valueSet={firstTarget} url={props.url}/>
+                <SecondPositionRow name={props.names[1]} value={data["motor_2_position"]} valueSet={secondTarget} url={props.url}/>
                 </tbody>
             </table>
 
@@ -171,23 +224,23 @@ export function Aml(props) {
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={[props.names[0] + " Control", "Value", "Control"]}/>
                 <tbody>
-                <FirstControl data={data} url={props.url}/>
+                <FirstControl data={data} url={props.url} setData={setData}/>
                 </tbody>
                 <TableHeader items={[props.names[1] + " Control", "Value", "Control"]}/>
                 <tbody>
-                <TableRow items={["Temperature", "", ""]}/>
-                <TableRow items={["Position Finished", "", ""]}/>
-                <TableRow items={["Redefine Step Counter", "", ""]}/>
-                <TableRow items={["Redefine Motor Position", "", ""]}/>
-                <TableRow items={["Redefine offset", "", ""]}/>
-                <TableRow items={["Updating Position", "", ""]}/>
-                <TableRow items={["Updating Temperature", "", ""]}/>
+                <SecondControl data={data} url={props.url} setData={setData}/>
                 </tbody>
                 <TableHeader items={["Debug Control", "Value", "Control"]}/>
                 <tbody>
-                <TableRow items={["Debugging rs232:", "", ""]}/>
-                <TableRow items={["Debugging Broker:", "", ""]}/>
-                <TableRow items={["Debugging Aml:", "", ""]}/>
+                <TableRow items={["Debugging rs232:", data["debug_rs232"]? "True":"False",
+                    <Toggle data={data} url={props.url} keyGet="debug_rs232"
+                            keySet="debug_rs232" setData={setData}/>]}/>
+                <TableRow items={["Debugging Broker:", data["debug_broker"]? "True":"False",
+                    <Toggle data={data} url={props.url} keyGet="debug_broker"
+                            keySet="debug_broker" setData={setData}/>]}/>
+                <TableRow items={["Debugging Aml:", data["debug_aml"]? "True":"False",
+                    <Toggle data={data} url={props.url} keyGet="debug_aml"
+                            keySet="debug_aml" setData={setData}/>]}/>
                 </tbody>
             </table>
         </>);
