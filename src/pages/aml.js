@@ -1,50 +1,42 @@
 import {TableHeader, TableRow} from "../components/table_elements";
-import {ButtonSpinner, IntInputButton, Toggle} from "../components/button_spinner";
-import {getJson, sendRequest} from "../http_helper";
-import {useCallback, useEffect, useRef, useState} from "react";
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function doNothing() {
-    console.log('Taking a break...');
-    await sleep(2000);
-    console.log('Two seconds later, showing sleep in a loop...');
-}
-
+import {ButtonSpinner, IntInputButton, SmallButtonSpinner, Toggle} from "../components/button_spinner";
+import {sendRequest} from "../http_helper";
+import React, {useContext, useEffect, useState} from "react";
+import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
+import {ControllerContext} from "../App";
 
 function FirstPositionRow(props) {
+    const context = useContext(ControllerContext);
     return (
         <TableRow items={
             [
-                props.name,
+                context.names[0],
                 props.value,
-                <IntInputButton text="Set" value={props.valueSet} callback={async () => {
-                    await sendRequest(props.url, {"set_m1_target_position": props.valueSet})
-                }}/>
+                <IntInputButton text="Set" value={props.target} setValue={props.setTarget}
+                                callback={async () => await context.send({"set_m1_target_position": props.target})}/>
             ]}
         />);
 }
 
 function SecondPositionRow(props) {
+    const context = useContext(ControllerContext);
     return (
         <TableRow items={
             [
-                props.name,
+                context.names[1],
                 props.value,
-                <IntInputButton text="Set" value={props.valueSet} callback={async () => {
-                    await sendRequest(props.url, {"set_m2_target_position": props.valueSet})
-                }}/>
+                <IntInputButton text="Set" value={props.target} setValue={props.setTarget}
+                                callback={async () => await context.send({"set_m2_target_position": props.target})}/>
             ]}
         />);
 }
 
 function MoveButton(props) {
+    const context = useContext(ControllerContext)
     return (
         <ButtonSpinner text="Move Both"
                        callback={
-                           async () => await sendRequest(props.url, {
+                           async () => await context.send({
                                "set_m1_target_position": props.firstTarget,
                                "set_m2_target_position": props.secondTarget
                            })
@@ -52,78 +44,52 @@ function MoveButton(props) {
 }
 
 function LoadButton(props) {
+    const context = useContext(ControllerContext)
     return (
         <ButtonSpinner text="Load"
                        callback={() => {
-                           props.setFirstTarget(props.first);
-                           props.setSecondTarget(props.second);
+                           props.setFirstTarget(context.loads[0]);
+                           props.setSecondTarget(context.loads[1]);
                        }}/>
     );
 }
 
-function HideButton(props) {
-    return (
-        <ButtonSpinner text="Hide" callback={async () => {
-            await sendRequest(props.url, {"hide": false})
-        }}/>
-    );
-}
-
-function ShowButton(props) {
-    return (
-        <ButtonSpinner text="Show" callback={async () => {
-            await sendRequest(props.url, {"hide": true})
-        }}/>
-    );
-}
-
-function ContinueButton(props) {
-    return (
-        <ButtonSpinner text="Continue" callback={async () => {
-            await sendRequest(props.url, {"continue": true})
-        }}/>
-    );
-}
 
 function SecondControl(props) {
     const [newStepCounter, setNewStepCounter] = useState('');
     const [newMotorPosition, setNewMotorPosition] = useState('');
     const [newOffset, setNewOffset] = useState('');
+    const context = useContext(ControllerContext);
     return (
         <>
-            <TableRow items={["Temperature", props.data["second_temperature"],
-                <ButtonSpinner text="Get Temperature" style="btn-sm float-end" callback={async () => {
-                    await sendRequest(props.url, {"get_m2_temperature": true})
-                }}/>]}/>
+            <TableRow items={["Temperature", props.data["motor_2_temperature"],
+                <SmallButtonSpinner text="Get Temperature"
+                                    callback={async () => await context.send({"get_m2_temperature": true})}/>]}/>
 
             <TableRow items={["Position", props.data["motor_2_position"],
-                <ButtonSpinner text="Get Position" style="btn-sm float-end" callback={async () => {
-                    await sendRequest(props.url, {"get_m2_position": true})
-                }}/>]}/>
+                <SmallButtonSpinner text="Get Position"
+                                    callback={async () => await context.send({"get_m2_position": true})}/>
+            ]}/>
             <TableRow items={["Redefine Step Counter", props.data["motor_2_steps"],
                 <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m2_step_counter": newStepCounter});
-                                }}/>
+                                callback={async () => await context.send({"set_m2_step_counter": newStepCounter})}/>
             ]}/>
             <TableRow items={["Redefine offset", props.data["motor_2_offset"],
                 <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m2_offset": newOffset});
-                                }}/>
+                                callback={async () => await context.send({"set_m2_offset": newOffset})}/>
             ]}/>
             <TableRow items={["Redefine Motor Position", props.data["motor_2_position"],
                 <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m2_position": newMotorPosition});
-                                }}/>
+                                callback={async () => await context.send({"set_m2_position": newMotorPosition})}/>
             ]}/>
             <TableRow items={["Updating Position", props.data["motor_2_updating_position"] ? "True" : "False",
-                <Toggle data={props.data} url={props.url} keyGet="motor_2_updating_position"
-                        keySet="toggle_get_m2_position" setData={props.setData}/>]}/>
-            <TableRow items={["Updating Temperature", props.data["motor_2_updating_temperature"]? "True":"False",
-                <Toggle data={props.data} url={props.url} keyGet="motor_2_updating_temperature"
-                        keySet="toggle_get_m2_temperature" setData={props.setData}/>]}/>
+                <Toggle data={props.data} keyGet="motor_2_updating_position"
+                        callback={async () =>
+                            await context.send({"toggle_get_m2_position": !props.data["motor_2_updating_position"]})}/>]}/>
+            <TableRow items={["Updating Temperature", props.data["motor_2_updating_temperature"] ? "True" : "False",
+                <Toggle data={props.data} keyGet="motor_2_updating_temperature"
+                        callback={async () =>
+                            await context.send({"toggle_get_m2_temperature": !props.data["motor_2_updating_temperature"]})}/>]}/>
         </>
     );
 }
@@ -132,99 +98,119 @@ function FirstControl(props) {
     const [newStepCounter, setNewStepCounter] = useState('');
     const [newMotorPosition, setNewMotorPosition] = useState('');
     const [newOffset, setNewOffset] = useState('');
+    const context = useContext(ControllerContext);
+
     return (
         <>
-            <TableRow items={["Temperature", props.data["first_temperature"],
-                <ButtonSpinner text="Get Temperature" style="btn-sm float-end" callback={async () => {
-                    await sendRequest(props.url, {"get_m1_temperature": true})
-                }}/>]}/>
+            <TableRow items={["Temperature", props.data["motor_1_temperature"],
+                <SmallButtonSpinner text="Get Temperature"
+                                    callback={async () => await context.send({"get_m1_temperature": true})}/>]}/>
 
             <TableRow items={["Position", props.data["motor_1_position"],
-                <ButtonSpinner text="Get Position" style="btn-sm float-end" callback={async () => {
-                    await sendRequest(props.url, {"get_m1_position": true})
-                }}/>]}/>
+                <SmallButtonSpinner text="Get Position"
+                                    callback={async () => await context.send({"get_m1_position": true})}/>
+            ]}/>
             <TableRow items={["Redefine Step Counter", props.data["motor_1_steps"],
                 <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m1_step_counter": newStepCounter});
-                                }}/>
+                                callback={async () => await context.send({"set_m1_step_counter": newStepCounter})}/>
             ]}/>
             <TableRow items={["Redefine offset", props.data["motor_1_offset"],
                 <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m1_offset": newOffset});
-                                }}/>
+                                callback={async () => await context.send({"set_m1_offset": newOffset})}/>
             ]}/>
             <TableRow items={["Redefine Motor Position", props.data["motor_1_position"],
                 <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
-                                callback={async () => {
-                                    await sendRequest(props.url, {"set_m1_position": newMotorPosition});
-                                }}/>
+                                callback={async () => await context.send({"set_m1_position": newMotorPosition})}/>
             ]}/>
             <TableRow items={["Updating Position", props.data["motor_1_updating_position"] ? "True" : "False",
-                <Toggle data={props.data} url={props.url} keyGet="motor_1_updating_position"
-                        keySet="toggle_get_m1_position" setData={props.setData}/>]}/>
-            <TableRow items={["Updating Temperature", props.data["motor_1_updating_temperature"]? "True":"False",
-            <Toggle data={props.data} url={props.url} keyGet="motor_1_updating_temperature"
-                    keySet="toggle_get_m1_temperature" setData={props.setData}/>]}/>
+                <Toggle data={props.data} keyGet="motor_1_updating_position"
+                        callback={async () =>
+                            await context.send({"toggle_get_m1_position": !props.data["motor_1_updating_position"]})}/>]}/>
+            <TableRow items={["Updating Temperature", props.data["motor_1_updating_temperature"] ? "True" : "False",
+                <Toggle data={props.data} keyGet="motor_1_updating_temperature"
+                        callback={async () =>
+                            await context.send({"toggle_get_m1_temperature": !props.data["motor_1_updating_temperature"]})}/>]}/>
         </>
     );
 }
 
-export function Aml(props) {
 
-    const [data, setData] = useState({});
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            setData(await getJson(props.url))
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [props.url]);
-
-    const [brief, setBrief] = useState("");
-    const [moving, setMoving] = useState("none");
-    const [running, setRunning] = useState("");
-    const [firstTarget, setFirstTarget] = useState('');
-    const [secondTarget, setSecondTarget] = useState('');
+function DebugControl(props) {
+    const context = useContext(ControllerContext);
     return (
         <>
-            <div className="clearfix">
-                <h3 className="float-start">AML {props.names[0]} {props.names[1]}</h3>
-                <h5 className="clearfix float-end">
-                    <span className="badge bg-info">{brief}</span>
-                    <span className="spinner-border spinner-border-sm" style={{"display": moving}}/>
-                    <span className="badge badge-danger">{running}</span>
-                </h5>
-            </div>
-            <hr/>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Identifier", "Value", "Control"]}/>
-                <tbody>
-                <TableRow items={["Request acknowledge", data["request_id"], ""]}/>
-                <TableRow items={["Request Finished", data["request_finished"] ? "True" : "False", ""]}/>
-                <TableRow items={["Error", data["error"], ""]}/>
-                <TableRow items={["Expiry Date", data["expiry_date"], ""]}/>
-                <FirstPositionRow name={props.names[0]} value={data["motor_1_position"]} valueSet={firstTarget} url={props.url}/>
-                <SecondPositionRow name={props.names[1]} value={data["motor_2_position"]} valueSet={secondTarget} url={props.url}/>
-                </tbody>
-            </table>
+            <TableRow items={["Debugging rs232:", props.data["debug_rs232"] ? "True" : "False",
+                <Toggle data={props.data} keyGet="debug_rs232"
+                        callback={async () => await context.send({"debug_rs232": !props.data["debug_rs232"]})}
+                />]}/>
+            <TableRow items={["Debugging Broker:", props.data["debug_broker"] ? "True" : "False",
+                <Toggle data={props.data} keyGet="debug_broker"
+                        callback={async () => await context.send({"debug_broker": !props.data["debug_broker"]})}
+                />]}/>
+            <TableRow items={["Debugging Aml:", props.data["debug_aml"] ? "True" : "False",
+                <Toggle data={props.data} keyGet="debug_aml"
+                        callback={async () => await context.send({"debug_aml": !props.data["debug_aml"]})}
+                />]}/>
+        </>
+    );
+}
 
-            <div className="clearfix">
-                <div className="btn-group float-end">
-                    <MoveButton url={props.url} firstTarget={firstTarget} secondTarget={secondTarget}/>
-                    <LoadButton setFirstTarget={setFirstTarget} setSecondTarget={setSecondTarget}
-                                first="100" second="200"/>
-                    <HideButton url={props.url}/>
-                    <ShowButton url={props.url}/>
-                    <ContinueButton url={props.url}/>
-                </div>
-            </div>
+
+function useStatus(data) {
+    const [position, setPosition] = useState("");
+    const [moving, setMoving] = useState(false);
+
+    useEffect( () => {
+        if (data["motor_1_position"] && data["motor_2_position"]) {
+            setPosition(data["motor_1_position"] + ", " + data["motor_2_position"]);
+        }
+        if (data["request_finished"]){
+            setMoving(!data["request_finished"]);
+        }
+    }, [data])
+
+    return {position, moving}
+}
+
+
+export function Aml(props) {
+    const {modalMessage, show, setShow, cb} = useModal()
+    const {data, setData, running} = useData(props.url);
+    const {position, moving} = useStatus(data);
+    const [firstTarget, setFirstTarget] = useState('');
+    const [secondTarget, setSecondTarget] = useState('');
+
+    const config = {
+        title: "AML " + props.names[0] + " " + props.names[1],
+        url: props.url, names: props.names, loads: props.loads,
+        busy: moving, brief: position, running: running,
+        popup: (message) => cb(message),
+        setData: (data) => setData(data),
+        send: async (request) => await sendRequest(props.url, request, cb, setData)
+    }
+
+    let table_extra = <>
+        <TableRow items={["Expiry Date", data["expiry_date"], ""]}/>
+        <FirstPositionRow value={data["motor_1_position"]} target={firstTarget}
+                          setTarget={setFirstTarget}/>
+        <SecondPositionRow value={data["motor_2_position"]} target={secondTarget}
+                           setTarget={setSecondTarget}/>
+    </>
+    let button_extra = <>
+        <MoveButton firstTarget={firstTarget} secondTarget={secondTarget}/>
+        <LoadButton setFirstTarget={setFirstTarget} setSecondTarget={setSecondTarget}/>
+    </>
+
+    return (
+        <ControllerContext.Provider value={config}>
+            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <GenericControl data={data} table_extra={table_extra} button_extra={button_extra}/>
 
             <hr/>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={[props.names[0] + " Control", "Value", "Control"]}/>
                 <tbody>
-                <FirstControl data={data} url={props.url} setData={setData}/>
+                <FirstControl data={data} setData={setData}/>
                 </tbody>
                 <TableHeader items={[props.names[1] + " Control", "Value", "Control"]}/>
                 <tbody>
@@ -232,16 +218,8 @@ export function Aml(props) {
                 </tbody>
                 <TableHeader items={["Debug Control", "Value", "Control"]}/>
                 <tbody>
-                <TableRow items={["Debugging rs232:", data["debug_rs232"]? "True":"False",
-                    <Toggle data={data} url={props.url} keyGet="debug_rs232"
-                            keySet="debug_rs232" setData={setData}/>]}/>
-                <TableRow items={["Debugging Broker:", data["debug_broker"]? "True":"False",
-                    <Toggle data={data} url={props.url} keyGet="debug_broker"
-                            keySet="debug_broker" setData={setData}/>]}/>
-                <TableRow items={["Debugging Aml:", data["debug_aml"]? "True":"False",
-                    <Toggle data={data} url={props.url} keyGet="debug_aml"
-                            keySet="debug_aml" setData={setData}/>]}/>
+                <DebugControl data={data} url={props.url}/>
                 </tbody>
             </table>
-        </>);
+        </ControllerContext.Provider>);
 }

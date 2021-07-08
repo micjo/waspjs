@@ -20,6 +20,7 @@ async function waitForCompleted(url, requestId, retryLimit){
 
     while (!complete) {
         let response = await fetch(url)
+        console.log(response);
         if (response.status === 404) { throw 'Daemon not reachable.'; }
         data = await response.json();
         await delay(250);
@@ -28,26 +29,48 @@ async function waitForCompleted(url, requestId, retryLimit){
         retryCount++;
         if (retryCount > retryLimit) { throw 'Daemon did not complete request'; }
     }
+
     return data;
 }
 
-export async function sendRequest(url, request) {
+export async function sendRequest(url, request, popup, setData) {
     let requestId = {"request_id": getUniqueIdentifier()}
-
     let fullRequest = {
         ...requestId,
         ...request
     };
 
-    let data = {}
-    await postData(url, JSON.stringify(fullRequest));
+    let data={}
+    try {
+        data = await postData(url, JSON.stringify(fullRequest));
+    }
+    catch(error) {
+        popup("Controller cannot be contacted. Is it running?");
+        return;
+    }
+
+    if(data.status === 404) {
+        popup("Controller cannot be contacted. Is it running?");
+        return;
+    }
+
+    if (data.status !== 200) {
+        let failMessage = await data.text()
+        popup(failMessage.slice(1,-1));
+        return;
+    }
+
     try {
         data = await waitForCompleted(url, requestId["request_id"], 50);
     }
     catch(error){
-        console.log(error);
+        popup(error);
     }
-    return data
+    setData(data);
+
+    if (data["error"] !== "Success") {
+        popup(data["error"]);
+    }
 }
 
 async function postData(host, textBody) {
@@ -64,7 +87,7 @@ export async function getJson(url)
 {
     let response = await fetch(url);
     let response_json = await response.json();
-    return response_json;
+    return [response.status, response_json];
 }
 
 
