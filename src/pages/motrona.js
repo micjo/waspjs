@@ -3,7 +3,7 @@ import {getJson, sendRequest} from "../http_helper";
 import {TableHeader, TableRow} from "../components/table_elements";
 import {GenericControl, ModalView, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
-import {ButtonSpinner} from "../components/button_spinner";
+import {ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner} from "../components/button_spinner";
 
 
 function useData(url) {
@@ -53,6 +53,35 @@ function ClearStartButton() {
     return (<ButtonSpinner text="Clear Start" callback={ async () => await context.send({"clear-start_counting": true})}/>);
 }
 
+function CountingSettings(props) {
+    const context = useContext(ControllerContext);
+    const [targetCharge, setTargetCharge] = useState("");
+    const [pulseToCount, setPulseToCount] = useState("");
+    const [countsToCharge, setCountsToCharge] = useState("");
+
+        return (
+            <>
+               <TableRow items={[
+                "Target Charge:", props.data["target_charge(nC)"],
+                <IntInputButton text="Set" value={targetCharge} setValue={setTargetCharge}
+                                callback={async () => await context.send({"target_charge": targetCharge})}/>
+                ]}/>
+                <TableRow items={[
+                "Pulses to counts factor:", props.data["counter_factor"],
+                <FloatInputButton text="Set" value={pulseToCount} setValue={setPulseToCount}
+                                callback={async () => await context.send({"pulse_count_factor": pulseToCount})}/>
+                ]}/>
+                <TableRow items={[
+                "Counts to charge factor:", props.data["nc_to_pulses_conversion_factor"],
+                <FloatInputButton text="Set" value={countsToCharge} setValue={setCountsToCharge}
+                                callback={async () => await context.send({"count_charge_factor": countsToCharge})}/>
+                ]}/>
+            </>
+
+
+);
+}
+
 export function Motrona(props) {
     const {modalMessage, show, setShow, cb} = useModal()
     const {data, setData, running} = useData(props.url);
@@ -89,6 +118,7 @@ export function Motrona(props) {
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Counting Settings", "Value", "Control"]}/>
                 <tbody>
+                <CountingSettings data={data}/>
                 </tbody>
                 <TableHeader items={["Analog Settings", "Value", "Control"]}/>
                 <tbody>

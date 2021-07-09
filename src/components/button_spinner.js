@@ -65,6 +65,20 @@ export function InputButton(props) {
         </div>);
 }
 
+export function FloatInputButton(props) {
+    return (
+        <InputButton
+            text={props.text} onInputChange={(v) => {
+            if (v) {
+                props.setValue(parseFloat(v));
+            } else {
+                props.setValue("");
+            }
+        }}
+            value={props.value} callback={props.callback}/>
+    );
+}
+
 export function IntInputButton(props) {
     return (
         <InputButton
