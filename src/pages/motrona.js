@@ -3,7 +3,7 @@ import {getJson, sendRequest} from "../http_helper";
 import {TableHeader, TableRow} from "../components/table_elements";
 import {GenericControl, ModalView, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
-import {ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner} from "../components/button_spinner";
+import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton, Toggle} from "../components/input_elements";
 
 
 function useData(url) {
@@ -34,9 +34,16 @@ function useStatus(data) {
     const [counts, setCounts] = useState("");
     const [counting, setCounting] = useState(false);
 
-    useEffect( () => {
-        setCounts(data["charge(nC)"] + " -> " + data["target_charge(nC)"]);
-        setCounting(data["status"] === "Counting");
+    useEffect(() => {
+        if ("charge(nC)" in data && "target_charge(nC)" in data) {
+            setCounts(data["charge(nC)"] + " -> " + data["target_charge(nC)"]);
+        }
+        else {
+            setCounts("")
+        }
+        if ("status" in data) {
+            setCounting(data["status"] === "Counting");
+        }
     }, [data])
 
     return {counts, counting}
@@ -45,53 +52,177 @@ function useStatus(data) {
 
 function PauseButton() {
     const context = useContext(ControllerContext)
-    return (<ButtonSpinner text="Pause" callback={ async () => await context.send({"pause_counting": true})}/>);
+    return (<ButtonSpinner text="Pause" callback={async () => await context.send({"pause_counting": true})}/>);
 }
 
 function ClearStartButton() {
     const context = useContext(ControllerContext)
-    return (<ButtonSpinner text="Clear Start" callback={ async () => await context.send({"clear-start_counting": true})}/>);
+    return (
+        <ButtonSpinner text="Clear Start" callback={async () => await context.send({"clear-start_counting": true})}/>);
 }
 
-function CountingSettings(props) {
+function CountingSettings() {
     const context = useContext(ControllerContext);
     const [targetCharge, setTargetCharge] = useState("");
     const [pulseToCount, setPulseToCount] = useState("");
     const [countsToCharge, setCountsToCharge] = useState("");
+    const [countMode, setCountMode] = useState("");
+    const [inputPulse, setInputPulse] = useState("");
 
-        return (
-            <>
-               <TableRow items={[
-                "Target Charge:", props.data["target_charge(nC)"],
+    return (
+        <>
+            <TableRow items={[
+                "Target Charge:", context.data["target_charge(nC)"],
                 <IntInputButton text="Set" value={targetCharge} setValue={setTargetCharge}
                                 callback={async () => await context.send({"target_charge": targetCharge})}/>
-                ]}/>
-                <TableRow items={[
-                "Pulses to counts factor:", props.data["counter_factor"],
+            ]}/>
+            <TableRow items={[
+                "Pulses to counts factor:", context.data["counter_factor"],
                 <FloatInputButton text="Set" value={pulseToCount} setValue={setPulseToCount}
-                                callback={async () => await context.send({"pulse_count_factor": pulseToCount})}/>
-                ]}/>
-                <TableRow items={[
-                "Counts to charge factor:", props.data["nc_to_pulses_conversion_factor"],
+                                  callback={async () => await context.send({"pulse_count_factor": pulseToCount})}/>
+            ]}/>
+            <TableRow items={[
+                "Counts to charge factor:", context.data["nc_to_pulses_conversion_factor"],
                 <FloatInputButton text="Set" value={countsToCharge} setValue={setCountsToCharge}
-                                callback={async () => await context.send({"count_charge_factor": countsToCharge})}/>
-                ]}/>
-            </>
-
-
-);
+                                  callback={async () => await context.send({"count_charge_factor": countsToCharge})}/>
+            ]}/>
+            <TableRow items={[
+                "Counting Mode:", context.data["count_mode"],
+                <DropDownButton text="Set" setValue={setCountMode}
+                                selects={["a_single", "a+b", "a-b", "a/b_90_x1", "a/b_90_x2", "a/b_90_x4"]}
+                                callback={async () => await context.send({"set_count_mode": countMode})}/>
+            ]}/>
+            <TableRow items={[
+                "Input Pulse:", context.data["input_pulse_type"],
+                <DropDownButton text="Set" setValue={setInputPulse} selects={["npn", "pnp", "namur", "tri-state"]}
+                                callback={async () => await context.send({"set_type_of_input_pulse": inputPulse})}/>
+            ]}/>
+        </>
+    );
 }
 
-export function Motrona(props) {
+function AnalogSettings() {
+    const context = useContext(ControllerContext);
+
+    const [analogStart, setAnalogStart] = useState("")
+    const [analogEnd, setAnalogEnd] = useState("")
+    const [analogGain, setAnalogGain] = useState("")
+    const [analogOffset, setAnalogOffset] = useState("")
+    return (
+        <>
+            <TableRow items={[
+                "Analog Start:", context.data["analog_start"],
+                <IntInputButton text="Set" value={analogStart} setValue={setAnalogStart}
+                                callback={async () => await context.send({"set_analog_start": analogStart})}/>
+            ]}/>
+            <TableRow items={[
+                "Analog End:", context.data["analog_end"],
+                <IntInputButton text="Set" value={analogEnd} setValue={setAnalogEnd}
+                                callback={async () => await context.send({"set_analog_end": analogEnd})}/>
+            ]}/>
+            <TableRow items={[
+                "Analog Gain:", context.data["analog_gain"],
+                <FloatInputButton text="Set" value={analogGain} setValue={setAnalogGain}
+                                callback={async () => await context.send({"set_analog_gain": analogGain})}/>
+            ]}/>
+            <TableRow items={[
+                "Analog Offset:", context.data["analog_offset"],
+                <FloatInputButton text="Set" value={analogOffset} setValue={setAnalogOffset}
+                                callback={async () => await context.send({"set_analog_offset": analogOffset})}/>
+            ]}/>
+
+
+        </>
+    )
+}
+
+export function PreselectionSettings() {
+    const context = useContext(ControllerContext);
+    const [preselectionOne, setPreselectionOne] = useState("");
+    const [preselectionTwo, setPreselectionTwo] = useState("");
+    const [preselectionThree, setPreselectionThree] = useState("");
+    const [preselectionFour, setPreselectionFour] = useState("");
+    return (
+        <>
+            <TableRow items={[
+                "Preselection 1:", context.data["preselection_1"],
+                <IntInputButton text="Set" value={preselectionOne} setValue={setPreselectionOne}
+                                callback={async () => await context.send({"preselection_1": preselectionOne})}/>
+            ]}/>
+            <TableRow items={[
+                "Preselection 2:", context.data["preselection_2"],
+                <IntInputButton text="Set" value={preselectionTwo} setValue={setPreselectionTwo}
+                                callback={async () => await context.send({"preselection_2": preselectionTwo})}/>
+            ]}/>
+            <TableRow items={[
+                "Preselection 3:", context.data["preselection_3"],
+                <IntInputButton text="Set" value={preselectionThree} setValue={setPreselectionThree}
+                                  callback={async () => await context.send({"preselection_3": preselectionThree})}/>
+            ]}/>
+            <TableRow items={[
+                "Preselection 4:", context.data["preselection_4"],
+                <IntInputButton text="Set" value={preselectionFour} setValue={setPreselectionFour}
+                                  callback={async () => await context.send({"preselection_4": preselectionFour})}/>
+            ]}/>
+
+
+        </>
+    )
+}
+
+function DebugControl() {
+    const context = useContext(ControllerContext);
+    return (
+        <>
+            <TableRow items={["Debugging rs232:", context.data["debug_rs232"] ? "True" : "False",
+                <Toggle data={context.data} keyGet="debug_rs232"
+                        callback={async () => await context.send({"debug_rs232": !context.data["debug_rs232"]})}
+                />]}/>
+            <TableRow items={["Debugging Broker:", context.data["debug_broker"] ? "True" : "False",
+                <Toggle data={context.data} keyGet="debug_broker"
+                        callback={async () => await context.send({"debug_broker": !context.data["debug_broker"]})}
+                />]}/>
+            <TableRow items={["Debugging Motrona:", context.data["debug_motrona"] ? "True" : "False",
+                <Toggle data={context.data} keyGet="debug_motrona"
+                        callback={async () => await context.send({"debug_motrona": !context.data["debug_motrona"]})}
+                />]}/>
+        </>
+    );
+}
+
+function AdvancedControl() {
+    return (
+    <table className="table table-striped table-hover table-sm">
+        <TableHeader items={["Counting Settings", "Value", "Control"]}/>
+        <tbody>
+        <CountingSettings />
+        </tbody>
+        <TableHeader items={["Analog Settings", "Value", "Control"]}/>
+        <tbody>
+        <AnalogSettings />
+        </tbody>
+        <TableHeader items={["Preselection Settings", "Value", "Control"]}/>
+        <tbody>
+        <PreselectionSettings />
+        </tbody>
+        <TableHeader items={["Debug Control", "Value", "Control"]}/>
+        <tbody>
+        <DebugControl/>
+        </tbody>
+    </table>);
+
+}
+
+export function useMotrona(url){
     const {modalMessage, show, setShow, cb} = useModal()
-    const {data, setData, running} = useData(props.url);
+    const {data, setData, running} = useData(url);
     const {counts, counting} = useStatus(data);
 
     const config = {
-        title: "Motrona RBS",
-        url: props.url, busy: counting, brief: counts, running: running,
+        title: "Motrona RBS", data: data,
+        url: url, busy: counting, brief: counts, running: running,
         popup: (message) => cb(message), setData: (data) => setData(data),
-        send: async (request) => await sendRequest(props.url, request, cb, setData)
+        send: async (request) => await sendRequest(url, request, cb, setData)
     }
 
     let table_extra = <>
@@ -105,30 +236,21 @@ export function Motrona(props) {
     </>
 
     let button_extra = <>
-        <PauseButton />
-        <ClearStartButton />
+        <PauseButton/>
+        <ClearStartButton/>
     </>
+
+    return {config, show, setShow, modalMessage, table_extra, button_extra}
+
+}
+
+export function Motrona(props) {
+    let {config, show, setShow, modalMessage, table_extra, button_extra} = useMotrona(props.url)
 
     return (
         <ControllerContext.Provider value={config}>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
-            <GenericControl data={data} table_extra={table_extra} button_extra={button_extra}/>
-
-            <hr/>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Counting Settings", "Value", "Control"]}/>
-                <tbody>
-                <CountingSettings data={data}/>
-                </tbody>
-                <TableHeader items={["Analog Settings", "Value", "Control"]}/>
-                <tbody>
-                </tbody>
-                <TableHeader items={["Preselection Settings", "Value", "Control"]}/>
-                <tbody>
-                </tbody>
-                <TableHeader items={["Debug Control", "Value", "Control"]}/>
-                <tbody>
-                </tbody>
-            </table>
+            <GenericControl table_extra={table_extra} button_extra={button_extra}/>
+            <AdvancedControl/>
         </ControllerContext.Provider>);
 }

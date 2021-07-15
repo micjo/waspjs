@@ -1,7 +1,7 @@
 // import logo from './logo.svg';
 import './App.css';
 import React, {useContext} from "react";
-import {BrowserRouter as Router, NavLink, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Link, NavLink, Route, Switch} from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
@@ -9,6 +9,7 @@ import {Rbs} from './pages/rbs.js'
 import {Dashboard} from "./pages/dashboard";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
+import {Caen} from "./pages/caen";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -19,19 +20,23 @@ const controllerConfig =
         aml_x_y: {
             url: "http://localhost:8000/api/aml_x_y",
             names: ["X", "Y"],
-            loads: [10, 10]
+            loads: [10, 10],
+            title: "AML X Y"
         },
         aml_phi_zeta: {
             url: "http://localhost:8000/api/aml_phi_zeta",
             names: ["Phi", "Zeta"],
-            loads: [0, 1]
+            loads: [0, 1],
+            title: "AML Phi Zeta"
         },
         aml_det_theta: {
             url: "http://localhost:8000/api/aml_det_theta",
             names: ["Detector", "Theta"],
-            loads: [170, 0]
+            loads: [170, 0],
+            title: "AML Detector Theta"
         },
-        motrona_rbs: {url: "http://localhost:8000/api/motrona_rbs"},
+        motrona_rbs: {url: "http://localhost:8000/api/motrona_rbs", title: "Motrona RBS"},
+        caen_rbs: {url: "http://localhost:8000/api/caen_rbs", title: "Caen RBS"},
     };
 
 export default function App() {
@@ -72,6 +77,10 @@ function NavigationBar() {
                         <NavLi url="/aml_phi_zeta" body="AML Phi Zeta"/>
                         <NavLi url="/aml_det_theta" body="AML Det Theta"/>
                         <NavLi url="/motrona_rbs" body="Motrona RBS"/>
+                        <NavLi url="/caen_rbs" body="Caen RBS"/>
+                        <li className="nav-item ms-2 me-2 flex-nowrap">
+                        <Link to={{ pathname: "http://localhost:8000/docs" }} className="nav-link" target="_blank" >Docs</Link>
+                        </li>
 
                     </ul>
                 </div>
@@ -89,6 +98,7 @@ function PageContent() {
     const aml_phi_zeta = context.aml_phi_zeta;
     const aml_det_theta = context.aml_det_theta;
     const motrona_rbs = context.motrona_rbs;
+    const caen_rbs = context.caen_rbs;
 
     return (
         <div className="fluid-container mt-3 ms-3 me-3 mb-3">
@@ -105,6 +115,9 @@ function PageContent() {
                 </Route>
                 <Route path="/motrona_rbs">
                     <Motrona url={motrona_rbs.url}/>
+                </Route>
+                <Route path="/caen_rbs">
+                    <Caen url={caen_rbs.url}/>
                 </Route>
                 <Route path="/"> <Dashboard/></Route>
             </Switch>

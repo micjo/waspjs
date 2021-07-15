@@ -1,5 +1,5 @@
 import {TableHeader, TableRow} from "../components/table_elements";
-import {ButtonSpinner, IntInputButton, SmallButtonSpinner, Toggle} from "../components/button_spinner";
+import {ButtonSpinner, IntInputButton, SmallButtonSpinner, Toggle} from "../components/input_elements";
 import {sendRequest} from "../http_helper";
 import React, {useContext, useEffect, useState} from "react";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
@@ -161,11 +161,17 @@ function useStatus(data) {
     const [moving, setMoving] = useState(false);
 
     useEffect( () => {
-        if (data["motor_1_position"] && data["motor_2_position"]) {
+        if ("motor_1_position" in data && "motor_2_position" in data) {
             setPosition(data["motor_1_position"] + ", " + data["motor_2_position"]);
         }
-        if (data["request_finished"]){
+        else {
+            setPosition("");
+        }
+        if ("request_finished" in data){
             setMoving(!data["request_finished"]);
+        }
+        else {
+            setMoving(false);
         }
     }, [data])
 
@@ -173,20 +179,40 @@ function useStatus(data) {
 }
 
 
-export function Aml(props) {
+function AdvancedControl() {
+    let context = useContext(ControllerContext)
+    return (
+    <table className="table table-striped table-hover table-sm">
+        <TableHeader items={[context.names[0] + " Control", "Value", "Control"]}/>
+        <tbody>
+        <FirstControl data={context.data} setData={context.setData}/>
+        </tbody>
+        <TableHeader items={[context.names[1] + " Control", "Value", "Control"]}/>
+        <tbody>
+        <SecondControl data={context.data} url={context.url} setData={context.setData}/>
+        </tbody>
+        <TableHeader items={["Debug Control", "Value", "Control"]}/>
+        <tbody>
+        <DebugControl data={context.data} url={context.url}/>
+        </tbody>
+    </table>);
+}
+
+
+export function useAml(url, names, loads) {
     const {modalMessage, show, setShow, cb} = useModal()
-    const {data, setData, running} = useData(props.url);
+    const {data, setData, running} = useData(url);
     const {position, moving} = useStatus(data);
     const [firstTarget, setFirstTarget] = useState('');
     const [secondTarget, setSecondTarget] = useState('');
 
     const config = {
-        title: "AML " + props.names[0] + " " + props.names[1],
-        url: props.url, names: props.names, loads: props.loads,
+        title: "AML " + names[0] + " " + names[1],
+        url: url, names: names, loads: loads,
         busy: moving, brief: position, running: running,
-        popup: (message) => cb(message),
+        data: data, popup: (message) => cb(message),
         setData: (data) => setData(data),
-        send: async (request) => await sendRequest(props.url, request, cb, setData)
+        send: async (request) => await sendRequest(url, request, cb, setData)
     }
 
     let table_extra = <>
@@ -201,25 +227,19 @@ export function Aml(props) {
         <LoadButton setFirstTarget={setFirstTarget} setSecondTarget={setSecondTarget}/>
     </>
 
+
+    return {config, show, setShow, modalMessage, table_extra, button_extra};
+}
+
+
+
+export function Aml(props) {
+    let {config, show, setShow, modalMessage, table_extra, button_extra} = useAml(props.url, props.names, props.loads)
+
     return (
         <ControllerContext.Provider value={config}>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
-            <GenericControl data={data} table_extra={table_extra} button_extra={button_extra}/>
-
-            <hr/>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={[props.names[0] + " Control", "Value", "Control"]}/>
-                <tbody>
-                <FirstControl data={data} setData={setData}/>
-                </tbody>
-                <TableHeader items={[props.names[1] + " Control", "Value", "Control"]}/>
-                <tbody>
-                <SecondControl data={data} url={props.url} setData={setData}/>
-                </tbody>
-                <TableHeader items={["Debug Control", "Value", "Control"]}/>
-                <tbody>
-                <DebugControl data={data} url={props.url}/>
-                </tbody>
-            </table>
+            <GenericControl table_extra={table_extra} button_extra={button_extra}/>
+            <AdvancedControl/>
         </ControllerContext.Provider>);
 }

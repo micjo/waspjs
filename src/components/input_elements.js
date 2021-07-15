@@ -1,6 +1,4 @@
-import React, {useEffect, useState} from "react"
-import {onChangeSetInt} from "../conversions";
-import {sendRequest} from "../http_helper";
+import React, {useState} from "react"
 
 export function Toggle(props) {
     const [requestOngoing, setRequestOngoing] = useState(false);
@@ -32,10 +30,22 @@ export function Toggle(props) {
     );
 }
 
+export function SimpleToggle(props) {
+    return (
+        <div className="input-group-text">
+                <input className="form-check-input mt-0" type="checkbox"
+                       checked={props.checked} onChange={async () => {
+                    props.setChecked(!props.checked);
+                }
+                }/>
+        </div>
+);
+}
+
 
 export function SmallButtonSpinner(props) {
     return (
-        <ButtonSpinner style="btn-sm float-end" text={props.text} callback={props.callback}/>
+        <ButtonSpinner extraStyle="btn-sm float-end" text={props.text} callback={props.callback}/>
     );
 }
 
@@ -43,7 +53,7 @@ export function ButtonSpinner(props) {
     const [spinner, setSpinner] = useState(false);
     return (
         <>
-            <button className={"btn btn-outline-primary " + props.style} onClick={async () => {
+            <button className={"btn btn-outline-primary " + props.extraStyle} onClick={async () => {
                 setSpinner(true);
                 await props.callback();
                 setSpinner(false);
@@ -91,4 +101,37 @@ export function IntInputButton(props) {
         }}
             value={props.value} callback={props.callback}/>
     );
+}
+
+export function DropDown(props) {
+    let items = []
+    for (let select of props.selects) {
+        items.push(<option key={select} value={select}>{select}</option>)
+    }
+
+    return (
+        <select className="form-select form-select-sm" defaultValue="unselected" onChange={ (e)=> {props.setValue((e.target.value))}}>
+            <option value="unselected">Choose...</option>
+            {items}
+        </select>
+    )
+}
+
+
+export function DropDownButton(props) {
+
+    let items = []
+    for (let select of props.selects) {
+        items.push(<option key={select} value={select}>{select}</option>)
+    }
+
+    return (
+        <div className="input-group input-sm">
+            <select className="form-select form-select-sm" defaultValue="unselected" onChange={ (e)=> {props.setValue((e.target.value))}}>
+                <option value="unselected">Choose...</option>
+                {items}
+            </select>
+            <SmallButtonSpinner callback={props.callback} text={props.text}/>
+        </div>
+    )
 }

@@ -1,5 +1,5 @@
 import React from "react"
-import {ButtonSpinner} from "./button_spinner";
+import {ButtonSpinner} from "./input_elements";
 import {TableRow, TableHeader} from "./table_elements";
 import {sendRequest} from "../http_helper";
 
