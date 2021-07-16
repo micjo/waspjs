@@ -20,7 +20,6 @@ async function waitForCompleted(url, requestId, retryLimit){
 
     while (!complete) {
         let response = await fetch(url)
-        console.log(response);
         if (response.status === 404) { break; }
         data = await response.json();
         complete = (data['request_id'] === requestId && data['request_finished'] === true);
@@ -33,7 +32,6 @@ async function waitForCompleted(url, requestId, retryLimit){
 }
 
 export async function sendRequest(url, request, popup, setData) {
-    console.log("sending request");
     let requestId = {"request_id": getUniqueIdentifier()}
     let fullRequest = {
         ...requestId,

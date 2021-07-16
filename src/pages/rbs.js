@@ -1,11 +1,11 @@
 import React, {useContext, useState} from "react";
 import {Controllers} from "../App";
 import {useAml} from "./aml";
-import {ConditionalBadge, GenericCard, ModalView, useData, useModal} from "../components/generic_control";
+import {ProgressSpinner, ConditionalBadge, GenericCard, ModalView, useData, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
 import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
-import {TableHeader} from "../components/table_elements";
+import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {postData} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
 
@@ -40,6 +40,50 @@ function CaenCard(props) {
         </ControllerContext.Provider>);
 }
 
+const exection = {
+    TODO: "TODO",
+    DOING: "DOING",
+    DONE: "DONE"
+}
+
+function ProgressTable(props) {
+
+    let table = []
+    if (!props.data["rqm"]) {
+        return <></>
+    }
+    let itemExecuting = exection.DONE;
+    for (let item of props.data.rqm.recipes) {
+        if (item.sample_id === props.data.active_recipe) {
+            itemExecuting = exection.DOING;
+        }
+        if (itemExecuting === exection.TODO) {
+            table.push(<TableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "0%"]}/>)
+        }
+        if (itemExecuting === exection.DONE) {
+            table.push(<SuccessTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
+        }
+        if (itemExecuting === exection.DOING) {
+            table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
+                <ProgressSpinner text={Math.round(props.data.recipe_progress_percentage) + "%"}/>]}/>
+            )
+            itemExecuting = exection.TODO;
+        }
+    }
+
+    return (
+        <>
+            <h3>RQM: {props.data.rqm.rqm_number}</h3>
+            <table className="table table-striped table-hover table-sm">
+                <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
+                <tbody>
+                {table}
+                </tbody>
+            </table>
+        </>
+    )
+}
+
 function RbsCard(props) {
     let url = "http://localhost:8000/api/rbs"
     let {data, setData, running} = useData(url + "/state");
@@ -59,36 +103,38 @@ function RbsCard(props) {
         setJob(json_job);
     }
 
+    let rqm_number = "";
+    let run_status = "";
+    if (data["run_status"]) {
+        run_status = data["run_status"]
+    }
+    if (data["rqm"]) {
+        rqm_number = data["rqm"]["rqm_number"]
+    }
+
     return (
         <>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <div className="clearfix">
                 <h3 className="float-start">RBS Experiment</h3>
                 <h5 className="clearfix float-end">
-                    <ConditionalBadge error={false} text={data["run_status"]}/>
+                    <ConditionalBadge error={false} text={run_status + ": " + rqm_number}/>
                 </h5>
             </div>
 
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Sample Id", "Type", "File Stem"]}/>
-                <tbody>
+            <ProgressTable data={data}/>
 
-                </tbody>
-            </table>
+
             <div className="clearfix">
                 <div className="btn-group float-end">
                     <ButtonSpinner text="Abort" callback={async () => {
                         await postData(url + "/abort", "")
                     }}/>
-                    <ButtonSpinner text="Pause watchdir" callback={async () => {
-                        await postData(url + "/pause_dir_scan", {"pause_dir_scan": true})
-                    }}/>
-                    <ButtonSpinner text="Resume watchdir" callback={async () => {
-                        await postData(url + "/pause_dir_scan", {"pause_dir_scan": false})
-                    }}/>
                     <label className="btn btn-outline-primary">
-                   Upload CSV <input type="file" id="csv_input" hidden onClick={(e)=>{e.target.value= null;}}
-                                     onChange={async (e) =>  await handleFileChange(e)}
+                        Upload CSV <input type="file" id="csv_input" hidden onClick={(e) => {
+                        e.target.value = null;
+                    }}
+                                          onChange={async (e) => await handleFileChange(e)}
                     />
                     </label>
                     <ButtonSpinner text="Run CSV" callback={async () => {

@@ -86,15 +86,24 @@ export function BriefBadge(props) {
     return element;
 }
 
-function BusySpinnner(props) {
-    return(
-    <span className="spinner-border spinner-border-sm me-2"
-          style={{"visibility": props.busy ? "visible" : "hidden"}}/>);
+export function ProgressSpinner(props) {
+    return (
+        <>
+            <label>{props.text}</label>
+            <span className="spinner-border spinner-border-sm ms-2"/>
+        </>
+    );
 }
 
+function BusySpinnner(props)
+{
+    return (
+        <span className="spinner-border spinner-border-sm me-2"
+              style={{"visibility": props.busy ? "visible" : "hidden"}}/>);
+}
 
-
-export function ButtonControl(props) {
+export function ButtonControl(props)
+{
     const controller = useContext(ControllerContext);
     return (
         <div className="clearfix">
@@ -109,7 +118,8 @@ export function ButtonControl(props) {
 
 }
 
-export function TableControl(props) {
+export function TableControl(props)
+{
     return (
         <table className="table table-striped table-hover table-sm">
             <TableHeader items={["Identifier", "Value", "Control"]}/>
@@ -123,7 +133,8 @@ export function TableControl(props) {
 }
 
 
-export function PageTitle() {
+export function PageTitle()
+{
     const controller = useContext(ControllerContext);
     return (
         <>
@@ -140,7 +151,8 @@ export function PageTitle() {
     );
 }
 
-export function GenericCard(props) {
+export function GenericCard(props)
+{
     const context = useContext(ControllerContext);
     return (
         <div className="card text-nowrap bg-light text-dark mt-2 mb-3">
@@ -163,7 +175,8 @@ export function GenericCard(props) {
 
 }
 
-export function GenericControl(props) {
+export function GenericControl(props)
+{
     const context = useContext(ControllerContext);
     return (
         <>
@@ -171,11 +184,12 @@ export function GenericControl(props) {
             <TableControl table_extra={props.table_extra} data={context.data}/>
             <ButtonControl button_extra={props.button_extra}/>
             <hr/>
-    </>
+        </>
     );
 }
 
-export function useModal() {
+export function useModal()
+{
     const [show, setShow] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
 
@@ -187,7 +201,8 @@ export function useModal() {
     return {modalMessage, show, setShow, cb}
 }
 
-export function useData(url) {
+export function useData(url)
+{
     const [data, setData] = useState({});
     const [running, setRunning] = useState("");
 

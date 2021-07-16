@@ -44,17 +44,26 @@ function HistogramChart(props) {
     const [updateGraph, setUpdateGraph] = useState(false);
     const [board, setBoard] = useState(0);
     const [channel, setChannel] = useState(0);
+    const {modalMessage, show, setShow, cb} = useModal()
 
     useEffect(() => {
         const interval = setInterval(async () => {
             if (updateGraph) {
                 let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/pack-0-8192-1024";
-                let [status, json_response] = await getJson(url);
+                let status, json_response;
+                try {
+                    [status, json_response] = await getJson(url);
+                }
+                catch (e) {
+                    cb("Error while getting histogram! Make sure that the daemon is running and the board and " +
+                        "channel exist.");
+                    setUpdateGraph(false);
+                }
                 if (status === 404) {
-                    console.log("cannot reach caen");
-                } else if (status == 413) {
-                    console.log("Requesting too large dataset, reduce width")
-                } else {
+                    cb("cannot reach caen");
+                    setUpdateGraph(false);
+                }
+                else {
                     let data = []
                     for (let item in json_response) {
                         data.push({x: item, y: json_response[item]});
@@ -68,21 +77,22 @@ function HistogramChart(props) {
 
     return (
         <div>
+            <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <h3>Histogram</h3>
             <div className="input-group input-sm mb-3">
                 <label className="input-group-text">Board:</label>
-                <DropDown selects={[1, 2, 3, 4, 5, 6, 7, 8]} setValue={setBoard}></DropDown>
+                <DropDown selects={[1, 2, 3, 4, 5, 6, 7, 8]} setValue={setBoard}/>
                 <label className="input-group-text">Channel:</label>
                 <DropDown selects={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
-                          setValue={setChannel}></DropDown>
+                          setValue={setChannel}/>
                 <label className="input-group-text">Update:</label>
                 <SimpleToggle checked={updateGraph} setChecked={setUpdateGraph}>Update</SimpleToggle>
             </div>
             <ResponsiveContainer width='100%' height={300}>
                 <LineChart data={histogramData}>
                     <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis dataKey="x" domain={[0, 2000]}/>
-                    <YAxis domain={[0, 2000]}/>
+                    <XAxis dataKey="x"/>
+                    <YAxis/>
                     <Tooltip/>
                     <Legend/>
                     <Line type="monotone" isAnimationActive={false} dataKey="y" stroke="#8884d8" dot={false}/>
@@ -117,7 +127,6 @@ export function useCaen(url) {
         setData: (data) => setData(data),
         send: async (request) => await sendRequest(url, request, cb, setData)
     }
-
     let table_extra = <>
         <TableRow items={["Acquiring", data["acquisition_active"] ? "True" : "False", ""]}/>
     </>
@@ -127,6 +136,7 @@ export function useCaen(url) {
         <SimpleButton text="Dump Registry" request={{"store_registry": true}}/>
         <SimpleButton text="Start Acquisition" request={{"start_acquisition": true}}/>
         <SimpleButton text="Stop Acquisition" request={{"stop_acquisition": true}}/>
+        <SimpleButton text="Clear Acquisition" request={{"clear_acquisition": true}}/>
     </>
 
     return {config, show, setShow, modalMessage, table_extra, button_extra};

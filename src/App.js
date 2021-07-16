@@ -1,4 +1,3 @@
-// import logo from './logo.svg';
 import './App.css';
 import React, {useContext} from "react";
 import {BrowserRouter as Router, Link, NavLink, Route, Switch} from "react-router-dom";
