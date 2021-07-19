@@ -1,6 +1,6 @@
 import './App.css';
 import React, {useContext} from "react";
-import {BrowserRouter as Router, Link, NavLink, Route, Switch} from "react-router-dom";
+import {BrowserRouter as HashRouter, Link, NavLink, Route, Switch} from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
@@ -42,10 +42,10 @@ export default function App() {
     return (
         <Controllers.Provider value={controllerConfig}>
             <div>
-                <Router>
+                <HashRouter>
                     <NavigationBar/>
                     <PageContent/>
-                </Router>
+                </HashRouter>
             </div>
         </Controllers.Provider>
     );
@@ -62,7 +62,7 @@ function NavLi(props) {
 function NavigationBar() {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark navbar-sm">
-            <div className="container-fluid">
+        e   <div className="container-fluid">
                 <button className="navbar-toggler float-end" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -104,13 +104,13 @@ function PageContent() {
             <Switch>
                 <Route path="/rbs"><Rbs/></Route>
                 <Route path="/aml_x_y">
-                    <Aml url={aml_x_y.url} names={aml_x_y.names} loads={aml_x_y.loads}/>
+                    <Aml url={aml_x_y.url} names={aml_x_y.names} loads={aml_x_y.loads} key={1}/>
                 </Route>
                 <Route path="/aml_phi_zeta">
-                    <Aml url={aml_phi_zeta.url} names={aml_phi_zeta.names}loads={aml_phi_zeta.loads}/>
+                    <Aml url={aml_phi_zeta.url} names={aml_phi_zeta.names}loads={aml_phi_zeta.loads} key={2}/>
                 </Route>
                 <Route path="/aml_det_theta">
-                    <Aml url={aml_det_theta.url} names={aml_det_theta.names} loads={aml_det_theta.loads}/>
+                    <Aml url={aml_det_theta.url} names={aml_det_theta.names} loads={aml_det_theta.loads} key={3}/>
                 </Route>
                 <Route path="/motrona_rbs">
                     <Motrona url={motrona_rbs.url}/>

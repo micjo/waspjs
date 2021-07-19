@@ -206,6 +206,8 @@ export function useAml(url, names, loads) {
     const [firstTarget, setFirstTarget] = useState('');
     const [secondTarget, setSecondTarget] = useState('');
 
+    console.log(data);
+
     const config = {
         title: "AML " + names[0] + " " + names[1],
         url: url, names: names, loads: loads,
