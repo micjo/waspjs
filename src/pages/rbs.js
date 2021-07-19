@@ -8,6 +8,7 @@ import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {postData} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
+import {HistogramCaen} from "../components/histogram_caen";
 
 function AmlCard(props) {
     let {config, show, setShow, modalMessage, table_extra, button_extra} =
@@ -161,6 +162,7 @@ export function Rbs() {
             </div>
             <div className="col-sm">
                 <RbsCard/>
+                <HistogramCaen url={context.caen_rbs.url}/>
             </div>
 
         </div>

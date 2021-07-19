@@ -1,19 +1,10 @@
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import React, {useContext, useEffect, useState} from "react";
-import {getJson, sendRequest} from "../http_helper";
+import {sendRequest} from "../http_helper";
 import {TableRow} from "../components/table_elements";
 import {ControllerContext} from "../App";
-import {ButtonSpinner, DropDown, SimpleToggle} from "../components/input_elements";
-import {
-    CartesianGrid,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-    Legend, Brush
-} from "recharts";
+import {ButtonSpinner} from "../components/input_elements";
+import {HistogramCaen} from "../components/histogram_caen";
 
 
 function useStatus(data) {
@@ -39,76 +30,11 @@ function SimpleButton(props) {
 }
 
 
-function HistogramChart(props) {
-    const [histogramData, setHistogramData] = useState([0])
-    const [updateGraph, setUpdateGraph] = useState(false);
-    const [board, setBoard] = useState(0);
-    const [channel, setChannel] = useState(0);
-    const {modalMessage, show, setShow, cb} = useModal()
-
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            if (updateGraph) {
-                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/pack-0-8192-1024";
-                let status, json_response;
-                try {
-                    [status, json_response] = await getJson(url);
-                }
-                catch (e) {
-                    cb("Error while getting histogram! Make sure that the daemon is running and the board and " +
-                        "channel exist.");
-                    setUpdateGraph(false);
-                }
-                if (status === 404) {
-                    cb("cannot reach caen");
-                    setUpdateGraph(false);
-                }
-                else {
-                    let data = []
-                    for (let item in json_response) {
-                        data.push({x: item, y: json_response[item]});
-                    }
-                    setHistogramData(data)
-                }
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [updateGraph, board, channel, props.url]);
-
-    return (
-        <div>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
-            <h3>Histogram</h3>
-            <div className="input-group input-sm mb-3">
-                <label className="input-group-text">Board:</label>
-                <DropDown selects={[1, 2, 3, 4, 5, 6, 7, 8]} setValue={setBoard}/>
-                <label className="input-group-text">Channel:</label>
-                <DropDown selects={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
-                          setValue={setChannel}/>
-                <label className="input-group-text">Update:</label>
-                <SimpleToggle checked={updateGraph} setChecked={setUpdateGraph}>Update</SimpleToggle>
-            </div>
-            <ResponsiveContainer width='100%' height={300}>
-                <LineChart data={histogramData}>
-                    <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis dataKey="x"/>
-                    <YAxis/>
-                    <Tooltip/>
-                    <Legend/>
-                    <Line type="monotone" isAnimationActive={false} dataKey="y" stroke="#8884d8" dot={false}/>
-                    <Brush/>
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-    );
-
-}
-
 export function Caen(props) {
     return (
         <>
             <CaenControl url={props.url}/>
-            <HistogramChart url={props.url}/>
+            <HistogramCaen url={props.url}/>
         </>
     );
 }
