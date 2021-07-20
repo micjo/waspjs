@@ -32,12 +32,15 @@ function MotronaCard(props) {
 }
 
 function CaenCard(props) {
+    let context = useContext(Controllers);
     let {config, show, setShow, modalMessage, table_extra, button_extra} = useCaen(props.caen.url)
+    let histogram = <HistogramCaen url={context.caen_rbs.url}/>
 
     return (
         <ControllerContext.Provider value={config}>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
-            <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
+            <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}
+                         extra={histogram}/>
         </ControllerContext.Provider>);
 }
 
@@ -162,7 +165,6 @@ export function Rbs() {
             </div>
             <div className="col-sm">
                 <RbsCard/>
-                <HistogramCaen url={context.caen_rbs.url}/>
             </div>
 
         </div>

@@ -64,7 +64,7 @@ export async function sendRequest(url, request, popup, setData) {
         popup("Daemon did not complete request");
     }
 
-    if (data["error"] !== "Success") {
+    if (!(data["error"] === "Success" || data["error"] === "No error")) {
         popup(data["error"]);
     }
     setData(data);

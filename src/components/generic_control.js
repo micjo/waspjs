@@ -170,6 +170,7 @@ export function GenericCard(props)
             <div className="collapse" id={"control" + props.collapse}>
                 <TableControl table_extra={props.table_extra} data={context.data}/>
                 <ButtonControl button_extra={props.button_extra}/>
+                {props.extra}
             </div>
         </div>);
 
