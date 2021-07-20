@@ -68,7 +68,7 @@ function RunningBadge(props) {
     let element;
     if (props.running === "Not connected") {
         element = <span className="badge bg-danger">{props.running}</span>
-    } else if (props.error !== "Success") {
+    } else if (! (props.error === "Success" || props.error === "No error")) {
         element = <span className="badge bg-warning">{props.error}</span>
     } else {
         element = <span className="badge bg-success">{props.running}</span>

@@ -11,7 +11,7 @@ export function StatusRow(props) {
     let runningStatus = running !== "Running";
     let runBadge = <ConditionalBadge text={running} error={runningStatus}/>
 
-    let successStatus = data["error"] === "Success" || data["error"] === "No Error";
+    let successStatus = data["error"] === "Success" || data["error"] === "No error";
     let errorBadge = <ConditionalBadge text={data["error"]} error={!successStatus}/>;
 
     return (
