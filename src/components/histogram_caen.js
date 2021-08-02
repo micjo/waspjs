@@ -11,12 +11,21 @@ export function HistogramCaen(props) {
     const [channel, setChannel] = useState(0);
     const {modalMessage, show, setShow, cb} = useModal()
 
+    const [binsMin, setBinsMin] = useState(0)
+    const [binsMax, setBinsMax] = useState(8192)
+    const [binsWidth, setBinsWidth] = useState(1024)
+
     useEffect(() => {
         const interval = setInterval(async () => {
             if (updateGraph) {
-                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/pack-0-8192-1024";
+
+
+                let urlEnd = "pack-" + binsMin + "-" + binsMax + "-" + binsWidth;
+                console.log(urlEnd);
+                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/" +  urlEnd;
                 let status, json_response;
                 try {
+                    console.log("getting json from " + url);
                     [status, json_response] = await getJson(url);
                 } catch (e) {
                     cb("Error while getting histogram! Make sure that the daemon is running and the board and " +
@@ -26,7 +35,11 @@ export function HistogramCaen(props) {
                 if (status === 404) {
                     cb("cannot reach caen");
                     setUpdateGraph(false);
-                } else {
+                } else if (status == 413) {
+                    cb("Dataset requested is too large.")
+                    setUpdateGraph(false);
+                }
+                else {
                     let data = []
                     for (let item in json_response) {
                         data.push({x: item, y: json_response[item]});
@@ -36,7 +49,7 @@ export function HistogramCaen(props) {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [updateGraph, board, channel, props.url]);
+    }, [updateGraph, board, channel, props.url, binsMin, binsWidth, binsMax]);
 
     return (
         <div>
@@ -50,6 +63,20 @@ export function HistogramCaen(props) {
                           setValue={setChannel}/>
                 <label className="input-group-text">Update:</label>
                 <SimpleToggle checked={updateGraph} setChecked={setUpdateGraph}>Update</SimpleToggle>
+            </div>
+            <div className="input-group input-sm mb-3">
+                <label className="input-group-text">Bins min:</label>
+                <input type="number" className="form-control" placeholder="New Value"
+                       value={binsMin}
+                       onInput={e => setBinsMin(e.target.value)} disabled={updateGraph}/>
+                <label className="input-group-text">Bins max:</label>
+                <input type="number" className="form-control" placeholder="New Value"
+                       value={binsMax} disabled={updateGraph}
+                       onInput={e => setBinsMax(e.target.value)}/>
+                <label className="input-group-text">Bins width:</label>
+                <input type="number" className="form-control" placeholder="New Value"
+                       value={binsWidth} disabled={updateGraph}
+                       onInput={e => setBinsWidth(e.target.value)}/>
             </div>
             <ResponsiveContainer width='100%' height={300}>
                 <LineChart data={histogramData}>
