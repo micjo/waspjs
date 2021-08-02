@@ -81,7 +81,7 @@ export function HistogramCaen(props) {
             <ResponsiveContainer width='100%' height={300}>
                 <LineChart data={histogramData}>
                     <CartesianGrid strokeDasharray="3 3"/>
-                    <XAxis dataKey="x" interval={49}/>
+                    <XAxis dataKey="x" interval={49} angle={-45} textAnchor="end" height={50}/>
                     <YAxis/>
                     <Tooltip/>
                     <Legend/>
