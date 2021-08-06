@@ -30,17 +30,19 @@ export function ModalView(props) {
 
 
 function HideButton(props) {
+    const controller = useContext(ControllerContext);
     return (
         <ButtonSpinner text="Hide" callback={async () => {
-            await sendRequest(props.url, {"hide": false})
+            await sendRequest(props.url, {"hide": true}, controller.popup, controller.setData)
         }}/>
     );
 }
 
 function ShowButton(props) {
+    const controller = useContext(ControllerContext);
     return (
         <ButtonSpinner text="Show" callback={async () => {
-            await sendRequest(props.url, {"hide": true})
+            await sendRequest(props.url, {"hide": false}, controller.popup, controller.setData)
         }}/>
     );
 }
