@@ -1,0 +1,12 @@
+[Unit]
+Description=Wait for eth1 to be Configured
+Before=nectar.service
+
+[Service]
+Type=oneshot
+ExecStart=/lib/systemd/systemd-networkd-wait-online -i eth0 -4
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
+

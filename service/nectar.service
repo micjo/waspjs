@@ -1,0 +1,16 @@
+[Unit]
+Description=Some description
+Requires=systemd-networkd-wait-eth1.service
+
+[Service]
+Type=simple
+User=root
+Environment=PYTHONPATH=/root/wasp-nectar/build
+WorkingDirectory=/root/wasp-nectar/build
+ExecStart=/usr/bin/python /root/wasp-nectar/build/run.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
+

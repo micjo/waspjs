@@ -9,13 +9,13 @@ import socketserver
 import re
 from pathlib import Path
 
-HOST = ('0.0.0.0', 8080)
+HOST = ('0.0.0.0', 3000)
 pattern = re.compile('.png|.jpg|.jpeg|.js|.css|.ico|.gif|.svg', re.IGNORECASE)
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        url_parts = urllib.parse.urlparse(self.path)
+        url_parts = urllib.parse.urlparse(self.path + '/build')
         request_file_path = Path(url_parts.path.strip("/"))
 
         ext = request_file_path.suffix
@@ -27,3 +27,4 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
 httpd = socketserver.TCPServer(HOST, Handler)
 httpd.serve_forever()
+
