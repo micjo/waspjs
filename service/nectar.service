@@ -1,5 +1,5 @@
 [Unit]
-Description=Some description
+Description=Nectar UI - Frontend to lab infrastructure
 Requires=systemd-networkd-wait-eth1.service
 
 [Service]
