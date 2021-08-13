@@ -89,7 +89,7 @@ function ProgressTable(props) {
 }
 
 function RbsCard(props) {
-    let url = "http://localhost:8000/api/rbs"
+    let url = "http://169.254.150.200:8000/api/rbs"
     let {data, setData, running} = useData(url + "/state");
     const [job, setJob] = useState({});
     let {modalMessage, show, setShow, cb} = useModal();
@@ -97,7 +97,7 @@ function RbsCard(props) {
     async function handleFileChange(e) {
         let data = new FormData();
         data.append('file', e.target.files[0]);
-        let response = await fetch('http://localhost:8000/api/rbs/rqm_csv', {method: 'POST', body: data});
+        let response = await fetch('http://169.254.150.200:8000/api/rbs/rqm_csv', {method: 'POST', body: data});
         let json_job = await response.json();
 
         if (response.status !== 200) {

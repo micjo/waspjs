@@ -17,25 +17,25 @@ export const Controllers = React.createContext({});
 const controllerConfig =
     {
         aml_x_y: {
-            url: "http://localhost:8000/api/aml_x_y",
+	    url: "http://169.254.150.200:8000/api/aml_x_y",
             names: ["X", "Y"],
             loads: [10, 10],
             title: "AML X Y"
         },
         aml_phi_zeta: {
-            url: "http://localhost:8000/api/aml_phi_zeta",
+            url: "http://169.254.150.200:8000/api/aml_phi_zeta",
             names: ["Phi", "Zeta"],
             loads: [0, 1],
             title: "AML Phi Zeta"
         },
         aml_det_theta: {
-            url: "http://localhost:8000/api/aml_det_theta",
+            url: "http://169.254.150.200:8000/api/aml_det_theta",
             names: ["Detector", "Theta"],
             loads: [170, 0],
             title: "AML Detector Theta"
         },
-        motrona_rbs: {url: "http://localhost:8000/api/motrona_rbs", title: "Motrona RBS"},
-        caen_rbs: {url: "http://localhost:8000/api/caen_rbs", title: "Caen RBS"},
+        motrona_rbs: {url: "http://169.254.150.200:8000/api/motrona_rbs", title: "Motrona RBS"},
+        caen_rbs: {url: "http://169.254.150.200:8000/api/caen_rbs", title: "Caen RBS"},
     };
 
 export default function App() {
@@ -78,7 +78,7 @@ function NavigationBar() {
                         <NavLi url="/motrona_rbs" body="Motrona RBS"/>
                         <NavLi url="/caen_rbs" body="Caen RBS"/>
                         <li className="nav-item ms-2 me-2 flex-nowrap">
-                        <Link to={{ pathname: "http://localhost:8000/docs" }} className="nav-link" target="_blank" >Docs</Link>
+                        <Link to={{ pathname: "http://169.254.150.200:8000/docs" }} className="nav-link" target="_blank" >Docs</Link>
                         </li>
 
                     </ul>

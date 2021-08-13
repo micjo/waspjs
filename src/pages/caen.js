@@ -59,10 +59,10 @@ export function useCaen(url) {
     let button_extra = <>
         <SimpleButton text="Connect" request={{"open_connection": true}}/>
         <SimpleButton text="Configure Registry" request={{"write_registry": true}}/>
-        <SimpleButton text="Dump Registry" request={{"store_registry": true}}/>
+        <SimpleButton text="Dump Registry" request={{"store_registers": true}}/>
         <SimpleButton text="Start" request={{"start_acquisition": true}}/>
         <SimpleButton text="Stop" request={{"stop_acquisition": true}}/>
-        <SimpleButton text="Clear" request={{"clear_acquisition": true}}/>
+        <SimpleButton text="Clear" request={{"clear": true}}/>
     </>
 
     return {config, show, setShow, modalMessage, table_extra, button_extra};
