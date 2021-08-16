@@ -1,34 +1,9 @@
 import React, {useContext, useEffect, useState} from "react";
-import {getJson, sendRequest} from "../http_helper";
+import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow} from "../components/table_elements";
-import {GenericControl, ModalView, useModal} from "../components/generic_control";
+import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
 import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton, Toggle} from "../components/input_elements";
-
-
-function useData(url) {
-    const [data, setData] = useState({});
-    const [brief, setBrief] = useState("");
-    const [moving, setMoving] = useState(false);
-    const [running, setRunning] = useState("");
-
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            let [status, json_response] = await getJson(url);
-            if (status === 404) {
-                setRunning("Not connected");
-            } else {
-                setRunning("Running");
-                setData(json_response);
-                setBrief(json_response["status"] + ", " + json_response["motor_2_position"]);
-                setMoving(!json_response["request_finished"]);
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [url]);
-
-    return {data, setData, moving, brief, running}
-}
 
 function useStatus(data) {
     const [counts, setCounts] = useState("");
@@ -46,7 +21,7 @@ function useStatus(data) {
         }
     }, [data])
 
-    return {counts, counting}
+    return [counts, counting]
 
 }
 
@@ -214,9 +189,9 @@ function AdvancedControl() {
 }
 
 export function useMotrona(url){
-    const {modalMessage, show, setShow, cb} = useModal()
-    const {data, setData, running} = useData(url);
-    const {counts, counting} = useStatus(data);
+    const [modalMessage, show, setShow, cb] = useModal()
+    const [data, setData, running] = useData(url);
+    const [counts, counting] = useStatus(data);
 
     const config = {
         title: "Motrona RBS", data: data,
@@ -240,12 +215,11 @@ export function useMotrona(url){
         <ClearStartButton/>
     </>
 
-    return {config, show, setShow, modalMessage, table_extra, button_extra}
-
+    return [config, show, setShow, modalMessage, table_extra, button_extra]
 }
 
 export function Motrona(props) {
-    let {config, show, setShow, modalMessage, table_extra, button_extra} = useMotrona(props.url)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.url)
 
     return (
         <ControllerContext.Provider value={config}>

@@ -20,7 +20,7 @@ function useStatus(data) {
         }
     }, [data])
 
-    return {acquiring, busy}
+    return [acquiring, busy]
 }
 
 
@@ -41,9 +41,9 @@ export function Caen(props) {
 
 
 export function useCaen(url) {
-    const {modalMessage, show, setShow, cb} = useModal()
-    const {data, setData, running} = useData(url);
-    const {acquiring, busy} = useStatus(data);
+    const [modalMessage, show, setShow, cb] = useModal()
+    const [data, setData, running] = useData(url);
+    const [acquiring, busy] = useStatus(data);
 
     const config = {
         title: "CAEN",
@@ -65,11 +65,11 @@ export function useCaen(url) {
         <SimpleButton text="Clear" request={{"clear": true}}/>
     </>
 
-    return {config, show, setShow, modalMessage, table_extra, button_extra};
+    return [config, show, setShow, modalMessage, table_extra, button_extra];
 }
 
 export function CaenControl(props) {
-    let {config, show, setShow, modalMessage, table_extra, button_extra} = useCaen(props.url)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.url)
 
     return (
         <ControllerContext.Provider value={config}>

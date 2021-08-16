@@ -21,11 +21,9 @@ export function HistogramCaen(props) {
 
 
                 let urlEnd = "pack-" + binsMin + "-" + binsMax + "-" + binsWidth;
-                console.log(urlEnd);
                 let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/" +  urlEnd;
                 let status, json_response;
                 try {
-                    console.log("getting json from " + url);
                     [status, json_response] = await getJson(url);
                 } catch (e) {
                     cb("Error while getting histogram! Make sure that the daemon is running and the board and " +
@@ -35,7 +33,7 @@ export function HistogramCaen(props) {
                 if (status === 404) {
                     cb("cannot reach caen");
                     setUpdateGraph(false);
-                } else if (status == 413) {
+                } else if (status === 413) {
                     cb("Dataset requested is too large.")
                     setUpdateGraph(false);
                 }
@@ -49,7 +47,7 @@ export function HistogramCaen(props) {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [updateGraph, board, channel, props.url, binsMin, binsWidth, binsMax]);
+    }, [updateGraph, board, channel, props.url, binsMin, binsWidth, binsMax, cb]);
 
     return (
         <div>
@@ -63,6 +61,8 @@ export function HistogramCaen(props) {
                           setValue={setChannel}/>
                 <label className="input-group-text">Update:</label>
                 <SimpleToggle checked={updateGraph} setChecked={setUpdateGraph}>Update</SimpleToggle>
+                <label className="icon-info-sign" data-toggle="tooltip" title="first tooltip" id='example'>?</label>
+
             </div>
             <div className="input-group input-sm mb-3">
                 <label className="input-group-text">Bins min:</label>

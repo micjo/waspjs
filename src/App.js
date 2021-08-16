@@ -1,6 +1,6 @@
 import './App.css';
-import React, {useContext} from "react";
-import {BrowserRouter as HashRouter, Link, NavLink, Route, Router, Switch} from "react-router-dom";
+import React, {useContext, useEffect, useState} from "react";
+import {BrowserRouter as HashRouter, Link, NavLink, Route, Switch} from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
@@ -9,38 +9,34 @@ import {Dashboard} from "./pages/dashboard";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
 import {Caen} from "./pages/caen";
+import {getJson} from "./http_helper";
 
 document.body.style.backgroundColor = "floralwhite";
 
 export const Controllers = React.createContext({});
 
-const controllerConfig =
-    {
-        aml_x_y: {
-            url: "http://localhost/hive/api/aml_x_y",
-            names: ["X", "Y"],
-            loads: [10, 10],
-            title: "AML X Y"
-        },
-        aml_phi_zeta: {
-            url: "http://localhost/hive/api/aml_phi_zeta",
-            names: ["Phi", "Zeta"],
-            loads: [0, 1],
-            title: "AML Phi Zeta"
-        },
-        aml_det_theta: {
-            url: "http://localhost/hive/api/aml_det_theta",
-            names: ["Detector", "Theta"],
-            loads: [170, 0],
-            title: "AML Detector Theta"
-        },
-        motrona_rbs: {url: "http://localhost/hive/api/motrona_rbs", title: "Motrona RBS"},
-        caen_rbs: {url: "http://localhost/hive/api/caen_rbs", title: "Caen RBS"},
-    };
+
+function redirectCallsToHive(hwConfig) {
+    for (const [key, value] of Object.entries(hwConfig['hw_control'])) {
+        value.url = "/hive/api/" + key
+    }
+}
 
 export default function App() {
+
+    const[hwConfig, setHwConfig] = useState("");
+    const getHwConfig = async ()=>{
+        const [,newHwConfig] = await getJson("/hive/api/rbs/hw_config");
+        redirectCallsToHive(newHwConfig);
+        setHwConfig(newHwConfig['hw_control']);
+    }
+    useEffect(()=> {
+        getHwConfig();
+    },[])
+
+
     return (
-        <Controllers.Provider value={controllerConfig}>
+        <Controllers.Provider value={hwConfig}>
             <div>
                 <HashRouter>
                     <NavigationBar/>
@@ -66,7 +62,7 @@ function NavigationBar() {
                 <button className="navbar-toggler float-end" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span className="navbar-toggler-icon"></span>
+                    <span className="navbar-toggler-icon"/>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
@@ -93,6 +89,10 @@ export const ControllerContext = React.createContext({});
 function PageContent() {
 
     const context = useContext(Controllers);
+
+    if (context === "") {
+        return <></>
+    }
     const aml_x_y = context.aml_x_y;
     const aml_phi_zeta = context.aml_phi_zeta;
     const aml_det_theta = context.aml_det_theta;
@@ -107,7 +107,7 @@ function PageContent() {
                     <Aml url={aml_x_y.url} names={aml_x_y.names} loads={aml_x_y.loads} key={1}/>
                 </Route>
                 <Route path="/nectar/aml_phi_zeta">
-                    <Aml url={aml_phi_zeta.url} names={aml_phi_zeta.names}loads={aml_phi_zeta.loads} key={2}/>
+                    <Aml url={aml_phi_zeta.url} names={aml_phi_zeta.names} loads={aml_phi_zeta.loads} key={2}/>
                 </Route>
                 <Route path="/nectar/aml_det_theta">
                     <Aml url={aml_det_theta.url} names={aml_det_theta.names} loads={aml_det_theta.loads} key={3}/>

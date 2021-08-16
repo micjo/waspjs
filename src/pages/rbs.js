@@ -1,7 +1,14 @@
 import React, {useContext, useState} from "react";
 import {Controllers} from "../App";
 import {useAml} from "./aml";
-import {ProgressSpinner, ConditionalBadge, GenericCard, ModalView, useData, useModal} from "../components/generic_control";
+import {
+    ProgressSpinner,
+    ConditionalBadge,
+    GenericCard,
+    ModalView,
+    useModal,
+    useReadOnlyData
+} from "../components/generic_control";
 import {ControllerContext} from "../App";
 import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
@@ -11,7 +18,7 @@ import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 
 function AmlCard(props) {
-    let {config, show, setShow, modalMessage, table_extra, button_extra} =
+    let [config, show, setShow, modalMessage, table_extra, button_extra] =
         useAml(props.aml.url, props.aml.names, props.aml.loads)
 
     return (
@@ -22,7 +29,7 @@ function AmlCard(props) {
 }
 
 function MotronaCard(props) {
-    let {config, show, setShow, modalMessage, table_extra, button_extra} = useMotrona(props.motrona.url)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.motrona.url)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -32,9 +39,8 @@ function MotronaCard(props) {
 }
 
 function CaenCard(props) {
-    let context = useContext(Controllers);
-    let {config, show, setShow, modalMessage, table_extra, button_extra} = useCaen(props.caen.url)
-    let histogram = <HistogramCaen url={context.caen_rbs.url}/>
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.caen.url)
+    let histogram = <HistogramCaen url={props.caen.url}/>
 
     return (
         <ControllerContext.Provider value={config}>
@@ -68,8 +74,10 @@ function ProgressTable(props) {
             table.push(<SuccessTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
         }
         if (itemExecuting === exection.DOING) {
+            let fraction = parseFloat(props.data.accumulated_charge)/ parseFloat(props.data.accumulated_charge_target);
+            let percentage = (fraction * 100).toFixed(2);
             table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
-                <ProgressSpinner text={Math.round(props.data.recipe_progress_percentage) + "%"}/>]}/>
+                <ProgressSpinner text={percentage + "%"}/>]}/>
             )
             itemExecuting = exection.TODO;
         }
@@ -77,7 +85,7 @@ function ProgressTable(props) {
 
     return (
         <>
-            <h3>RQM: {props.data.rqm.rqm_number}</h3>
+            <h5>RQM: {props.data.rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
                 <tbody>
@@ -88,23 +96,52 @@ function ProgressTable(props) {
     )
 }
 
-function RbsCard(props) {
-    let url = "http://169.254.150.200:8000/api/rbs"
-    let {data, setData, running} = useData(url + "/state");
+function ScheduleTable(props) {
+    let table = []
+    if (Array.isArray(props.schedule) && props.schedule.length) {
+         for (let item of props.schedule) {
+             table.push(<TableRow key={item} items={[item]} />)
+         }
+    }
+
+
+    return (
+        <>
+            <table className="table table-striped table-hover table-sm">
+                <TableHeader items={["Name"]}/>
+                <tbody>
+                {table}
+                </tbody>
+            </table>
+        </>
+    )
+
+}
+
+function RbsCard() {
+    let url = "/hive/api/rbs"
+    let data = useReadOnlyData(url + "/state");
+    let schedule = useReadOnlyData(url + "/schedule")
     const [job, setJob] = useState({});
-    let {modalMessage, show, setShow, cb} = useModal();
+    let [modalMessage, show, setShow, cb] = useModal();
 
     async function handleFileChange(e) {
         let data = new FormData();
         data.append('file', e.target.files[0]);
-        let response = await fetch('http://169.254.150.200:8000/api/rbs/rqm_csv', {method: 'POST', body: data});
+        let response = await fetch(url + '/rqm_csv', {method: 'POST', body: data});
         let json_job = await response.json();
 
         if (response.status !== 200) {
-            let message = "Failed to parse csv. Error message:\n" + json_job;
+            let message = <>Failed to parse csv. <br/>Error message:
+                            <div className="alert alert-dark text-monospace">{json_job}</div></>;
             cb(message);
         }
         setJob(json_job);
+    }
+
+
+    async function scheduleRqm() {
+        await postData(url + "/run", JSON.stringify(job))
     }
 
     let rqm_number = "";
@@ -128,7 +165,6 @@ function RbsCard(props) {
 
             <ProgressTable data={data}/>
 
-
             <div className="clearfix">
                 <div className="btn-group float-end">
                     <ButtonSpinner text="Abort" callback={async () => {
@@ -141,11 +177,11 @@ function RbsCard(props) {
                                           onChange={async (e) => await handleFileChange(e)}
                     />
                     </label>
-                    <ButtonSpinner text="Run CSV" callback={async () => {
-                        await postData(url + "/run", JSON.stringify(job))
-                    }}/>
+                    <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
                 </div>
             </div>
+            <h5>RBS Schedule</h5>
+            <ScheduleTable schedule={schedule}/>
         </>);
 
 }

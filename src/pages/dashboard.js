@@ -6,7 +6,7 @@ import {ConditionalBadge} from "../components/generic_control";
 
 
 export function StatusRow(props) {
-    const {data, setData, running} = useData(props.url);
+    const [data, , running] = useData(props.url);
 
     let runningStatus = running !== "Running";
     let runBadge = <ConditionalBadge text={running} error={runningStatus}/>

@@ -70,7 +70,7 @@ function RunningBadge(props) {
     let element;
     if (props.running === "Not connected") {
         element = <span className="badge bg-danger">{props.running}</span>
-    } else if (! (props.error === "Success" || props.error === "No error")) {
+    } else if (!(props.error === "Success" || props.error === "No error")) {
         element = <span className="badge bg-warning">{props.error}</span>
     } else {
         element = <span className="badge bg-success">{props.running}</span>
@@ -97,15 +97,13 @@ export function ProgressSpinner(props) {
     );
 }
 
-function BusySpinnner(props)
-{
+function BusySpinnner(props) {
     return (
         <span className="spinner-border spinner-border-sm me-2"
               style={{"visibility": props.busy ? "visible" : "hidden"}}/>);
 }
 
-export function ButtonControl(props)
-{
+export function ButtonControl(props) {
     const controller = useContext(ControllerContext);
     return (
         <div className="clearfix">
@@ -120,8 +118,7 @@ export function ButtonControl(props)
 
 }
 
-export function TableControl(props)
-{
+export function TableControl(props) {
     return (
         <table className="table table-striped table-hover table-sm">
             <TableHeader items={["Identifier", "Value", "Control"]}/>
@@ -135,8 +132,7 @@ export function TableControl(props)
 }
 
 
-export function PageTitle()
-{
+export function PageTitle() {
     const controller = useContext(ControllerContext);
     return (
         <>
@@ -153,8 +149,7 @@ export function PageTitle()
     );
 }
 
-export function GenericCard(props)
-{
+export function GenericCard(props) {
     const context = useContext(ControllerContext);
     return (
         <div className="card text-nowrap bg-light text-dark mt-2 mb-3">
@@ -166,20 +161,20 @@ export function GenericCard(props)
                     <RunningBadge running={context.running} error={context.data["error"]}/>
                 </div>
             </div>
-            <button className="btn btn-secondary" data-bs-toggle="collapse" href={"#control" + props.collapse}>Expand
+            <a className="btn btn-secondary" data-bs-toggle="collapse" href={"#control" + props.collapse}>Expand
                 Toggle
-            </button>
+            </a>
             <div className="collapse" id={"control" + props.collapse}>
                 <TableControl table_extra={props.table_extra} data={context.data}/>
                 <ButtonControl button_extra={props.button_extra}/>
                 {props.extra}
             </div>
+
         </div>);
 
 }
 
-export function GenericControl(props)
-{
+export function GenericControl(props) {
     const context = useContext(ControllerContext);
     return (
         <>
@@ -191,8 +186,7 @@ export function GenericControl(props)
     );
 }
 
-export function useModal()
-{
+export function useModal() {
     const [show, setShow] = useState(false);
     const [modalMessage, setModalMessage] = useState("");
 
@@ -201,26 +195,47 @@ export function useModal()
         setShow(true)
     }, []);
 
-    return {modalMessage, show, setShow, cb}
+    return [modalMessage, show, setShow, cb]
 }
 
-export function useData(url)
-{
+export function useReadOnlyData(url) {
+    const [data, setData] = useState({});
+
+    useEffect(() => {
+            const getControllerData = async () => {
+                let [, json_response] = await getJson(url);
+                setData(json_response);
+            }
+
+            getControllerData();
+            const interval = setInterval(getControllerData, 1000);
+            return () => clearInterval(interval);
+        }, [url]
+    );
+
+    return data
+}
+
+export function useData(url) {
     const [data, setData] = useState({});
     const [running, setRunning] = useState("");
 
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            let [status, json_response] = await getJson(url);
-            if (status === 404) {
-                setRunning("Not connected");
-            } else {
-                setRunning("Running");
-                setData(json_response);
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [url]);
 
-    return {data, setData, running}
+    useEffect(() => {
+            const getControllerData = async () => {
+                let [status, json_response] = await getJson(url);
+                if (status === 404) {
+                    setRunning("Not connected");
+                } else {
+                    setRunning("Running");
+                    setData(json_response);
+                }
+            }
+            getControllerData()
+            const interval = setInterval(getControllerData, 1000);
+            return () => clearInterval(interval);
+        }, [url]
+    );
+
+    return [data, setData, running]
 }

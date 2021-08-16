@@ -175,7 +175,7 @@ function useStatus(data) {
         }
     }, [data])
 
-    return {position, moving}
+    return [position, moving]
 }
 
 
@@ -200,13 +200,11 @@ function AdvancedControl() {
 
 
 export function useAml(url, names, loads) {
-    const {modalMessage, show, setShow, cb} = useModal()
-    const {data, setData, running} = useData(url);
-    const {position, moving} = useStatus(data);
+    const [modalMessage, show, setShow, cb] = useModal()
+    const [data, setData, running] = useData(url);
+    const [position, moving] = useStatus(data);
     const [firstTarget, setFirstTarget] = useState('');
     const [secondTarget, setSecondTarget] = useState('');
-
-    console.log(data);
 
     const config = {
         title: "AML " + names[0] + " " + names[1],
@@ -230,13 +228,13 @@ export function useAml(url, names, loads) {
     </>
 
 
-    return {config, show, setShow, modalMessage, table_extra, button_extra};
+    return [config, show, setShow, modalMessage, table_extra, button_extra];
 }
 
 
 
 export function Aml(props) {
-    let {config, show, setShow, modalMessage, table_extra, button_extra} = useAml(props.url, props.names, props.loads)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useAml(props.url, props.names, props.loads)
 
     return (
         <ControllerContext.Provider value={config}>
