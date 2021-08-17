@@ -74,7 +74,7 @@ function NavigationBar() {
                         <NavLi url="motrona_rbs" body="Motrona RBS"/>
                         <NavLi url="caen_rbs" body="Caen RBS"/>
                         <li className="nav-item ms-2 me-2 flex-nowrap">
-                        <Link to={{ pathname: "http://localhost/hive/docs" }} className="nav-link" target="_blank" >Docs</Link>
+                        <Link to={{ pathname: "/hive/docs" }} className="nav-link" target="_blank" >Docs</Link>
                         </li>
 
                     </ul>
