@@ -3,6 +3,7 @@ import {ModalView, useModal} from "./generic_control";
 import {getJson} from "../http_helper";
 import {DropDown, SimpleToggle} from "./input_elements";
 import {Brush, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
+import {BsQuestionCircle} from "react-icons/bs"
 
 export function HistogramCaen(props) {
     const [histogramData, setHistogramData] = useState([0])
@@ -19,9 +20,8 @@ export function HistogramCaen(props) {
         const interval = setInterval(async () => {
             if (updateGraph) {
 
-
                 let urlEnd = "pack-" + binsMin + "-" + binsMax + "-" + binsWidth;
-                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/" +  urlEnd;
+                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/" + urlEnd;
                 let status, json_response;
                 try {
                     [status, json_response] = await getJson(url);
@@ -36,8 +36,7 @@ export function HistogramCaen(props) {
                 } else if (status === 413) {
                     cb("Dataset requested is too large.")
                     setUpdateGraph(false);
-                }
-                else {
+                } else {
                     let data = []
                     for (let item in json_response) {
                         data.push({x: item, y: json_response[item]});
@@ -61,8 +60,6 @@ export function HistogramCaen(props) {
                           setValue={setChannel}/>
                 <label className="input-group-text">Update:</label>
                 <SimpleToggle checked={updateGraph} setChecked={setUpdateGraph}>Update</SimpleToggle>
-                <label className="icon-info-sign" data-toggle="tooltip" title="first tooltip" id='example'>?</label>
-
             </div>
             <div className="input-group input-sm mb-3">
                 <label className="input-group-text">Bins min:</label>
@@ -77,6 +74,11 @@ export function HistogramCaen(props) {
                 <input type="number" className="form-control" placeholder="New Value"
                        value={binsWidth} disabled={updateGraph}
                        onInput={e => setBinsWidth(e.target.value)}/>
+
+                <a className="ms-2" href={"#histogram_help"} data-toggle="tooltip" title="These settings are independent
+                of the RBS experiment. Each experiment data structure (CSV, JSON) defines these at the top.">
+                    <BsQuestionCircle/>
+                </a>
             </div>
             <ResponsiveContainer width='100%' height={300}>
                 <LineChart data={histogramData}>
