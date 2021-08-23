@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {Controllers} from "../App";
+import {HiveData} from "../App";
 import {TableHeader, TableRow} from "../components/table_elements";
 import {useData} from "../components/generic_control";
 import {ConditionalBadge} from "../components/generic_control";
@@ -20,9 +20,10 @@ export function StatusRow(props) {
 }
 
 export function Dashboard() {
-    const context = useContext(Controllers);
+    const context = useContext(HiveData);
 
     return (
+        <>
         <table className="table table-striped table-hover table-sm">
             <TableHeader items={["Name", "Connection State", "Error State", "Last Request id"]}/>
             <tbody>
@@ -32,5 +33,6 @@ export function Dashboard() {
             <StatusRow url={context.caen_rbs.url} title={context.caen_rbs.title}/>
             <StatusRow url={context.motrona_rbs.url} title={context.motrona_rbs.title}/>
             </tbody>
-        </table>);
+        </table>
+            </>);
 }

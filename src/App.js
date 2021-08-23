@@ -13,44 +13,52 @@ import {getJson} from "./http_helper";
 
 document.body.style.backgroundColor = "floralwhite";
 
-export const Controllers = React.createContext({});
+export const HiveData = React.createContext({});
+
+let hive_url;
+
+if (process.env.NODE_ENV === "development") {
+    hive_url = "http://localhost:8000"
+} else {
+    hive_url = "/hive"
+}
 
 
 function redirectCallsToHive(hwConfig) {
-    for (const [key, value] of Object.entries(hwConfig['hw_control'])) {
-        value.url = "/hive/api/" + key
+    for (const [, value] of Object.entries(hwConfig)) {
+        value.url = hive_url  + value["proxy"]
     }
 }
 
 export default function App() {
 
-    const[hwConfig, setHwConfig] = useState("");
-    const getHwConfig = async ()=>{
-        const [,newHwConfig] = await getJson("/hive/api/rbs/hw_config");
+    const [hwConfig, setHwConfig] = useState("");
+    const getHwConfig = async () => {
+        const [, newHwConfig] = await getJson(hive_url + "/api/rbs/hw_config");
         redirectCallsToHive(newHwConfig);
-        setHwConfig(newHwConfig['hw_control']);
+        setHwConfig(newHwConfig);
     }
-    useEffect(()=> {
+    useEffect(() => {
         getHwConfig();
-    },[])
+    }, [])
 
 
     return (
-        <Controllers.Provider value={hwConfig}>
+        <HiveData.Provider value={hwConfig}>
             <div>
                 <HashRouter>
                     <NavigationBar/>
                     <PageContent/>
                 </HashRouter>
             </div>
-        </Controllers.Provider>
+        </HiveData.Provider>
     );
 }
 
 function NavLi(props) {
     return (
         <li className="nav-item ms-2 me-2 flex-nowrap">
-            <NavLink exact to={"/nectar/" + props.url } href={props.url} className="nav-link">{props.body}</NavLink>
+            <NavLink exact to={"/nectar/" + props.url} href={props.url} className="nav-link">{props.body}</NavLink>
         </li>
     );
 }
@@ -58,7 +66,7 @@ function NavLi(props) {
 function NavigationBar() {
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark navbar-sm">
-           <div className="container-fluid">
+            <div className="container-fluid">
                 <button className="navbar-toggler float-end" type="button" data-bs-toggle="collapse"
                         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +82,7 @@ function NavigationBar() {
                         <NavLi url="motrona_rbs" body="Motrona RBS"/>
                         <NavLi url="caen_rbs" body="Caen RBS"/>
                         <li className="nav-item ms-2 me-2 flex-nowrap">
-                        <Link to={{ pathname: "/hive/docs" }} className="nav-link" target="_blank" >Docs</Link>
+                            <Link to={{pathname: hive_url + "/"}} className="nav-link" target="_blank">Docs</Link>
                         </li>
 
                     </ul>
@@ -88,7 +96,7 @@ export const ControllerContext = React.createContext({});
 
 function PageContent() {
 
-    const context = useContext(Controllers);
+    const context = useContext(HiveData);
 
     if (context === "") {
         return <></>

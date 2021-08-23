@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {Controllers} from "../App";
+import {HiveData} from "../App";
 import {useAml} from "./aml";
 import {
     ProgressSpinner,
@@ -118,17 +118,17 @@ function ScheduleTable(props) {
 
 }
 
-function RbsCard() {
-    let url = "/hive/api/rbs"
-    let data = useReadOnlyData(url + "/state");
-    let schedule = useReadOnlyData(url + "/schedule")
+function RbsCard(props) {
+    let url = props.rbs.url;
+    let data = useReadOnlyData(url + "state");
+    let schedule = useReadOnlyData(url + "schedule")
     const [job, setJob] = useState({});
     let [modalMessage, show, setShow, cb] = useModal();
 
     async function handleFileChange(e) {
         let data = new FormData();
         data.append('file', e.target.files[0]);
-        let response = await fetch(url + '/rqm_csv', {method: 'POST', body: data});
+        let response = await fetch(url + 'rqm_csv', {method: 'POST', body: data});
         let json_job = await response.json();
 
         if (response.status !== 200) {
@@ -188,7 +188,7 @@ function RbsCard() {
 
 
 export function Rbs() {
-    let context = useContext(Controllers);
+    let context = useContext(HiveData);
 
     return (
         <div className="row">
@@ -200,7 +200,7 @@ export function Rbs() {
                 <CaenCard caen={context.caen_rbs} collapse={5}/>
             </div>
             <div className="col-sm">
-                <RbsCard/>
+                <RbsCard rbs={context.rbs}/>
             </div>
 
         </div>

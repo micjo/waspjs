@@ -10,7 +10,7 @@ export function HistogramCaen(props) {
     const [updateGraph, setUpdateGraph] = useState(false);
     const [board, setBoard] = useState(0);
     const [channel, setChannel] = useState(0);
-    const {modalMessage, show, setShow, cb} = useModal()
+    const [modalMessage, show, setShow, cb] = useModal()
 
     const [binsMin, setBinsMin] = useState(0)
     const [binsMax, setBinsMax] = useState(8192)
@@ -76,7 +76,7 @@ export function HistogramCaen(props) {
                        onInput={e => setBinsWidth(e.target.value)}/>
 
                 <a className="ms-2" href={"#histogram_help"} data-toggle="tooltip" title="These settings are independent
-                of the RBS experiment. Each experiment data structure (CSV, JSON) defines these at the top.">
+                of a running RBS experiment. Each experiment data structure (CSV, JSON) defines these at the top.">
                     <BsQuestionCircle/>
                 </a>
             </div>
