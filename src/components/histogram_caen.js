@@ -75,10 +75,12 @@ export function HistogramCaen(props) {
                        value={binsWidth} disabled={updateGraph}
                        onInput={e => setBinsWidth(e.target.value)}/>
 
-                <a className="ms-2" href={"#histogram_help"} data-toggle="tooltip" title="These settings are independent
+                <span className="input-group-text">
+                <a href={"#histogram_help"} data-toggle="tooltip" title="These settings are independent
                 of a running RBS experiment. Each experiment data structure (CSV, JSON) defines these at the top.">
                     <BsQuestionCircle/>
                 </a>
+                </span>
             </div>
             <ResponsiveContainer width='100%' height={300}>
                 <LineChart data={histogramData}>

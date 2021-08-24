@@ -16,6 +16,7 @@ import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../compon
 import {postData} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
+import {BsCheck, BsDot, BsQuestionCircle, BsX} from "react-icons/bs";
 
 function AmlCard(props) {
     let [config, show, setShow, modalMessage, table_extra, button_extra] =
@@ -71,10 +72,11 @@ function ProgressTable(props) {
             table.push(<TableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "0%"]}/>)
         }
         if (itemExecuting === exection.DONE) {
-            table.push(<SuccessTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
+            table.push(<SuccessTableRow key={item.file_stem}
+                                        items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
         }
         if (itemExecuting === exection.DOING) {
-            let fraction = parseFloat(props.data.accumulated_charge)/ parseFloat(props.data.accumulated_charge_target);
+            let fraction = parseFloat(props.data.accumulated_charge) / parseFloat(props.data.accumulated_charge_target);
             let percentage = (fraction * 100).toFixed(2);
             table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
                 <ProgressSpinner text={percentage + "%"}/>]}/>
@@ -99,9 +101,9 @@ function ProgressTable(props) {
 function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
-         for (let item of props.schedule) {
-             table.push(<TableRow key={item} items={[item]} />)
-         }
+        for (let item of props.schedule) {
+            table.push(<TableRow key={item} items={[item]}/>)
+        }
     }
 
 
@@ -118,14 +120,32 @@ function ScheduleTable(props) {
 
 }
 
-function RbsCard(props) {
-    let url = props.rbs.url;
-    let data = useReadOnlyData(url + "state");
-    let schedule = useReadOnlyData(url + "schedule")
+function FileValidBadge(props) {
+    if (props.fileValid === "valid") {
+        return <span className="input-group-text bg-success">
+                        <BsCheck style={{color: "white"}}/>
+                </span>
+    } else if (props.fileValid === "invalid") {
+        return <span className="input-group-text bg-danger">
+                        <BsX style={{color: "white"}}/>
+                </span>
+    } else {
+        return <span className="input-group-text">
+                        <BsDot/>
+                </span>
+    }
+}
+
+function RandomSchedule(props) {
+    let url = props.url;
     const [job, setJob] = useState({});
     let [modalMessage, show, setShow, cb] = useModal();
+    const [filename, setFilename] = useState("");
+    const [fileValid, setFileValid] = useState("");
 
     async function handleFileChange(e) {
+        console.log(e.target.value)
+        setFilename(e.target.files[0].name);
         let data = new FormData();
         data.append('file', e.target.files[0]);
         let response = await fetch(url + 'rqm_csv', {method: 'POST', body: data});
@@ -133,16 +153,46 @@ function RbsCard(props) {
 
         if (response.status !== 200) {
             let message = <>Failed to parse csv. <br/>Error message:
-                            <div className="alert alert-dark text-monospace">{json_job}</div></>;
+                <div className="alert alert-dark text-monospace">{json_job}</div></>;
             cb(message);
+            setFileValid("invalid");
+            setJob({})
+        } else {
+            setJob(json_job);
+            setFileValid("valid");
         }
-        setJob(json_job);
     }
-
 
     async function scheduleRqm() {
-        await postData(url + "/run", JSON.stringify(job))
+        await postData(url + "run", JSON.stringify(job))
+        setJob({})
+        setFilename("");
+        setFileValid("")
     }
+
+    return (
+        <>
+            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <div className="input-group mt-2 mb-2">
+                <span className="input-group-text flex-grow-1">{filename}</span>
+                <FileValidBadge fileValid={fileValid}/>
+                <label className="btn btn-outline-primary align-middle">Upload CSV
+                    <input type="file" id="csv_input" hidden
+                           onClick={(e) => {
+                               e.target.value = null;
+                           }}
+                           onChange={async (e) => await handleFileChange(e)}/>
+                </label>
+                <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
+            </div>
+        </>
+    );
+}
+
+function RbsCard(props) {
+    let url = props.rbs.url;
+    let data = useReadOnlyData(url + "state");
+    let schedule = useReadOnlyData(url + "schedule")
 
     let rqm_number = "";
     let run_status = "";
@@ -155,7 +205,6 @@ function RbsCard(props) {
 
     return (
         <>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <div className="clearfix">
                 <h3 className="float-start">RBS Experiment</h3>
                 <h5 className="clearfix float-end">
@@ -163,21 +212,14 @@ function RbsCard(props) {
                 </h5>
             </div>
 
-            <ProgressTable data={data}/>
+            <div className="clearfix"><RandomSchedule url={url}/></div>
+            <div className="clearfix"><ProgressTable data={data}/></div>
 
             <div className="clearfix">
                 <div className="btn-group float-end">
                     <ButtonSpinner text="Abort" callback={async () => {
-                        await postData(url + "/abort", "")
+                        await postData(url + "abort", "")
                     }}/>
-                    <label className="btn btn-outline-primary">
-                        Upload CSV <input type="file" id="csv_input" hidden onClick={(e) => {
-                        e.target.value = null;
-                    }}
-                                          onChange={async (e) => await handleFileChange(e)}
-                    />
-                    </label>
-                    <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
                 </div>
             </div>
             <h5>RBS Schedule</h5>
