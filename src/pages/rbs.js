@@ -217,7 +217,7 @@ function RbsCard(props) {
 
             <div className="clearfix">
                 <div className="btn-group float-end">
-                    <ButtonSpinner text="Abort" callback={async () => {
+                    <ButtonSpinner text="Abort / Clear" callback={async () => {
                         await postData(url + "abort", "")
                     }}/>
                 </div>
