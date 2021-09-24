@@ -150,15 +150,15 @@ function DebugControl() {
     return (
         <>
             <TableRow items={["Debugging rs232:", context.data["debug_rs232"] ? "True" : "False",
-                <Toggle data={context.data} keyGet="debug_rs232"
+                <Toggle checked={context.data["debug_rs232"]}
                         callback={async () => await context.send({"debug_rs232": !context.data["debug_rs232"]})}
                 />]}/>
             <TableRow items={["Debugging Broker:", context.data["debug_broker"] ? "True" : "False",
-                <Toggle data={context.data} keyGet="debug_broker"
+                <Toggle checked={context.data["debug_broker"]}
                         callback={async () => await context.send({"debug_broker": !context.data["debug_broker"]})}
                 />]}/>
             <TableRow items={["Debugging Motrona:", context.data["debug_motrona"] ? "True" : "False",
-                <Toggle data={context.data} keyGet="debug_motrona"
+                <Toggle checked={context.data["debug_motrona"]}
                         callback={async () => await context.send({"debug_motrona": !context.data["debug_motrona"]})}
                 />]}/>
         </>

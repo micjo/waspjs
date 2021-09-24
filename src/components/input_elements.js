@@ -4,7 +4,7 @@ export function Toggle(props) {
     const [requestOngoing, setRequestOngoing] = useState(false);
 
     let disabled = requestOngoing ? "Disabled" : "";
-    let checked = props.data[props.keyGet] ? "checked" : "";
+    let checked = props.checked ? "checked" : "";
     let visible = requestOngoing? "visible" : "hidden";
 
     return (

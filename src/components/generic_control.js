@@ -47,11 +47,11 @@ function ShowButton(props) {
     );
 }
 
-function ContinueButton() {
+function IgnoreErrorButton() {
     const controller = useContext(ControllerContext);
     return (
-        <ButtonSpinner text="Continue" callback={async () => {
-            await sendRequest(controller.url, {"continue": true}, controller.popup, controller.setData)
+        <ButtonSpinner text="Ignore Error" callback={async () => {
+            await sendRequest(controller.url, {"ignore_error": true}, controller.popup, controller.setData)
         }}/>
     );
 }
@@ -111,7 +111,7 @@ export function ButtonControl(props) {
                 {props.button_extra}
                 <HideButton url={controller.url}/>
                 <ShowButton url={controller.url}/>
-                <ContinueButton url={controller.url}/>
+                <IgnoreErrorButton url={controller.url}/>
             </div>
         </div>
     );
@@ -216,10 +216,9 @@ export function useReadOnlyData(url) {
     return data
 }
 
-export function useData(url) {
-    const [data, setData] = useState({});
-    const [running, setRunning] = useState("");
-
+export function useData(url, initialData={} ) {
+    const [data, setData] = useState(initialData);
+    const [running, setRunning] = useState();
 
     useEffect(() => {
             const getControllerData = async () => {

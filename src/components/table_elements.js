@@ -1,4 +1,5 @@
 import React from "react";
+import {Toggle} from "./input_elements";
 
 export function TableHeader(props) {
     const header = []
@@ -12,7 +13,10 @@ export function TableHeader(props) {
 export function TableRow(props) {
     let row = []
     for (let index in props.items){
-        row.push(<td key={index}>{props.items[index]}</td>)
+        let item = props.items[index];
+        if (item === true) { item = "True";}
+        if (item === false) {item = "False";}
+        row.push(<td key={index}>{item}</td>)
     }
     return <tr>{row}</tr>
 }
@@ -31,4 +35,14 @@ export function WarningTableRow(props) {
         row.push(<td key={index}>{props.items[index]}</td>)
     }
     return <tr className="table-warning">{row}</tr>
+}
+
+
+export function ToggleTableRow(props) {
+    let request = {};
+    request[props.setState] = !props.state;
+
+    return <TableRow items={[props.text, props.state, <Toggle checked={props.state}
+                    callback={async () => await props.send(request)}/>]}/>
+
 }
