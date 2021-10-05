@@ -1,5 +1,5 @@
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
-import {ButtonSpinner, IntInputButton, SmallButtonSpinner, Toggle} from "../components/input_elements";
+import {ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner, Toggle} from "../components/input_elements";
 import {sendRequest} from "../http_helper";
 import React, {useContext, useEffect, useState} from "react";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
@@ -12,7 +12,7 @@ function FirstPositionRow(props) {
             [
                 context.names[0],
                 props.value,
-                <IntInputButton text="Set" value={props.target} setValue={props.setTarget}
+                <FloatInputButton text="Set" value={props.target} setValue={props.setTarget}
                                 callback={async () => await context.send({"set_m1_target_position": props.target})}/>
             ]}
         />);
@@ -25,7 +25,7 @@ function SecondPositionRow(props) {
             [
                 context.names[1],
                 props.value,
-                <IntInputButton text="Set" value={props.target} setValue={props.setTarget}
+                <FloatInputButton text="Set" value={props.target} setValue={props.setTarget}
                                 callback={async () => await context.send({"set_m2_target_position": props.target})}/>
             ]}
         />);
@@ -95,9 +95,9 @@ function SecondControl() {
 }
 
 function FirstControl() {
-    const [newStepCounter, setNewStepCounter] = useState('');
-    const [newMotorPosition, setNewMotorPosition] = useState('');
-    const [newOffset, setNewOffset] = useState('');
+    const [newStepCounter, setNewStepCounter] = useState("");
+    const [newMotorPosition, setNewMotorPosition] = useState("");
+    const [newOffset, setNewOffset] = useState("");
     const context = useContext(ControllerContext);
 
     return (
@@ -115,11 +115,11 @@ function FirstControl() {
                                 callback={async () => await context.send({"set_m1_step_counter": newStepCounter})}/>
             ]}/>
             <TableRow items={["Redefine offset", context.data["motor_1_offset"],
-                <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
+                <FloatInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
                                 callback={async () => await context.send({"set_m1_offset": newOffset})}/>
             ]}/>
             <TableRow items={["Redefine Motor Position", context.data["motor_1_position"],
-                <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
+                <FloatInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
                                 callback={async () => await context.send({"set_m1_position": newMotorPosition})}/>
             ]}/>
             <TableRow items={["Updating Position", context.data["motor_1_updating_position"] ? "True" : "False",
@@ -191,8 +191,8 @@ export function useAml(url, names, loads) {
     const [modalMessage, show, setShow, cb] = useModal()
     const [data, setData, running] = useData(url, {"loggers": {}});
     const [position, moving] = useStatus(data);
-    const [firstTarget, setFirstTarget] = useState('');
-    const [secondTarget, setSecondTarget] = useState('');
+    const [firstTarget, setFirstTarget] = useState("");
+    const [secondTarget, setSecondTarget] = useState("");
 
     const config = {
         title: "AML " + names[0] + " " + names[1],
