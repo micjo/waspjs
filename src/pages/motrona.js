@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
-import {TableHeader, TableRow} from "../components/table_elements";
+import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
 import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton, Toggle} from "../components/input_elements";
@@ -147,20 +147,16 @@ export function PreselectionSettings() {
 
 function DebugControl() {
     const context = useContext(ControllerContext);
+    let loggers = context.data["loggers"];
+    let debugging_event_loop = loggers["log_event_loop"] === "debug";
+    let debugging_aml = loggers["log_motrona"] === "debug";
+    let debugging_vlinx = loggers["log_vlinx"] === "debug";
+
     return (
         <>
-            <TableRow items={["Debugging rs232:", context.data["debug_rs232"] ? "True" : "False",
-                <Toggle checked={context.data["debug_rs232"]}
-                        callback={async () => await context.send({"debug_rs232": !context.data["debug_rs232"]})}
-                />]}/>
-            <TableRow items={["Debugging Broker:", context.data["debug_broker"] ? "True" : "False",
-                <Toggle checked={context.data["debug_broker"]}
-                        callback={async () => await context.send({"debug_broker": !context.data["debug_broker"]})}
-                />]}/>
-            <TableRow items={["Debugging Motrona:", context.data["debug_motrona"] ? "True" : "False",
-                <Toggle checked={context.data["debug_motrona"]}
-                        callback={async () => await context.send({"debug_motrona": !context.data["debug_motrona"]})}
-                />]}/>
+            <ToggleTableRow text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} setState={"debug_log_event_loop"}/>
+            <ToggleTableRow text={"Debugging Motrona:"} state={debugging_aml} send={context.send} setState={"debug_log_motrona"}/>
+            <ToggleTableRow text={"Debugging Vlinx(rs232):"} state={debugging_vlinx} send={context.send} setState={"debug_log_vlinx"}/>
         </>
     );
 }
@@ -190,7 +186,7 @@ function AdvancedControl() {
 
 export function useMotrona(url){
     const [modalMessage, show, setShow, cb] = useModal()
-    const [data, setData, running] = useData(url);
+    const [data, setData, running] = useData(url, {"loggers": {}});
     const [counts, counting] = useStatus(data);
 
     const config = {

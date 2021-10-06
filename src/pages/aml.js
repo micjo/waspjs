@@ -75,11 +75,11 @@ function SecondControl() {
                                 callback={async () => await context.send({"set_m2_step_counter": newStepCounter})}/>
             ]}/>
             <TableRow items={["Redefine offset", context.data["motor_2_offset"],
-                <IntInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
+                <FloatInputButton text="Redefine" setValue={setNewOffset} value={newOffset}
                                 callback={async () => await context.send({"set_m2_offset": newOffset})}/>
             ]}/>
             <TableRow items={["Redefine Motor Position", context.data["motor_2_position"],
-                <IntInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
+                <FloatInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
                                 callback={async () => await context.send({"set_m2_position": newMotorPosition})}/>
             ]}/>
             <TableRow items={["Updating Position", context.data["motor_2_updating_position"] ? "True" : "False",
