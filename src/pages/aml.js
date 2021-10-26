@@ -178,11 +178,11 @@ function AdvancedControl() {
     return (
         <table className="table table-striped table-hover table-sm">
             <TableHeader items={[context.names[0] + " Control", "Value", "Control"]}/>
-            <tbody> <FirstControl/> </tbody>
+            <tbody><FirstControl/></tbody>
             <TableHeader items={[context.names[1] + " Control", "Value", "Control"]}/>
-            <tbody> <SecondControl/> </tbody>
-            <TableHeader items={["Deug Control", "Value", "Control"]}/>
-            <tbody> <DebugControl/> </tbody>
+            <tbody><SecondControl/></tbody>
+            <TableHeader items={["Debug Control", "Value", "Control"]}/>
+            <tbody><DebugControl/></tbody>
         </table>);
 }
 

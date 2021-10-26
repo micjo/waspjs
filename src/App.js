@@ -25,8 +25,8 @@ if (process.env.NODE_ENV === "development") {
 
 
 function redirectCallsToHive(hwConfig) {
-    for (const [, value] of Object.entries(hwConfig)) {
-        value.url = hive_url  + value["proxy"]
+    for (const [key,value] of Object.entries(hwConfig)){
+        value.url = hive_url  + "/api/" + key
     }
 }
 
@@ -34,8 +34,9 @@ export default function App() {
 
     const [hwConfig, setHwConfig] = useState("");
     const getHwConfig = async () => {
-        const [, newHwConfig] = await getJson(hive_url + "/api/rbs/hw_config");
-        redirectCallsToHive(newHwConfig);
+        const [, newHwConfig] = await getJson(hive_url + "/api/hive_config")
+        redirectCallsToHive(newHwConfig["hw_config"]["controllers"]);
+        newHwConfig["root_url"] = hive_url + "/api/"
         setHwConfig(newHwConfig);
     }
     useEffect(() => {
@@ -101,11 +102,11 @@ function PageContent() {
     if (context === "") {
         return <></>
     }
-    const aml_x_y = context.aml_x_y;
-    const aml_phi_zeta = context.aml_phi_zeta;
-    const aml_det_theta = context.aml_det_theta;
-    const motrona_rbs = context.motrona_rbs;
-    const caen_rbs = context.caen_rbs;
+    const aml_x_y = context.hw_config.controllers.aml_x_y;
+    const aml_phi_zeta = context.hw_config.controllers.aml_phi_zeta;
+    const aml_det_theta = context.hw_config.controllers.aml_det_theta;
+    const motrona_rbs = context.hw_config.controllers.motrona_rbs;
+    const caen_rbs = context.hw_config.controllers.caen_rbs;
 
     return (
         <div className="fluid-container mt-3 ms-3 me-3 mb-3">

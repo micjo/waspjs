@@ -13,7 +13,7 @@ import {ControllerContext} from "../App";
 import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
-import {postData} from "../http_helper";
+import {delay, getJson, postData} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsQuestionCircle, BsX} from "react-icons/bs";
@@ -60,12 +60,9 @@ const exection = {
 function ProgressTable(props) {
 
     let table = []
-    if (!props.data["rqm"]) {
-        return <></>
-    }
     let itemExecuting = exection.DONE;
-    for (let item of props.data.rqm.recipes) {
-        if (item.sample_id === props.data.active_recipe) {
+    for (let item of props.data.active_rqm.recipes) {
+        if (item.sample_id === props.data.active_sample_id) {
             itemExecuting = exection.DOING;
         }
         if (itemExecuting === exection.TODO) {
@@ -87,7 +84,7 @@ function ProgressTable(props) {
 
     return (
         <>
-            <h5>RQM: {props.data.rqm.rqm_number}</h5>
+            <h5>RQM: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
                 <tbody>
@@ -102,7 +99,7 @@ function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
         for (let item of props.schedule) {
-            table.push(<TableRow key={item} items={[item]}/>)
+            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
         }
     }
 
@@ -150,6 +147,7 @@ function RandomSchedule(props) {
         data.append('file', e.target.files[0]);
         let response = await fetch(url + 'rqm_csv', {method: 'POST', body: data});
         let json_job = await response.json();
+        console.log(response.status)
 
         if (response.status !== 200) {
             let message = <>Failed to parse csv. <br/>Error message:
@@ -190,18 +188,14 @@ function RandomSchedule(props) {
 }
 
 function RbsCard(props) {
-    let url = props.rbs.url;
-    let data = useReadOnlyData(url + "state");
-    let schedule = useReadOnlyData(url + "schedule")
+    let url = props.root_url + "rbs/"
+    let initialState = {"queue": [],"active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
+        "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0}
+    let state = useReadOnlyData(url + "state", initialState);
 
-    let rqm_number = "";
-    let run_status = "";
-    if (data["run_status"]) {
-        run_status = data["run_status"]
-    }
-    if (data["rqm"]) {
-        rqm_number = data["rqm"]["rqm_number"]
-    }
+    let run_status = state["run_status"]
+    let rqm_number = state["active_rqm"]["rqm_number"]
+    console.log(state)
 
     return (
         <>
@@ -213,17 +207,25 @@ function RbsCard(props) {
             </div>
 
             <div className="clearfix"><RandomSchedule url={url}/></div>
-            <div className="clearfix"><ProgressTable data={data}/></div>
+            <div className="clearfix"><ProgressTable data={state}/></div>
 
             <div className="clearfix">
                 <div className="btn-group float-end">
                     <ButtonSpinner text="Abort / Clear" callback={async () => {
                         await postData(url + "abort", "")
+                        let running = true
+                        while(running) {
+                            await delay(250);
+                            let [,data] = await getJson(url+ "state")
+                            running = data["run_status"] !== "Idle"
+                        }
                     }}/>
+                    <ButtonSpinner text="Pause/Unpause(TODO)" callback={async () => {}} />
+                    <ButtonSpinner text="Continue(TODO)" callback={async () => {}} />
                 </div>
             </div>
             <h5>RBS Schedule</h5>
-            <ScheduleTable schedule={schedule}/>
+            <ScheduleTable schedule={state["queue"]}/>
         </>);
 
 }
@@ -235,14 +237,14 @@ export function Rbs() {
     return (
         <div className="row">
             <div className="col-sm">
-                <AmlCard aml={context.aml_x_y} collapse={1}/>
-                <AmlCard aml={context.aml_det_theta} collapse={2}/>
-                <AmlCard aml={context.aml_phi_zeta} collapse={3}/>
-                <MotronaCard motrona={context.motrona_rbs} collapse={4}/>
-                <CaenCard caen={context.caen_rbs} collapse={5}/>
+                <AmlCard aml={context.hw_config.controllers.aml_x_y} collapse={1}/>
+                <AmlCard aml={context.hw_config.controllers.aml_det_theta} collapse={2}/>
+                <AmlCard aml={context.hw_config.controllers.aml_phi_zeta} collapse={3}/>
+                <MotronaCard motrona={context.hw_config.controllers.motrona_rbs} collapse={4}/>
+                <CaenCard caen={context.hw_config.controllers.caen_rbs} collapse={5}/>
             </div>
             <div className="col-sm">
-                <RbsCard rbs={context.rbs}/>
+                <RbsCard rbs={context.rbs_config} root_url={context.root_url}/>
             </div>
 
         </div>

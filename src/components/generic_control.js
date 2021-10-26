@@ -198,8 +198,8 @@ export function useModal() {
     return [modalMessage, show, setShow, cb]
 }
 
-export function useReadOnlyData(url) {
-    const [data, setData] = useState({});
+export function useReadOnlyData(url, initialState) {
+    const [data, setData] = useState(initialState);
 
     useEffect(() => {
             const getControllerData = async () => {
