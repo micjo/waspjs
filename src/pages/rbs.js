@@ -195,7 +195,6 @@ function RbsCard(props) {
 
     let run_status = state["run_status"]
     let rqm_number = state["active_rqm"]["rqm_number"]
-    console.log(state)
 
     return (
         <>
