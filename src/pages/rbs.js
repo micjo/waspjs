@@ -83,15 +83,15 @@ function ProgressTable(props) {
     }
 
     return (
-        <>
-            <h5>RQM: {props.data.active_rqm.rqm_number}</h5>
+        <div className="clearfix">
+            <h5>RQM active: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
                 <tbody>
                 {table}
                 </tbody>
             </table>
-        </>
+        </div>
     )
 }
 
@@ -102,19 +102,40 @@ function ScheduleTable(props) {
             table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
         }
     }
-
-
     return (
         <>
+            <h5>RQMs Future: </h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Name"]}/>
                 <tbody>
                 {table}
                 </tbody>
             </table>
+            <hr/>
         </>
     )
+}
 
+function DoneTable(props) {
+    let table = []
+    console.log(props.done_queue)
+    if (Array.isArray(props.done_queue) && props.done_queue.length) {
+        for (let item of props.done_queue) {
+            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
+        }
+    }
+    return (
+        <>
+            <h5>RQMs Finished </h5>
+            <table className="table table-striped table-hover table-sm">
+                <TableHeader items={["Name"]}/>
+                <tbody>
+                {table}
+                </tbody>
+            </table>
+            <hr/>
+        </>
+    )
 }
 
 function FileValidBadge(props) {
@@ -169,7 +190,8 @@ function RandomSchedule(props) {
     }
 
     return (
-        <>
+        <div className="clearfix">
+            <h5>RQM Add:</h5>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
                 <span className="input-group-text flex-grow-1">{filename}</span>
@@ -183,15 +205,19 @@ function RandomSchedule(props) {
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
             </div>
-        </>
+            <hr/>
+        </div>
     );
 }
 
 function RbsCard(props) {
     let url = props.root_url + "rbs/"
-    let initialState = {"queue": [],"active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
-        "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0}
+    let initialState = {
+        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
+        "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
+    }
     let state = useReadOnlyData(url + "state", initialState);
+    console.log(state)
 
     let run_status = state["run_status"]
     let rqm_number = state["active_rqm"]["rqm_number"]
@@ -205,7 +231,8 @@ function RbsCard(props) {
                 </h5>
             </div>
 
-            <div className="clearfix"><RandomSchedule url={url}/></div>
+            <RandomSchedule url={url}/>
+            <ScheduleTable schedule={state["queue"]}/>
             <div className="clearfix"><ProgressTable data={state}/></div>
 
             <div className="clearfix">
@@ -213,18 +240,20 @@ function RbsCard(props) {
                     <ButtonSpinner text="Abort / Clear" callback={async () => {
                         await postData(url + "abort", "")
                         let running = true
-                        while(running) {
+                        while (running) {
                             await delay(250);
-                            let [,data] = await getJson(url+ "state")
+                            let [, data] = await getJson(url + "state")
                             running = data["run_status"] !== "Idle"
                         }
                     }}/>
-                    <ButtonSpinner text="Pause/Unpause(TODO)" callback={async () => {}} />
-                    <ButtonSpinner text="Continue(TODO)" callback={async () => {}} />
+                    <ButtonSpinner text="Pause/Unpause(TODO)" callback={async () => {
+                    }}/>
+                    <ButtonSpinner text="Continue(TODO)" callback={async () => {
+                    }}/>
                 </div>
             </div>
-            <h5>RBS Schedule</h5>
-            <ScheduleTable schedule={state["queue"]}/>
+            <hr/>
+            <DoneTable done_queue={state["done_queue"]}/>
         </>);
 
 }
