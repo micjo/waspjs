@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {HiveData} from "../App";
+import {HiveConfig} from "../App";
 import {useAml} from "./aml";
 import {
     ProgressSpinner,
@@ -13,14 +13,15 @@ import {ControllerContext} from "../App";
 import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
-import {delay, getJson, postData} from "../http_helper";
+import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
-import {BsCheck, BsDot, BsQuestionCircle, BsX} from "react-icons/bs";
+import {BsCheck, BsDot, BsX} from "react-icons/bs";
+
 
 function AmlCard(props) {
     let [config, show, setShow, modalMessage, table_extra, button_extra] =
-        useAml(props.aml.url, props.aml.names, props.aml.loads)
+        useAml(props.aml.proxy, props.aml.names, props.aml.loads)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -30,7 +31,7 @@ function AmlCard(props) {
 }
 
 function MotronaCard(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.motrona.url)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.motrona.proxy)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -40,8 +41,8 @@ function MotronaCard(props) {
 }
 
 function CaenCard(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.caen.url)
-    let histogram = <HistogramCaen url={props.caen.url}/>
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.caen.proxy)
+    let histogram = <HistogramCaen url={props.caen.proxy}/>
 
     return (
         <ControllerContext.Provider value={config}>
@@ -84,7 +85,7 @@ function ProgressTable(props) {
 
     return (
         <div className="clearfix">
-            <h5>RQM active: {props.data.active_rqm.rqm_number}</h5>
+            <h5>Active: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
                 <tbody>
@@ -104,7 +105,7 @@ function ScheduleTable(props) {
     }
     return (
         <>
-            <h5>RQMs Future: </h5>
+            <h5>Scheduled: </h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Name"]}/>
                 <tbody>
@@ -118,7 +119,6 @@ function ScheduleTable(props) {
 
 function DoneTable(props) {
     let table = []
-    console.log(props.done_queue)
     if (Array.isArray(props.done_queue) && props.done_queue.length) {
         for (let item of props.done_queue) {
             table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
@@ -126,7 +126,7 @@ function DoneTable(props) {
     }
     return (
         <>
-            <h5>RQMs Finished </h5>
+            <h5>Done: </h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Name"]}/>
                 <tbody>
@@ -136,6 +136,22 @@ function DoneTable(props) {
             <hr/>
         </>
     )
+}
+
+function HardwareCards(props) {
+    let hardwareCards = []
+    for (let [key, item] of Object.entries(props.hardware)) {
+        if (item.type === "aml") {
+            hardwareCards.push(<AmlCard aml={item} collapse={key} key={key}/>)
+        }
+        if (item.type === "motrona") {
+            hardwareCards.push(<MotronaCard motrona={item} collapse={key} key={key}/>)
+        }
+        if (item.type === "caen") {
+            hardwareCards.push(<CaenCard caen={item} collapse={key} key={key}/>)
+        }
+    }
+    return (<> {hardwareCards} </>);
 }
 
 function FileValidBadge(props) {
@@ -162,13 +178,11 @@ function RandomSchedule(props) {
     const [fileValid, setFileValid] = useState("");
 
     async function handleFileChange(e) {
-        console.log(e.target.value)
         setFilename(e.target.files[0].name);
         let data = new FormData();
         data.append('file', e.target.files[0]);
         let response = await fetch(url + 'rqm_csv', {method: 'POST', body: data});
         let json_job = await response.json();
-        console.log(response.status)
 
         if (response.status !== 200) {
             let message = <>Failed to parse csv. <br/>Error message:
@@ -191,9 +205,9 @@ function RandomSchedule(props) {
 
     return (
         <div className="clearfix">
-            <h5>RQM Add:</h5>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
+                <span className="input-group-text" id="inputGroup-sizing-sm">Add</span>
                 <span className="input-group-text flex-grow-1">{filename}</span>
                 <FileValidBadge fileValid={fileValid}/>
                 <label className="btn btn-outline-primary align-middle">Upload CSV
@@ -205,74 +219,90 @@ function RandomSchedule(props) {
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
             </div>
-            <hr/>
         </div>
     );
 }
 
-function RbsCard(props) {
-    let url = props.root_url + "rbs/"
+function RbsExperiment(props) {
+    let url = props.root_url + "/api/rbs/"
     let initialState = {
         "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
         "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
     }
     let state = useReadOnlyData(url + "state", initialState);
-    console.log(state)
 
     let run_status = state["run_status"]
     let rqm_number = state["active_rqm"]["rqm_number"]
 
     return (
-        <>
+        <div>
             <div className="clearfix">
-                <h3 className="float-start">RBS Experiment</h3>
+                <h3 className="float-start">RBS RQM</h3>
                 <h5 className="clearfix float-end">
                     <ConditionalBadge error={false} text={run_status + ": " + rqm_number}/>
                 </h5>
             </div>
-
             <RandomSchedule url={url}/>
+            <RbsControl url={url}/>
             <ScheduleTable schedule={state["queue"]}/>
             <div className="clearfix"><ProgressTable data={state}/></div>
 
             <div className="clearfix">
                 <div className="btn-group float-end">
-                    <ButtonSpinner text="Abort / Clear" callback={async () => {
-                        await postData(url + "abort", "")
-                        let running = true
-                        while (running) {
-                            await delay(250);
-                            let [, data] = await getJson(url + "state")
-                            running = data["run_status"] !== "Idle"
-                        }
-                    }}/>
-                    <ButtonSpinner text="Pause/Unpause(TODO)" callback={async () => {
-                    }}/>
-                    <ButtonSpinner text="Continue(TODO)" callback={async () => {
-                    }}/>
                 </div>
             </div>
             <hr/>
             <DoneTable done_queue={state["done_queue"]}/>
-        </>);
+        </div>);
+}
 
+function RbsControl(props) {
+    return (
+        <div>
+            <div className="clearfix">
+                <div className="float-end btn-group">
+                    <ButtonSpinner text="Start Hw Controllers" callback={async () => {
+                        await postData(props.url + "hw_control?start=true", "");
+                    }}/>
+                    <ButtonSpinner text="Stop Hw Controllers" callback={async () => {
+                        await postData(props.url + "hw_control?start=false", "");
+                    }}/>
+                    <ButtonSpinner text="Get RBS Logs" callback={async () => {
+                        let response = await fetch(props.url + "logs");
+                        let blob = await response.blob()
+                        console.log(blob);
+
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = getUniqueIdentifier() + "_logs.txt";
+                        link.click();
+                    }}/>
+                    <ButtonSpinner text="Abort / Clear" callback={async () => {
+                        await postData(props.url + "abort", "")
+                        let running = true
+                        while (running) {
+                            await delay(250);
+                            let [, data] = await getJson(props.url + "state")
+                            running = data["run_status"] !== "Idle"
+                        }
+                    }}/>
+                </div>
+            </div>
+        </div>
+    );
 }
 
 
 export function Rbs() {
-    let context = useContext(HiveData);
+    let context = useContext(HiveConfig);
 
     return (
         <div className="row">
             <div className="col-sm">
-                <AmlCard aml={context.hw_config.controllers.aml_x_y} collapse={1}/>
-                <AmlCard aml={context.hw_config.controllers.aml_det_theta} collapse={2}/>
-                <AmlCard aml={context.hw_config.controllers.aml_phi_zeta} collapse={3}/>
-                <MotronaCard motrona={context.hw_config.controllers.motrona_rbs} collapse={4}/>
-                <CaenCard caen={context.hw_config.controllers.caen_rbs} collapse={5}/>
+                <RbsExperiment rbs={context.rbs_config} root_url={context.hive_url}/>
             </div>
             <div className="col-sm">
-                <RbsCard rbs={context.rbs_config} root_url={context.root_url}/>
+                <HardwareCards hardware={context.rbs_config.hardware}/>
             </div>
 
         </div>

@@ -3,9 +3,8 @@ import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {ControllerContext} from "../App";
-import {ButtonSpinner, Toggle} from "../components/input_elements";
+import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
-import {useAml} from "./aml";
 
 
 function useStatus(data) {

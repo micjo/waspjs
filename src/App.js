@@ -13,46 +13,51 @@ import {getJson} from "./http_helper";
 
 document.body.style.backgroundColor = "floralwhite";
 
-export const HiveData = React.createContext({});
+export const HiveConfig = React.createContext({});
 
-let hive_url;
-
-if (process.env.NODE_ENV === "development") {
-    hive_url = "http://localhost:8000"
-} else {
-    hive_url = "/hive"
+function completeProxies(root_url, hiveConfig) {
+    for (let [, value] of Object.entries(hiveConfig["hw_config"]["controllers"])) {
+        value["proxy"] = root_url + value["proxy"];
+    }
+    for (let [, value] of Object.entries(hiveConfig["rbs_config"]["hardware"])) {
+        value["proxy"] = root_url + value["proxy"];
+    }
 }
 
-
-function redirectCallsToHive(hwConfig) {
-    for (const [key,value] of Object.entries(hwConfig)){
-        value.url = hive_url  + "/api/" + key
+function useHiveConfig() {
+    let hive_url;
+    if (process.env.NODE_ENV === "development") {
+        hive_url = "http://localhost:8000"
+    } else {
+        hive_url = "/hive"
     }
+    const [hwConfig, setHwConfig] = useState("");
+    useEffect(() => {
+        const getHwConfig = async () => {
+            const [, newHwConfig] = await getJson(hive_url + "/api/hive_config")
+            newHwConfig["hive_url"] = hive_url;
+            completeProxies(hive_url,newHwConfig);
+            setHwConfig(newHwConfig);
+            console.log(newHwConfig);
+        }
+
+        getHwConfig();
+    }, [hive_url])
+
+    return hwConfig;
 }
 
 export default function App() {
-
-    const [hwConfig, setHwConfig] = useState("");
-    const getHwConfig = async () => {
-        const [, newHwConfig] = await getJson(hive_url + "/api/hive_config")
-        redirectCallsToHive(newHwConfig["hw_config"]["controllers"]);
-        newHwConfig["root_url"] = hive_url + "/api/"
-        setHwConfig(newHwConfig);
-    }
-    useEffect(() => {
-        getHwConfig();
-    }, [])
-
-
+    let hiveConfig = useHiveConfig();
     return (
-        <HiveData.Provider value={hwConfig}>
+        <HiveConfig.Provider value={hiveConfig}>
             <div>
                 <HashRouter>
                     <NavigationBar/>
                     <PageContent/>
                 </HashRouter>
             </div>
-        </HiveData.Provider>
+        </HiveConfig.Provider>
     );
 }
 
@@ -65,6 +70,8 @@ function NavLi(props) {
 }
 
 function NavigationBar() {
+    let hiveConfig = useContext(HiveConfig);
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark navbar-sm">
             <div className="container-fluid">
@@ -83,7 +90,7 @@ function NavigationBar() {
                         <NavLi url="motrona_rbs" body="Motrona RBS"/>
                         <NavLi url="caen_rbs" body="Caen RBS"/>
                         <li className="nav-item ms-2 me-2 flex-nowrap">
-                            <Link to={{pathname: hive_url + "/"}} className="nav-link" target="_blank">Docs</Link>
+                            <Link to={{pathname: hiveConfig.hive_url}} className="nav-link" target="_blank">Docs</Link>
                         </li>
 
                     </ul>
@@ -97,13 +104,13 @@ export const ControllerContext = React.createContext({});
 
 function PageContent() {
 
-    const context = useContext(HiveData);
+    const context = useContext(HiveConfig);
 
     if (context === "") {
-        return <></>
+        return <h1></h1>
     }
-    const aml_x_y = context.hw_config.controllers.aml_x_y;
-    const aml_phi_zeta = context.hw_config.controllers.aml_phi_zeta;
+    let aml_x_y = context.hw_config.controllers.aml_x_y;
+    let aml_phi_zeta = context.hw_config.controllers.aml_phi_zeta;
     const aml_det_theta = context.hw_config.controllers.aml_det_theta;
     const motrona_rbs = context.hw_config.controllers.motrona_rbs;
     const caen_rbs = context.hw_config.controllers.caen_rbs;
@@ -113,19 +120,19 @@ function PageContent() {
             <Switch>
                 <Route path="/nectar/rbs"><Rbs/></Route>
                 <Route path="/nectar/aml_x_y">
-                    <Aml url={aml_x_y.url} names={aml_x_y.names} loads={aml_x_y.loads} key={1}/>
+                    <Aml url={aml_x_y.proxy} names={aml_x_y.names} loads={aml_x_y.loads} key={1}/>
                 </Route>
                 <Route path="/nectar/aml_phi_zeta">
-                    <Aml url={aml_phi_zeta.url} names={aml_phi_zeta.names} loads={aml_phi_zeta.loads} key={2}/>
+                    <Aml url={aml_phi_zeta.proxy} names={aml_phi_zeta.names} loads={aml_phi_zeta.loads} key={2}/>
                 </Route>
                 <Route path="/nectar/aml_det_theta">
-                    <Aml url={aml_det_theta.url} names={aml_det_theta.names} loads={aml_det_theta.loads} key={3}/>
+                    <Aml url={aml_det_theta.proxy} names={aml_det_theta.names} loads={aml_det_theta.loads} key={3}/>
                 </Route>
                 <Route path="/nectar/motrona_rbs">
-                    <Motrona url={motrona_rbs.url}/>
+                    <Motrona url={motrona_rbs.proxy}/>
                 </Route>
                 <Route path="/nectar/caen_rbs">
-                    <Caen url={caen_rbs.url}/>
+                    <Caen url={caen_rbs.proxy}/>
                 </Route>
                 <Route path="/nectar/"> <Dashboard/></Route>
             </Switch>

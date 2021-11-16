@@ -3,7 +3,7 @@ import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import {ControllerContext} from "../App";
-import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton, Toggle} from "../components/input_elements";
+import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
 
 function useStatus(data) {
     const [counts, setCounts] = useState("");

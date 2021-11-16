@@ -1,11 +1,11 @@
-function getUniqueIdentifier() {
+export function getUniqueIdentifier() {
     // format: YYYY.MM.DD__HH:MM__SS
     let date = new Date().toISOString();
     date = date.slice(0, -5);
     date = date.split(':');
 
     let yearAndHour = date[0].replace(/-/g, ".").replace(/T/g, "__");
-    let identifier = yearAndHour + ":" + date[1] + "__" + date[2];
+    let identifier = yearAndHour + "." + date[1] + "__" + date[2];
     return identifier;
 }
 

@@ -4,6 +4,7 @@ import {getJson, sendRequest} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
+import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/all";
 
 export function ModalView(props) {
 
@@ -151,25 +152,26 @@ export function PageTitle() {
 
 export function GenericCard(props) {
     const context = useContext(ControllerContext);
+    const [expanded, setExpanded] = useState(false);
     return (
-        <div className="card text-nowrap bg-light text-dark mt-2 mb-3">
-            <div className="card-header clearfix">
-                <h6 className="float-start">{context.title}</h6>
+        <div className="card text-nowrap bg-light text-dark mt-2" >
+            <h6 className="card-header clearfix" data-bs-toggle="collapse" href={"#control" + props.collapse} role="button"
+                 aria-expanded="false" onClick={() => {setExpanded(!expanded);}}>
+                <div className="float-start">{context.title}</div>
                 <div className="clearfix float-end">
                     <BusySpinnner busy={context.busy}/>
                     <BriefBadge brief={context.brief}/>
                     <RunningBadge running={context.running} error={context.data["error"]}/>
+                    <span> {expanded ? <BsCaretDownSquare size={20}/> : <BsCaretUpSquare size={20}/>} </span>
                 </div>
-            </div>
-            <a className="btn btn-secondary" data-bs-toggle="collapse" href={"#control" + props.collapse}>Expand
-                Toggle
-            </a>
+            </h6>
             <div className="collapse" id={"control" + props.collapse}>
+            <div className="card-body">
                 <TableControl table_extra={props.table_extra} data={context.data}/>
                 <ButtonControl button_extra={props.button_extra}/>
                 {props.extra}
             </div>
-
+            </div>
         </div>);
 
 }
