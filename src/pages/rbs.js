@@ -92,6 +92,7 @@ function ProgressTable(props) {
                 {table}
                 </tbody>
             </table>
+            <hr/>
         </div>
     )
 }
@@ -119,8 +120,8 @@ function ScheduleTable(props) {
 
 function DoneTable(props) {
     let table = []
-    if (Array.isArray(props.done_queue) && props.done_queue.length) {
-        for (let item of props.done_queue) {
+    if (Array.isArray(props.done) && props.done.length) {
+        for (let item of props.done) {
             table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
         }
     }
@@ -129,6 +130,27 @@ function DoneTable(props) {
             <h5>Done: </h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Name"]}/>
+                <tbody>
+                {table}
+                </tbody>
+            </table>
+            <hr/>
+        </>
+    )
+}
+
+function FailedTable(props) {
+    let table = []
+    if (Array.isArray(props.failed) && props.failed.length) {
+        for (let item of props.failed) {
+            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.failure]}/>)
+        }
+    }
+    return (
+        <>
+            <h5>Failed: </h5>
+            <table className="table table-striped table-hover table-sm">
+                <TableHeader items={["Name", "Failure"]}/>
                 <tbody>
                 {table}
                 </tbody>
@@ -245,14 +267,9 @@ function RbsExperiment(props) {
             <RandomSchedule url={url}/>
             <RbsControl url={url}/>
             <ScheduleTable schedule={state["queue"]}/>
-            <div className="clearfix"><ProgressTable data={state}/></div>
-
-            <div className="clearfix">
-                <div className="btn-group float-end">
-                </div>
-            </div>
-            <hr/>
-            <DoneTable done_queue={state["done_queue"]}/>
+            <ProgressTable data={state}/>
+            <DoneTable done={state["done"]}/>
+            <FailedTable failed={state["failed"]}/>
         </div>);
 }
 
