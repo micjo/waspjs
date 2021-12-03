@@ -3,7 +3,7 @@ import {ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner, Tog
 import {sendRequest} from "../http_helper";
 import React, {useContext, useEffect, useState} from "react";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
-import {ControllerContext} from "../App";
+import {ControllerContext, HiveUrl} from "../App";
 
 function FirstPositionRow(props) {
     const context = useContext(ControllerContext);
@@ -187,7 +187,7 @@ function AdvancedControl() {
 }
 
 
-export function useAml(url, names, loads) {
+export function useAml(url, names, loads, title) {
     const [modalMessage, show, setShow, cb] = useModal()
     const [data, setData, running] = useData(url, {"loggers": {}});
     const [position, moving] = useStatus(data);
@@ -195,7 +195,7 @@ export function useAml(url, names, loads) {
     const [secondTarget, setSecondTarget] = useState("");
 
     const config = {
-        title: "AML " + names[0] + " " + names[1],
+        title: title,
         url: url, names: names, loads: loads,
         busy: moving, brief: position, running: running,
         data: data, popup: (message) => cb(message),
@@ -221,7 +221,13 @@ export function useAml(url, names, loads) {
 
 
 export function Aml(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useAml(props.url, props.names, props.loads)
+    const root_url = useContext(HiveUrl);
+    const url = root_url + props.hardware_value.proxy;
+    const names = props.hardware_value.names;
+    const loads = props.hardware_value.loads;
+    const title = props.hardware_value.title
+
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useAml(url, names, loads, title)
 
     return (
         <ControllerContext.Provider value={config}>

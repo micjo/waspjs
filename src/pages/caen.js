@@ -2,7 +2,7 @@ import {GenericControl, ModalView, useData, useModal} from "../components/generi
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
-import {ControllerContext} from "../App";
+import {ControllerContext, HiveUrl} from "../App";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 
@@ -31,7 +31,12 @@ function SimpleButton(props) {
 
 
 export function Caen(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.url)
+    const root_url = useContext(HiveUrl);
+
+    const url = root_url + props.hardware_value.proxy;
+    const title = props.hardware_value.title
+
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, title)
     return (
         <ControllerContext.Provider value={config}>
                 <ModalView show={show} setShow={setShow} message={modalMessage}/>
@@ -43,13 +48,13 @@ export function Caen(props) {
 }
 
 
-export function useCaen(url) {
+export function useCaen(url, title) {
     const [modalMessage, show, setShow, cb] = useModal()
     const [data, setData, running] = useData(url, {"loggers":{}});
     const [acquiring, busy] = useStatus(data);
 
     const config = {
-        title: "CAEN",
+        title: title,
         url: url, data: data,
         busy: busy, brief: acquiring, running: running,
         popup: (message) => cb(message),

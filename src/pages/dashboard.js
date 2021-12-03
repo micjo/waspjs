@@ -1,8 +1,10 @@
 import React, {useContext} from "react";
-import {HiveConfig} from "../App";
+import {HiveConfig, HiveUrl} from "../App";
 import {TableHeader, TableRow} from "../components/table_elements";
 import {useData} from "../components/generic_control";
 import {ConditionalBadge} from "../components/generic_control";
+import {GoLinkExternal} from "react-icons/all";
+import {Link} from "react-router-dom";
 
 
 export function StatusRow(props) {
@@ -15,30 +17,46 @@ export function StatusRow(props) {
     let errorBadge = <ConditionalBadge text={data["error"]} error={!successStatus}/>;
 
     return (
-    <TableRow items={ [props.title, runBadge, errorBadge, data["request_id"] ]}/>
+        <TableRow items={[props.title, runBadge, errorBadge, data["request_id"],
+            <Link to={props.href}><GoLinkExternal/></Link>]}/>
     );
 }
 
 export function Dashboard() {
     const context = useContext(HiveConfig);
+    const root_url = useContext(HiveUrl);
 
-    const aml_x_y = context.hw_config.controllers.aml_x_y;
-    const aml_phi_zeta = context.hw_config.controllers.aml_phi_zeta;
-    const aml_det_theta = context.hw_config.controllers.aml_det_theta;
-    const motrona_rbs = context.hw_config.controllers.motrona_rbs;
-    const caen_rbs = context.hw_config.controllers.caen_rbs;
+    let full_page = []
 
-    return (
-        <>
-        <table className="table table-striped table-hover table-sm">
-            <TableHeader items={["Name", "Connection State", "Error State", "Last Request id"]}/>
-            <tbody>
-            <StatusRow url={aml_x_y.proxy} title={aml_x_y.title}/>
-            <StatusRow url={aml_det_theta.proxy} title={aml_det_theta.title}/>
-            <StatusRow url={aml_phi_zeta.proxy} title={aml_phi_zeta.title}/>
-            <StatusRow url={caen_rbs.proxy} title={caen_rbs.title}/>
-            <StatusRow url={motrona_rbs.proxy} title={motrona_rbs.title}/>
-            </tbody>
-        </table>
-            </>);
+    for (const [key, value] of Object.entries(context)) {
+        let table = []
+        for (const [hardware_key, hardware_value] of Object.entries(value.hardware)) {
+            table.push(
+                <StatusRow url={root_url + hardware_value.proxy} title={hardware_value.title} key={hardware_key}
+                           href={"/nectar/" + key + "/" + hardware_key}
+                />)
+        }
+        const capitalized_key = key[0].toUpperCase() + key.slice(1);
+
+        let link = <></>
+        if (key === "rbs") {
+            link = <Link className="float-start" to={"/nectar/" + key + "/overview"}><GoLinkExternal/></Link>;
+        }
+
+        full_page.push(
+            <div key={key}>
+                <div className="clearfix"><h3 className="float-start"> {capitalized_key}</h3> {link}
+                </div>
+                <hr/>
+                <table className="table table-striped table-hover table-sm">
+                    <TableHeader items={["Name", "Connection State", "Error State", "Last Request id", "Go to"]}/>
+                    <tbody>
+                    {table}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    return (full_page)
 }

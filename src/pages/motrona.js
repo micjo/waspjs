@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
-import {ControllerContext} from "../App";
+import {ControllerContext, HiveUrl} from "../App";
 import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
 
 function useStatus(data) {
@@ -184,13 +184,13 @@ function AdvancedControl() {
 
 }
 
-export function useMotrona(url){
+export function useMotrona(url, title){
     const [modalMessage, show, setShow, cb] = useModal()
     const [data, setData, running] = useData(url, {"loggers": {}});
     const [counts, counting] = useStatus(data);
 
     const config = {
-        title: "Motrona RBS", data: data,
+        title: title, data: data,
         url: url, busy: counting, brief: counts, running: running,
         popup: (message) => cb(message), setData: (data) => setData(data),
         send: async (request) => await sendRequest(url, request, cb, setData)
@@ -215,7 +215,12 @@ export function useMotrona(url){
 }
 
 export function Motrona(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.url)
+    const root_url = useContext(HiveUrl);
+
+    const url = root_url + props.hardware_value.proxy;
+    const title = props.hardware_value.title
+
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(url, title)
 
     return (
         <ControllerContext.Provider value={config}>

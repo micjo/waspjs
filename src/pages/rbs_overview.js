@@ -1,5 +1,5 @@
 import React, {useContext, useState} from "react";
-import {HiveConfig} from "../App";
+import {HiveConfig, HiveUrl} from "../App";
 import {useAml} from "./aml";
 import {
     ProgressSpinner,
@@ -20,8 +20,11 @@ import {BsCheck, BsDot, BsX} from "react-icons/bs";
 
 
 function AmlCard(props) {
+    const root_url = useContext(HiveUrl);
+    const url = root_url + props.hw.proxy;
+
     let [config, show, setShow, modalMessage, table_extra, button_extra] =
-        useAml(props.aml.proxy, props.aml.names, props.aml.loads)
+        useAml(url, props.hw.names, props.hw.loads, props.hw.title)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -31,7 +34,10 @@ function AmlCard(props) {
 }
 
 function MotronaCard(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(props.motrona.proxy)
+    const root_url = useContext(HiveUrl);
+    const url = root_url + props.hw.proxy;
+
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(url, props.hw.title)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -41,8 +47,11 @@ function MotronaCard(props) {
 }
 
 function CaenCard(props) {
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(props.caen.proxy)
-    let histogram = <HistogramCaen url={props.caen.proxy}/>
+    const root_url = useContext(HiveUrl);
+    const url = root_url + props.hw.proxy;
+
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, props.hw.title)
+    let histogram = <HistogramCaen url={url}/>
 
     return (
         <ControllerContext.Provider value={config}>
@@ -160,17 +169,19 @@ function FailedTable(props) {
     )
 }
 
-function HardwareCards(props) {
+function HardwareCards() {
     let hardwareCards = []
-    for (let [key, item] of Object.entries(props.hardware)) {
+    let hiveConfig = useContext(HiveConfig);
+
+    for (let [key, item] of Object.entries(hiveConfig['rbs']['hardware'])) {
         if (item.type === "aml") {
-            hardwareCards.push(<AmlCard aml={item} collapse={key} key={key}/>)
+            hardwareCards.push(<AmlCard hw={item} collapse={key} key={key}/>)
         }
         if (item.type === "motrona") {
-            hardwareCards.push(<MotronaCard motrona={item} collapse={key} key={key}/>)
+            hardwareCards.push(<MotronaCard hw={item} collapse={key} key={key}/>)
         }
         if (item.type === "caen") {
-            hardwareCards.push(<CaenCard caen={item} collapse={key} key={key}/>)
+            hardwareCards.push(<CaenCard hw={item} collapse={key} key={key}/>)
         }
     }
     return (<> {hardwareCards} </>);
@@ -245,8 +256,10 @@ function RandomSchedule(props) {
     );
 }
 
-function RbsExperiment(props) {
-    let url = props.root_url + "/api/rbs/"
+function RbsExperiment() {
+    const root_url = useContext(HiveUrl);
+
+    let url = root_url + "/api/rbs/"
     let initialState = {
         "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
         "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
@@ -310,16 +323,16 @@ function RbsControl(props) {
 }
 
 
-export function Rbs() {
+export function RbsOverview() {
     let context = useContext(HiveConfig);
 
     return (
         <div className="row">
             <div className="col-sm">
-                <RbsExperiment rbs={context.rbs_config} root_url={context.hive_url}/>
+                <RbsExperiment />
             </div>
             <div className="col-sm">
-                <HardwareCards hardware={context.rbs_config.hardware}/>
+                <HardwareCards/>
             </div>
 
         </div>
