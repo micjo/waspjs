@@ -67,7 +67,7 @@ export default function App() {
 function NavLi(props) {
     return (
         <li className="nav-item ms-2 me-2 flex-nowrap">
-            <NavLink exact to={props.url} className="nav-link">{props.children}</NavLink>
+            <NavLink to={props.url} className="nav-link">{props.children}</NavLink>
         </li>
     );
 
@@ -134,8 +134,8 @@ function Navigation() {
         return <h1></h1>
     }
 
-    let routes = [<Route path="/nectar" key="dashboard" element={<Dashboard/>}/>];
-    let navBarElements = [<NavLi url="/nectar" key="dashboard">Dashboard </NavLi>];
+    let routes = [<Route path="/nectar/" key="dashboard" element={<Dashboard/>}/>];
+    let navBarElements = [<NavLi url="/nectar/" key="dashboard">Dashboard </NavLi>];
 
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
