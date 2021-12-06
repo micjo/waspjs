@@ -1,11 +1,9 @@
 import React, {useContext, useEffect, useState} from "react";
-import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
-import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
+import {GenericControl, ModalView} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
+import {FloatInputButton, DropDownButton} from "../components/input_elements";
 import {useGenericPage} from "./generic_page";
-import {Button} from "react-bootstrap";
 
 function useStatus(data) {
     const [position, setPosition] = useState("");
@@ -96,6 +94,9 @@ function SetPositionRow() {
 export function useMdrive(url, title) {
     let [config, show, setShow, modalMessage] = useGenericPage(url, title)
     const [position, moving] = useStatus(config.data);
+
+    config.brief = position
+    config.busy = moving
 
     let table_extra = <>
         <TableRow items={["Position Steps", config.data["motor_steps"], ""]}/>
