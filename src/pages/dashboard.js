@@ -39,7 +39,7 @@ export function Dashboard() {
         const capitalized_key = key[0].toUpperCase() + key.slice(1);
 
         let link = <></>
-        if (key === "rbs") {
+        if (key === "rbs" || key === "erd") {
             link = <Link className="float-start" to={"/nectar/" + key + "/overview"}><GoLinkExternal/></Link>;
         }
 

@@ -19,6 +19,7 @@ import {getJson} from "./http_helper";
 import {TableHeader} from "./components/table_elements";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
+import {ErdOverview} from "./pages/erd_overview";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -143,6 +144,11 @@ function Navigation() {
         if (key === "rbs") {
             dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
             routes.push(<Route path="/nectar/rbs/overview" element={<RbsOverview/>} key={key}/>)
+        }
+
+        if (key === "erd") {
+            dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
+            routes.push(<Route path="/nectar/erd/overview" element={<ErdOverview/>} key={key}/>)
         }
 
         for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {

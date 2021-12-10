@@ -17,14 +17,16 @@ import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsX} from "react-icons/bs";
+import {useMpa3} from "./mpa3";
+import {useMdrive} from "./mdrive";
 
 
-function AmlCard(props) {
+function Mpa3Card(props) {
     const root_url = useContext(HiveUrl);
     const url = root_url + props.hw.proxy;
 
     let [config, show, setShow, modalMessage, table_extra, button_extra] =
-        useAml(url, props.hw.names, props.hw.loads, props.hw.title)
+        useMpa3(url, props.hw.title)
 
     return (
         <ControllerContext.Provider value={config}>
@@ -33,31 +35,16 @@ function AmlCard(props) {
         </ControllerContext.Provider>);
 }
 
-function MotronaCard(props) {
+function MDriveCard(props) {
     const root_url = useContext(HiveUrl);
     const url = root_url + props.hw.proxy;
 
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMotrona(url, props.hw.title)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMdrive(url, props.hw.title)
 
     return (
         <ControllerContext.Provider value={config}>
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
-        </ControllerContext.Provider>);
-}
-
-function CaenCard(props) {
-    const root_url = useContext(HiveUrl);
-    const url = root_url + props.hw.proxy;
-
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, props.hw.title)
-    let histogram = <HistogramCaen url={url}/>
-
-    return (
-        <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
-            <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}
-                         extra={histogram}/>
         </ControllerContext.Provider>);
 }
 
@@ -83,7 +70,7 @@ function ProgressTable(props) {
                                         items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
         }
         if (itemExecuting === exection.DOING) {
-            let fraction = parseFloat(props.data.accumulated_charge) / parseFloat(props.data.accumulated_charge_target);
+            let fraction = parseFloat(props.data.run_time) / parseFloat(props.data.run_time_target);
             let percentage = (fraction * 100).toFixed(2);
             table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
                 <ProgressSpinner text={percentage + "%"}/>]}/>
@@ -173,15 +160,12 @@ function HardwareCards() {
     let hardwareCards = []
     let hiveConfig = useContext(HiveConfig);
 
-    for (let [key, item] of Object.entries(hiveConfig['rbs']['hardware'])) {
-        if (item.type === "aml") {
-            hardwareCards.push(<AmlCard hw={item} collapse={key} key={key}/>)
+    for (let [key, item] of Object.entries(hiveConfig['erd']['hardware'])) {
+        if (item.type === "mdrive") {
+            hardwareCards.push(<MDriveCard hw={item} collapse={key} key={key}/>)
         }
-        if (item.type === "motrona") {
-            hardwareCards.push(<MotronaCard hw={item} collapse={key} key={key}/>)
-        }
-        if (item.type === "caen") {
-            hardwareCards.push(<CaenCard hw={item} collapse={key} key={key}/>)
+        if (item.type === "mpa3") {
+            hardwareCards.push(<Mpa3Card hw={item} collapse={key} key={key}/>)
         }
     }
     return (<> {hardwareCards} </>);
@@ -203,7 +187,7 @@ function FileValidBadge(props) {
     }
 }
 
-function ScheduleRbs(props) {
+function ScheduleErd(props) {
     let url = props.url;
     const [job, setJob] = useState({});
     let [modalMessage, show, setShow, cb] = useModal();
@@ -256,10 +240,10 @@ function ScheduleRbs(props) {
     );
 }
 
-function RbsExperiment() {
+function ErdExperiment() {
     const root_url = useContext(HiveUrl);
 
-    let url = root_url + "/api/rbs/"
+    let url = root_url + "/api/erd/"
     let initialState = {
         "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
         "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
@@ -272,12 +256,12 @@ function RbsExperiment() {
     return (
         <div>
             <div className="clearfix">
-                <h3 className="float-start">RBS RQM</h3>
+                <h3 className="float-start">ERD RQM</h3>
                 <h5 className="clearfix float-end">
                     <ConditionalBadge error={false} text={run_status + ": " + rqm_number}/>
                 </h5>
             </div>
-            <ScheduleRbs url={url}/>
+            <ScheduleErd url={url}/>
             <RbsControl url={url}/>
             <ScheduleTable schedule={state["queue"]}/>
             <ProgressTable data={state}/>
@@ -297,7 +281,7 @@ function RbsControl(props) {
                     <ButtonSpinner text="Stop Hw Controllers" callback={async () => {
                         await postData(props.url + "hw_control?start=false", "");
                     }}/>
-                    <ButtonSpinner text="Get RBS Logs" callback={async () => {
+                    <ButtonSpinner text="Get Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
                         console.log(blob);
@@ -323,13 +307,13 @@ function RbsControl(props) {
 }
 
 
-export function RbsOverview() {
+export function ErdOverview() {
     let context = useContext(HiveConfig);
 
     return (
         <div className="row">
             <div className="col-sm">
-                <RbsExperiment />
+                <ErdExperiment />
             </div>
             <div className="col-sm">
                 <HardwareCards/>
