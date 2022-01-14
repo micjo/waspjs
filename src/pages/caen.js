@@ -81,7 +81,6 @@ function DebugControl() {
     let loggers = context.data["loggers"];
 
     let debugging_event_loop = loggers["event_loop"] === "debug";
-    console.log(debugging_event_loop);
     let debugging_dll = loggers["caen_dll"] === "debug";
     let debugging_command = loggers["caen_command"] === "debug";
     let debugging_events = loggers["caen_events"] === "debug";

@@ -11,12 +11,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
 import {RbsOverview} from './pages/rbs_overview.js'
-import {Dashboard, StatusRow} from "./pages/dashboard";
+import {Dashboard} from "./pages/dashboard";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
 import {Caen} from "./pages/caen";
 import {getJson} from "./http_helper";
-import {TableHeader} from "./components/table_elements";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
 import {ErdOverview} from "./pages/erd_overview";

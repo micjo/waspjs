@@ -1,6 +1,5 @@
 import React, {useContext, useState} from "react";
 import {HiveConfig, HiveUrl} from "../App";
-import {useAml} from "./aml";
 import {
     ProgressSpinner,
     ConditionalBadge,
@@ -10,12 +9,9 @@ import {
     useReadOnlyData
 } from "../components/generic_control";
 import {ControllerContext} from "../App";
-import {useMotrona} from "./motrona";
-import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
 import {ButtonSpinner} from "../components/input_elements";
-import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsX} from "react-icons/bs";
 import {useMpa3} from "./mpa3";
 import {useMdrive} from "./mdrive";
@@ -308,7 +304,6 @@ function RbsControl(props) {
 
 
 export function ErdOverview() {
-    let context = useContext(HiveConfig);
 
     return (
         <div className="row">

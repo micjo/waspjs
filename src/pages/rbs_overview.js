@@ -324,7 +324,6 @@ function RbsControl(props) {
 
 
 export function RbsOverview() {
-    let context = useContext(HiveConfig);
 
     return (
         <div className="row">
