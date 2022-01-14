@@ -42,7 +42,7 @@ export function Caen(props) {
             <ModalView show={show} setShow={setShow} message={modalMessage}/>
             <GenericControl table_extra={table_extra} button_extra={button_extra}/>
             <DebugControl/>
-            <HistogramCaen url={props.url}/>
+            <HistogramCaen url={url}/>
         </ControllerContext.Provider>
     );
 }
