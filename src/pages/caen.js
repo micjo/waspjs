@@ -1,7 +1,7 @@
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
-import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
+import {TableHeader, TableRow, ToggleTableRowLog} from "../components/table_elements";
 import {ControllerContext, HiveUrl} from "../App";
 import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
@@ -39,10 +39,10 @@ export function Caen(props) {
     let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, title)
     return (
         <ControllerContext.Provider value={config}>
-                <ModalView show={show} setShow={setShow} message={modalMessage}/>
-                <GenericControl table_extra={table_extra} button_extra={button_extra}/>
-                <DebugControl/>
-                <HistogramCaen url={props.url}/>
+            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <GenericControl table_extra={table_extra} button_extra={button_extra}/>
+            <DebugControl/>
+            <HistogramCaen url={props.url}/>
         </ControllerContext.Provider>
     );
 }
@@ -50,7 +50,7 @@ export function Caen(props) {
 
 export function useCaen(url, title) {
     const [modalMessage, show, setShow, cb] = useModal()
-    const [data, setData, running] = useData(url, {"loggers":{}});
+    const [data, setData, running] = useData(url, {"loggers": {}});
     const [acquiring, busy] = useStatus(data);
 
     const config = {
@@ -66,8 +66,8 @@ export function useCaen(url, title) {
     </>
     let button_extra = <>
         <SimpleButton text="Connect" request={{"open_connection": true}}/>
-        <SimpleButton text="Configure Registry" request={{"configure_registry": true}}/>
-        <SimpleButton text="Dump Registry" request={{"read_registry": true}}/>
+        <SimpleButton text="Upload Registry" request={{"upload_registry": true}}/>
+        <SimpleButton text="Download Registry" request={{"download_registry": true}}/>
         <SimpleButton text="Start" request={{"start": true}}/>
         <SimpleButton text="Stop" request={{"stop": true}}/>
         <SimpleButton text="Clear" request={{"clear": true}}/>
@@ -80,21 +80,26 @@ function DebugControl() {
     const context = useContext(ControllerContext);
     let loggers = context.data["loggers"];
 
-    let debugging_event_loop = loggers["log_event_loop"] === "debug";
-    let debugging_dll = loggers["log_caen_dll"] === "debug";
-    let debugging_command = loggers["log_caen_command"] === "debug";
-    let debugging_events = loggers["log_caen_events"] === "debug";
+    let debugging_event_loop = loggers["event_loop"] === "debug";
+    console.log(debugging_event_loop);
+    let debugging_dll = loggers["caen_dll"] === "debug";
+    let debugging_command = loggers["caen_command"] === "debug";
+    let debugging_events = loggers["caen_events"] === "debug";
 
     return (
         <>
             <table className="table table-striped table-hover table-sm">
-            <TableHeader items={["Debug Control", "Value", "Control"]}/>
-            <tbody>
-            <ToggleTableRow text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} setState={"debug_log_event_loop"}/>
-            <ToggleTableRow text={"Debugging dll:"} state={debugging_dll} send={context.send} setState={"debug_log_caen_dll"}/>
-            <ToggleTableRow text={"Debugging Commands:"} state={debugging_command} send={context.send} setState={"debug_log_caen_command"}/>
-            <ToggleTableRow text={"Debugging Events:"} state={debugging_events} send={context.send} setState={"debug_log_caen_events"}/>
-            </tbody>
+                <TableHeader items={["Debug Control", "Value", "Control"]}/>
+                <tbody>
+                <ToggleTableRowLog text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send}
+                                       name={"event_loop"}/>
+                <ToggleTableRowLog text={"Debugging dll:"} state={debugging_dll} send={context.send}
+                                name={"caen_dll"}/>
+                <ToggleTableRowLog text={"Debugging Commands:"} state={debugging_command} send={context.send}
+                                name={"caen_command"}/>
+                <ToggleTableRowLog text={"Debugging Events:"} state={debugging_events} send={context.send}
+                                name={"caen_events"}/>
+                </tbody>
             </table>
         </>
     );
