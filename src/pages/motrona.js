@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
-import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
+import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
 import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
@@ -12,8 +12,7 @@ function useStatus(data) {
     useEffect(() => {
         if ("charge(nC)" in data && "target_charge(nC)" in data) {
             setCounts(data["charge(nC)"] + " -> " + data["target_charge(nC)"]);
-        }
-        else {
+        } else {
             setCounts("")
         }
         if ("status" in data) {
@@ -98,12 +97,12 @@ function AnalogSettings() {
             <TableRow items={[
                 "Analog Gain:", context.data["analog_gain"],
                 <FloatInputButton text="Set" value={analogGain} setValue={setAnalogGain}
-                                callback={async () => await context.send({"set_analog_gain": analogGain})}/>
+                                  callback={async () => await context.send({"set_analog_gain": analogGain})}/>
             ]}/>
             <TableRow items={[
                 "Analog Offset:", context.data["analog_offset"],
                 <FloatInputButton text="Set" value={analogOffset} setValue={setAnalogOffset}
-                                callback={async () => await context.send({"set_analog_offset": analogOffset})}/>
+                                  callback={async () => await context.send({"set_analog_offset": analogOffset})}/>
             ]}/>
 
 
@@ -132,12 +131,12 @@ export function PreselectionSettings() {
             <TableRow items={[
                 "Preselection 3:", context.data["preselection_3"],
                 <IntInputButton text="Set" value={preselectionThree} setValue={setPreselectionThree}
-                                  callback={async () => await context.send({"preselection_3": preselectionThree})}/>
+                                callback={async () => await context.send({"preselection_3": preselectionThree})}/>
             ]}/>
             <TableRow items={[
                 "Preselection 4:", context.data["preselection_4"],
                 <IntInputButton text="Set" value={preselectionFour} setValue={setPreselectionFour}
-                                  callback={async () => await context.send({"preselection_4": preselectionFour})}/>
+                                callback={async () => await context.send({"preselection_4": preselectionFour})}/>
             ]}/>
 
 
@@ -148,43 +147,46 @@ export function PreselectionSettings() {
 function DebugControl() {
     const context = useContext(ControllerContext);
     let loggers = context.data["loggers"];
-    let debugging_event_loop = loggers["log_event_loop"] === "debug";
-    let debugging_aml = loggers["log_motrona"] === "debug";
-    let debugging_vlinx = loggers["log_vlinx"] === "debug";
+    let debugging_event_loop = loggers["event_loop"] === "debug";
+    let debugging_motrona = loggers["motrona"] === "debug";
+    let debugging_vlinx = loggers["vlinx"] === "debug";
 
     return (
         <>
-            <ToggleTableRow text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} setState={"debug_log_event_loop"}/>
-            <ToggleTableRow text={"Debugging Motrona:"} state={debugging_aml} send={context.send} setState={"debug_log_motrona"}/>
-            <ToggleTableRow text={"Debugging Vlinx(rs232):"} state={debugging_vlinx} send={context.send} setState={"debug_log_vlinx"}/>
+            <ToggleTableRowLog text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send}
+                               name={"event_loop"}/>
+            <ToggleTableRowLog text={"Debugging Motrona:"} state={debugging_motrona} send={context.send}
+                               name={"motrona"}/>
+            <ToggleTableRowLog text={"Debugging Vlinx(rs232):"} state={debugging_vlinx} send={context.send}
+                               name={"vlinx"}/>
         </>
     );
 }
 
 function AdvancedControl() {
     return (
-    <table className="table table-striped table-hover table-sm">
-        <TableHeader items={["Counting Settings", "Value", "Control"]}/>
-        <tbody>
-        <CountingSettings />
-        </tbody>
-        <TableHeader items={["Analog Settings", "Value", "Control"]}/>
-        <tbody>
-        <AnalogSettings />
-        </tbody>
-        <TableHeader items={["Preselection Settings", "Value", "Control"]}/>
-        <tbody>
-        <PreselectionSettings />
-        </tbody>
-        <TableHeader items={["Debug Control", "Value", "Control"]}/>
-        <tbody>
-        <DebugControl/>
-        </tbody>
-    </table>);
+        <table className="table table-striped table-hover table-sm">
+            <TableHeader items={["Counting Settings", "Value", "Control"]}/>
+            <tbody>
+            <CountingSettings/>
+            </tbody>
+            <TableHeader items={["Analog Settings", "Value", "Control"]}/>
+            <tbody>
+            <AnalogSettings/>
+            </tbody>
+            <TableHeader items={["Preselection Settings", "Value", "Control"]}/>
+            <tbody>
+            <PreselectionSettings/>
+            </tbody>
+            <TableHeader items={["Debug Control", "Value", "Control"]}/>
+            <tbody>
+            <DebugControl/>
+            </tbody>
+        </table>);
 
 }
 
-export function useMotrona(url, title){
+export function useMotrona(url, title) {
     const [modalMessage, show, setShow, cb] = useModal()
     const [data, setData, running] = useData(url, {"loggers": {}});
     const [counts, counting] = useStatus(data);
