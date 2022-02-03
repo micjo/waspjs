@@ -231,6 +231,15 @@ function ScheduleErd(props) {
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
+                    <ButtonSpinner text="Abort / Clear" callback={async () => {
+                        await postData(props.url + "abort", "")
+                        let running = true
+                        while (running) {
+                            await delay(250);
+                            let [, data] = await getJson(props.url + "state")
+                            running = data["run_status"] !== "Idle"
+                        }
+                    }}/>
             </div>
         </div>
     );
@@ -286,15 +295,6 @@ function RbsControl(props) {
                         link.href = URL.createObjectURL(blob);
                         link.download = getUniqueIdentifier() + "_logs.txt";
                         link.click();
-                    }}/>
-                    <ButtonSpinner text="Abort / Clear" callback={async () => {
-                        await postData(props.url + "abort", "")
-                        let running = true
-                        while (running) {
-                            await delay(250);
-                            let [, data] = await getJson(props.url + "state")
-                            running = data["run_status"] !== "Idle"
-                        }
                     }}/>
                 </div>
             </div>

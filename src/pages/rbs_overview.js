@@ -152,7 +152,7 @@ function FailedTable(props) {
     let table = []
     if (Array.isArray(props.failed) && props.failed.length) {
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.failure]}/>)
+            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.error_state]}/>)
         }
     }
     return (
@@ -251,6 +251,15 @@ function ScheduleRbs(props) {
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
+                    <ButtonSpinner text="Abort / Clear" callback={async () => {
+                        await postData(props.url + "abort", "")
+                        let running = true
+                        while (running) {
+                            await delay(250);
+                            let [, data] = await getJson(props.url + "state")
+                            running = data["run_status"] !== "Idle"
+                        }
+                    }}/>
             </div>
         </div>
     );
@@ -306,15 +315,6 @@ function RbsControl(props) {
                         link.href = URL.createObjectURL(blob);
                         link.download = getUniqueIdentifier() + "_logs.txt";
                         link.click();
-                    }}/>
-                    <ButtonSpinner text="Abort / Clear" callback={async () => {
-                        await postData(props.url + "abort", "")
-                        let running = true
-                        while (running) {
-                            await delay(250);
-                            let [, data] = await getJson(props.url + "state")
-                            running = data["run_status"] !== "Idle"
-                        }
                     }}/>
                 </div>
             </div>

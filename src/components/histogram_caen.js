@@ -8,7 +8,7 @@ import {BsQuestionCircle} from "react-icons/bs"
 export function HistogramCaen(props) {
     const [histogramData, setHistogramData] = useState([0])
     const [updateGraph, setUpdateGraph] = useState(false);
-    const [board, setBoard] = useState(0);
+    const [board, setBoard] = useState("10664");
     const [channel, setChannel] = useState(0);
     const [modalMessage, show, setShow, cb] = useModal()
 
@@ -20,8 +20,8 @@ export function HistogramCaen(props) {
         const interval = setInterval(async () => {
             if (updateGraph) {
 
-                let urlEnd = "pack-" + binsMin + "-" + binsMax + "-" + binsWidth;
-                let url = props.url + "/histogram/" + board.toString() + "-" + channel.toString() + "/" + urlEnd;
+                let urlEnd = "pack/" + binsMin + "-" + binsMax + "-" + binsWidth;
+                let url = props.url + "/histogram/" + board + "/" + channel.toString() + "/" + urlEnd;
                 let status, json_response;
                 try {
                     [status, json_response] = await getJson(url);
@@ -54,7 +54,7 @@ export function HistogramCaen(props) {
             <h3>Histogram</h3>
             <div className="input-group input-sm mb-3">
                 <label className="input-group-text">Board:</label>
-                <DropDown selects={[1, 2, 3, 4, 5, 6, 7, 8]} setValue={setBoard}/>
+                <DropDown selects={["10664","33"]} setValue={setBoard}/>
                 <label className="input-group-text">Channel:</label>
                 <DropDown selects={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
                           setValue={setChannel}/>
