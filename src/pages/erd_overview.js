@@ -34,8 +34,7 @@ function Mpa3Card(props) {
 function MDriveCard(props) {
     const root_url = useContext(HiveUrl);
     const url = root_url + props.hw.proxy;
-
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMdrive(url, props.hw.title)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMdrive(url, props.hw.title, props.hw.load)
 
     return (
         <ControllerContext.Provider value={config}>

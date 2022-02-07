@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {GenericControl, ModalView} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {FloatInputButton, DropDownButton} from "../components/input_elements";
+import {FloatInputButton, DropDownButton, ButtonSpinner} from "../components/input_elements";
 import {useGenericPage} from "./generic_page";
 
 function useStatus(data) {
@@ -77,33 +77,38 @@ function AdvancedControl() {
 }
 
 
-function SetPositionRow() {
-    const [positionTarget, setPositionTarget] = useState("");
+function SetPositionRow(props) {
     const context = useContext(ControllerContext);
     return (
         <TableRow items={
             [
                 "Position",
                 context.data["motor_position"],
-                <FloatInputButton text="Set" value={positionTarget} setValue={setPositionTarget}
-                                  callback={async () => await context.send({"set_motor_target_position": positionTarget})}/>
+                <FloatInputButton text="Set" value={props.positionTarget} setValue={props.setPositionTarget}
+                                  callback={async () => await context.send({"set_motor_target_position": props.positionTarget})}/>
             ]}
         />);
 }
 
-export function useMdrive(url, title) {
+export function useMdrive(url, title, load) {
     let [config, show, setShow, modalMessage] = useGenericPage(url, title)
-    const [position, moving] = useStatus(config.data);
+    const [position, moving] = useStatus(config.data)
+    const [positionTarget, setPositionTarget] = useState("");
 
     config.brief = position
     config.busy = moving
 
     let table_extra = <>
         <TableRow items={["Position Steps", config.data["motor_steps"], ""]}/>
-        <SetPositionRow />
+        <SetPositionRow positionTarget={positionTarget} setPositionTarget={setPositionTarget}/>
     </>
 
-    let button_extra = <> </>
+    let button_extra = <>
+        <ButtonSpinner text="Load"
+                       callback={() => {
+                           setPositionTarget(load);
+                       }}/>
+    </>
 
     return [config, show, setShow, modalMessage, table_extra, button_extra]
 }
@@ -113,9 +118,10 @@ export function Mdrive(props) {
     const root_url = useContext(HiveUrl);
 
     const url = root_url + props.hardware_value.proxy;
-    const title = props.hardware_value.title
+    const title = props.hardware_value.title;
+    const load = props.hardware_value.load;
 
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMdrive(url, title)
+    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMdrive(url, title, load)
 
     return (
         <ControllerContext.Provider value={config}>
