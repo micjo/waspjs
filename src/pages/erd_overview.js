@@ -134,7 +134,7 @@ function FailedTable(props) {
     let table = []
     if (Array.isArray(props.failed) && props.failed.length) {
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.failure]}/>)
+            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.error_state]}/>)
         }
     }
     return (
