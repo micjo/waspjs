@@ -18,7 +18,6 @@ import {ButtonSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsX} from "react-icons/bs";
 
-
 function AmlCard(props) {
     const root_url = useContext(HiveUrl);
     const url = root_url + props.hw.proxy;
@@ -61,42 +60,39 @@ function CaenCard(props) {
         </ControllerContext.Provider>);
 }
 
-const exection = {
-    TODO: "TODO",
-    DOING: "DOING",
-    DONE: "DONE"
-}
-
 function ProgressTable(props) {
-
     let table = []
-    let itemExecuting = exection.DONE;
     for (let item of props.data.active_rqm.recipes) {
-        if (item.sample_id === props.data.active_sample_id) {
-            itemExecuting = exection.DOING;
-        }
-        if (itemExecuting === exection.TODO) {
-            table.push(<TableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "0%"]}/>)
-        }
-        if (itemExecuting === exection.DONE) {
-            table.push(<SuccessTableRow key={item.file_stem}
-                                        items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
-        }
-        if (itemExecuting === exection.DOING) {
-            let fraction = parseFloat(props.data.accumulated_charge) / parseFloat(props.data.accumulated_charge_target);
-            let percentage = (fraction * 100).toFixed(2);
-            table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
-                <ProgressSpinner text={percentage + "%"}/>]}/>
-            )
-            itemExecuting = exection.TODO;
-        }
+        table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
     }
+
+    console.log(props.data.active_rqm_status);
+
+    let index = 0;
+     for (let item of props.data.active_rqm_status) {
+         let recipe = props.data.active_rqm.recipes[index];
+
+         let run_time = item.run_time.toFixed(2);
+         if (index < props.data.active_rqm_status.length -1 ) {
+             table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time, "100%"]}/>
+         }
+         else {
+             console.log("last item is " + item)
+             let fraction = parseFloat(item.accumulated_charge_corrected) / parseFloat(item.accumulated_charge_target);
+             let percentage = (fraction * 100).toFixed(2);
+
+
+             table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time,
+                 <ProgressSpinner text={percentage + "%"}/>]}/>
+         }
+         index++;
+     }
 
     return (
         <div className="clearfix">
             <h5>Active: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
+                <TableHeader items={["Recipe", "Type", "Sample id", "Run time (s)", "Progress"]}/>
                 <tbody>
                 {table}
                 </tbody>
@@ -270,8 +266,7 @@ function RbsExperiment() {
 
     let url = root_url + "/api/rbs/"
     let initialState = {
-        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
-        "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
+        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status":[]
     }
     let state = useReadOnlyData(url + "state", initialState);
 
