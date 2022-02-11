@@ -271,12 +271,6 @@ function RbsControl(props) {
         <div>
             <div className="clearfix">
                 <div className="float-end btn-group">
-                    <ButtonSpinner text="Start Hw Controllers" callback={async () => {
-                        await postData(props.url + "hw_control?start=true", "");
-                    }}/>
-                    <ButtonSpinner text="Stop Hw Controllers" callback={async () => {
-                        await postData(props.url + "hw_control?start=false", "");
-                    }}/>
                     <ButtonSpinner text="Get Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
