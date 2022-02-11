@@ -11,8 +11,9 @@ import {postData} from "../http_helper";
 
 export function StatusRow(props) {
     const root_url = useContext(HiveUrl);
-    const [data, , running] = useData(props.url);
-
+    const [data, , running] = useData(props.value.url);
+    let title = props.value.title;
+    let href = "/nectar/" + props.setup + "/" + props.id;
 
     let runningStatus = running !== "Running";
     let runBadge = <ConditionalBadge text={running} error={runningStatus}/>
@@ -23,36 +24,40 @@ export function StatusRow(props) {
     let start_query = "?name=" + props.id + "&start=true";
     let stop_query = "?name=" + props.id + "&start=false";
 
-    return (
-        <TableRow items={[props.title, runBadge, errorBadge, data["request_id"],
-            <div>
-                <SmallButtonSpinner text="Start" callback={async () => {
-                    await postData(root_url + "/api/service" + start_query, "" );
-                }}/>
-                <SmallButtonSpinner text="stop" callback={async () => {
-                    await postData(root_url + "/api/service" + stop_query, "");
-                }}/>
+   console.log(props)
+    let start_stop = <></>
+    if (props.value.type !== "mpa3") {
+        start_stop = <>
+        <SmallButtonSpinner text="Start" callback={async () => {
+            await postData(root_url + "/api/service" + start_query, "" );
+        }}/>
+        <SmallButtonSpinner text="Stop" callback={async () => {
+            await postData(root_url + "/api/service" + stop_query, "");
+        }}/>
+        </>
+    }
 
-                <Link to={props.href}><GoLinkExternal/></Link>
-            </div>]}
+    return (
+        <TableRow items={[title, runBadge, errorBadge, data["request_id"],
+            <div className="clearfix">
+                <div className="float-start">
+                {start_stop}
+                </div>
+            </div>,
+                <Link to={href}><GoLinkExternal/></Link>
+            ]}
         />);
 }
 
 export function Dashboard() {
     const context = useContext(HiveConfig);
-    const root_url = useContext(HiveUrl);
 
     let full_page = []
 
     for (const [setup_key, setup_value] of Object.entries(context)) {
         let table = []
         for (const [hardware_key, hardware_value] of Object.entries(setup_value.hardware)) {
-            table.push(
-                <StatusRow url={root_url + hardware_value.proxy} title={hardware_value.title} key={hardware_key}
-                           id={hardware_key}
-                           href={"/nectar/" + setup_key + "/" + hardware_key}
-                />)
-        }
+            table.push(<StatusRow key={hardware_key} id={hardware_key} value={hardware_value} setup={setup_key}/>)}
         const capitalized_key = setup_key[0].toUpperCase() + setup_key.slice(1);
 
         let link = <></>
@@ -66,7 +71,7 @@ export function Dashboard() {
                 </div>
                 <hr/>
                 <table className="table table-striped table-hover table-sm">
-                    <TableHeader items={["Name", "Connection State", "Error State", "Last Request id", "Control"]}/>
+                    <TableHeader items={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}/>
                     <tbody>
                     {table}
                     </tbody>

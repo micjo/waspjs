@@ -43,42 +43,36 @@ function MDriveCard(props) {
         </ControllerContext.Provider>);
 }
 
-const exection = {
-    TODO: "TODO",
-    DOING: "DOING",
-    DONE: "DONE"
-}
-
 function ProgressTable(props) {
-
     let table = []
-    let itemExecuting = exection.DONE;
     for (let item of props.data.active_rqm.recipes) {
-        if (item.sample_id === props.data.active_sample_id) {
-            itemExecuting = exection.DOING;
+        table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
+    }
+
+    let index = 0;
+    for (let item of props.data.active_rqm_status) {
+        let recipe = props.data.active_rqm.recipes[index];
+
+        let run_time = item.run_time.toFixed(2);
+        if (index < props.data.active_rqm_status.length -1 ) {
+            table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time, "100%"]}/>
         }
-        if (itemExecuting === exection.TODO) {
-            table.push(<TableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem, "0%"]}/>)
-        }
-        if (itemExecuting === exection.DONE) {
-            table.push(<SuccessTableRow key={item.file_stem}
-                                        items={[item.sample_id, item.type, item.file_stem, "100%"]}/>)
-        }
-        if (itemExecuting === exection.DOING) {
-            let fraction = parseFloat(props.data.run_time) / parseFloat(props.data.run_time_target);
+        else {
+            let fraction = parseFloat(item.run_time) / parseFloat(item.run_time_target);
             let percentage = (fraction * 100).toFixed(2);
-            table.push(<WarningTableRow key={item.file_stem} items={[item.sample_id, item.type, item.file_stem,
+
+
+            table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time,
                 <ProgressSpinner text={percentage + "%"}/>]}/>
-            )
-            itemExecuting = exection.TODO;
         }
+        index++;
     }
 
     return (
         <div className="clearfix">
             <h5>Active: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Sample Id", "Type", "File Stem", "Active"]}/>
+                <TableHeader items={["Recipe", "Type", "Sample id", "Run time (s)", "Progress"]}/>
                 <tbody>
                 {table}
                 </tbody>
@@ -249,9 +243,7 @@ function ErdExperiment() {
 
     let url = root_url + "/api/erd/"
     let initialState = {
-        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []},
-        "run_status": "Idle", "active_sample_id": "", "accumulated_charge": 0, "accumulated_charge_target": 0
-    }
+        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status": []}
     let state = useReadOnlyData(url + "state", initialState);
 
     let run_status = state["run_status"]

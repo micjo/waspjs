@@ -66,8 +66,6 @@ function ProgressTable(props) {
         table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
     }
 
-    console.log(props.data.active_rqm_status);
-
     let index = 0;
      for (let item of props.data.active_rqm_status) {
          let recipe = props.data.active_rqm.recipes[index];
@@ -77,7 +75,6 @@ function ProgressTable(props) {
              table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time, "100%"]}/>
          }
          else {
-             console.log("last item is " + item)
              let fraction = parseFloat(item.accumulated_charge_corrected) / parseFloat(item.accumulated_charge_target);
              let percentage = (fraction * 100).toFixed(2);
 
@@ -304,7 +301,6 @@ function RbsControl(props) {
                     <ButtonSpinner text="Get RBS Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
-                        console.log(blob);
 
                         const link = document.createElement("a");
                         link.href = URL.createObjectURL(blob);
