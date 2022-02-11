@@ -11,7 +11,8 @@ import {postData} from "../http_helper";
 
 export function StatusRow(props) {
     const root_url = useContext(HiveUrl);
-    const [data, , running] = useData(props.value.url);
+    let url = root_url + props.value.proxy;
+    const [data, , running] = useData(url);
     let title = props.value.title;
     let href = "/nectar/" + props.setup + "/" + props.id;
 
