@@ -25,7 +25,6 @@ export function StatusRow(props) {
     let start_query = "?name=" + props.id + "&start=true";
     let stop_query = "?name=" + props.id + "&start=false";
 
-   console.log(props)
     let start_stop = <></>
     if (props.value.type !== "mpa3") {
         start_stop = <>

@@ -5,7 +5,7 @@ export function Toggle(props) {
 
     let disabled = requestOngoing ? "Disabled" : "";
     let checked = props.checked ? "checked" : "";
-    let visible = requestOngoing? "visible" : "hidden";
+    let visible = requestOngoing ? "visible" : "hidden";
 
     return (
         <div className="d-flex align-items-center">
@@ -33,13 +33,13 @@ export function Toggle(props) {
 export function SimpleToggle(props) {
     return (
         <div className="input-group-text">
-                <input className="form-check-input mt-0" type="checkbox"
-                       checked={props.checked} onChange={async () => {
-                    props.setChecked(!props.checked);
-                }
-                }/>
+            <input className="form-check-input mt-0" type="checkbox"
+                   checked={props.checked} onChange={async () => {
+                props.setChecked(!props.checked);
+            }
+            }/>
         </div>
-);
+    );
 }
 
 
@@ -48,6 +48,36 @@ export function SmallButtonSpinner(props) {
         <ButtonSpinner extraStyle="btn-sm float-end" text={props.text} callback={props.callback}/>
     );
 }
+
+export function ClickableSpan(props) {
+    return (
+        <a href="#" onClick={async () => {
+            console.log("clicked");
+            await props.callback();
+        }}>
+            {props.children}
+
+        </a>
+    )
+}
+
+export function ClickableSpanWithSpinner(props) {
+    const [spinner, setSpinner] = useState(false);
+    return (
+        <div className="float-end">
+        <ClickableSpan callback={async () => {
+        setSpinner(true);
+        await props.callback();
+        setSpinner(false);
+    }
+    }>
+        <span className="me-1 spinner-border spinner-border-sm" role="status"
+              style={{display: spinner ? "inline-block" : "none"}}> </span>
+        {props.children}
+    </ClickableSpan>
+        </div>);
+}
+
 
 export function ButtonSpinner(props) {
     const [spinner, setSpinner] = useState(false);
@@ -110,7 +140,9 @@ export function DropDown(props) {
     }
 
     return (
-        <select className="form-select form-select-sm" defaultValue="unselected" onChange={ (e)=> {props.setValue((e.target.value))}}>
+        <select className="form-select form-select-sm" defaultValue="unselected" onChange={(e) => {
+            props.setValue((e.target.value))
+        }}>
             <option value="unselected">Choose...</option>
             {items}
         </select>
@@ -127,7 +159,9 @@ export function DropDownButton(props) {
 
     return (
         <div className="input-group input-sm">
-            <select className="form-select form-select-sm" defaultValue="unselected" onChange={ (e)=> {props.setValue((e.target.value))}}>
+            <select className="form-select form-select-sm" defaultValue="unselected" onChange={(e) => {
+                props.setValue((e.target.value))
+            }}>
                 <option value="unselected">Choose...</option>
                 {items}
             </select>

@@ -54,16 +54,17 @@ function ProgressTable(props) {
         let recipe = props.data.active_rqm.recipes[index];
         let time = new Date(item.run_time * 1000).toISOString().substr(11, 8);
 
-        if (index < props.data.active_rqm_status.length -1 ) {
-            table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
-        }
-        else {
+        if (index < props.data.active_rqm_status.length - 1) {
+            table[index] = <SuccessTableRow key={recipe.file_stem}
+                                            items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
+        } else {
             let fraction = parseFloat(item.run_time) / parseFloat(item.run_time_target);
             let percentage = (fraction * 100).toFixed(2);
 
 
-            table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
-                <ProgressSpinner text={percentage + "%"}/>]}/>
+            table[index] =
+                <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
+                    <ProgressSpinner text={percentage + "%"}/>]}/>
         }
         index++;
     }
@@ -224,15 +225,15 @@ function ScheduleErd(props) {
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
-                    <ButtonSpinner text="Abort / Clear" callback={async () => {
-                        await postData(props.url + "abort", "")
-                        let running = true
-                        while (running) {
-                            await delay(250);
-                            let [, data] = await getJson(props.url + "state")
-                            running = data["run_status"] !== "Idle"
-                        }
-                    }}/>
+                <ButtonSpinner text="Abort / Clear" callback={async () => {
+                    await postData(props.url + "abort", "")
+                    let running = true
+                    while (running) {
+                        await delay(250);
+                        let [, data] = await getJson(props.url + "state")
+                        running = data["run_status"] !== "Idle"
+                    }
+                }}/>
             </div>
         </div>
     );
@@ -243,7 +244,8 @@ function ErdExperiment() {
 
     let url = root_url + "/api/erd/"
     let initialState = {
-        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status": []}
+        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status": []
+    }
     let state = useReadOnlyData(url + "state", initialState);
 
     let run_status = state["run_status"]
@@ -293,7 +295,7 @@ export function ErdOverview() {
     return (
         <div className="row">
             <div className="col-sm">
-                <ErdExperiment />
+                <ErdExperiment/>
             </div>
             <div className="col-sm">
                 <HardwareCards/>

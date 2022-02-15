@@ -14,9 +14,9 @@ import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
-import {ButtonSpinner} from "../components/input_elements";
+import {ButtonSpinner, ClickableSpan, ClickableSpanWithSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
-import {BsCheck, BsDot, BsX} from "react-icons/bs";
+import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 
 function AmlCard(props) {
     const root_url = useContext(HiveUrl);
@@ -67,27 +67,28 @@ function ProgressTable(props) {
     }
 
     let index = 0;
-     for (let item of props.data.active_rqm_status) {
-         let recipe = props.data.active_rqm.recipes[index];
-         let time = new Date(item.run_time * 1000).toISOString().substr(11, 8);
+    for (let item of props.data.active_rqm_status) {
+        let recipe = props.data.active_rqm.recipes[index];
+        let time = new Date(item.run_time * 1000).toISOString().substr(11, 8);
 
-         if (index < props.data.active_rqm_status.length -1 ) {
-             table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
-         }
-         else {
-             let fraction = parseFloat(item.accumulated_charge_corrected) / parseFloat(item.accumulated_charge_target);
-             let percentage = (fraction * 100).toFixed(2);
+        if (index < props.data.active_rqm_status.length - 1) {
+            table[index] = <SuccessTableRow key={recipe.file_stem}
+                                            items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
+        } else {
+            let fraction = parseFloat(item.accumulated_charge_corrected) / parseFloat(item.accumulated_charge_target);
+            let percentage = (fraction * 100).toFixed(2);
 
 
-             table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
-                 <ProgressSpinner text={percentage + "%"}/>]}/>
-         }
-         index++;
-     }
+            table[index] =
+                <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
+                    <ProgressSpinner text={percentage + "%"}/>]}/>
+        }
+        index++;
+    }
 
     return (
         <div className="clearfix">
-            <h5>Active: {props.data.active_rqm.rqm_number}</h5>
+            <h5>Active: {props.data.active_rqm.rqm_number}   <AbortRunning url={props.url}/></h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Recipe", "Type", "Sample id", "Run time", "Progress"]}/>
                 <tbody>
@@ -102,15 +103,22 @@ function ProgressTable(props) {
 function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
+        let index = 0;
         for (let item of props.schedule) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm_number+index} items={[item.rqm_number,
+                <ClickableSpan callback={async () => {
+                    await postData(props.url + "abort?rqm_number=" + item.rqm_number, "");}}>
+                    <BsXSquare/>
+                </ClickableSpan>
+            ]}/>)
+            index++;
         }
     }
     return (
         <>
             <h5>Scheduled: </h5>
             <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Name"]}/>
+                <thead><tr><th>Name</th><th>Remove</th></tr></thead>
                 <tbody>
                 {table}
                 </tbody>
@@ -122,9 +130,11 @@ function ScheduleTable(props) {
 
 function DoneTable(props) {
     let table = []
+    let index = 0;
     if (Array.isArray(props.done) && props.done.length) {
         for (let item of props.done) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm_number+index} items={[item.rqm_number]}/>)
+            index++;
         }
     }
     return (
@@ -144,8 +154,10 @@ function DoneTable(props) {
 function FailedTable(props) {
     let table = []
     if (Array.isArray(props.failed) && props.failed.length) {
+        let index = 0;
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.error_state]}/>)
+            table.push(<TableRow key={item.rqm_number+index} items={[item.rqm_number, item.error_state]}/>)
+            index++;
         }
     }
     return (
@@ -244,15 +256,6 @@ function ScheduleRbs(props) {
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
-                    <ButtonSpinner text="Abort / Clear" callback={async () => {
-                        await postData(props.url + "abort", "")
-                        let running = true
-                        while (running) {
-                            await delay(250);
-                            let [, data] = await getJson(props.url + "state")
-                            running = data["run_status"] !== "Idle"
-                        }
-                    }}/>
             </div>
         </div>
     );
@@ -263,7 +266,7 @@ function RbsExperiment() {
 
     let url = root_url + "/api/rbs/"
     let initialState = {
-        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status":[]
+        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status": []
     }
     let state = useReadOnlyData(url + "state", initialState);
 
@@ -280,8 +283,8 @@ function RbsExperiment() {
             </div>
             <ScheduleRbs url={url}/>
             <RbsControl url={url}/>
-            <ScheduleTable schedule={state["queue"]}/>
-            <ProgressTable data={state}/>
+            <ScheduleTable schedule={state["queue"]} url={url}/>
+            <ProgressTable data={state} url={url}/>
             <DoneTable done={state["done"]}/>
             <FailedTable failed={state["failed"]}/>
         </div>);
@@ -313,7 +316,7 @@ export function RbsOverview() {
     return (
         <div className="row">
             <div className="col-sm">
-                <RbsExperiment />
+                <RbsExperiment/>
             </div>
             <div className="col-sm">
                 <HardwareCards/>
@@ -321,4 +324,19 @@ export function RbsOverview() {
 
         </div>
     );
+}
+
+function AbortRunning(props) {
+    return (
+    <ClickableSpanWithSpinner callback={async () => {
+        await postData(props.url + "abort_run", "")
+        let running = true
+        while (running) {
+            await delay(250);
+            let [, data] = await getJson(props.url + "state")
+            running = data["run_status"] !== "Idle"
+        }
+    }}>
+       <BsXSquare/>
+    </ClickableSpanWithSpinner>);
 }
