@@ -69,17 +69,17 @@ function ProgressTable(props) {
     let index = 0;
      for (let item of props.data.active_rqm_status) {
          let recipe = props.data.active_rqm.recipes[index];
+         let time = new Date(item.run_time * 1000).toISOString().substr(11, 8);
 
-         let run_time = item.run_time.toFixed(2);
          if (index < props.data.active_rqm_status.length -1 ) {
-             table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time, "100%"]}/>
+             table[index] = <SuccessTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
          }
          else {
              let fraction = parseFloat(item.accumulated_charge_corrected) / parseFloat(item.accumulated_charge_target);
              let percentage = (fraction * 100).toFixed(2);
 
 
-             table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, run_time,
+             table[index] = <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
                  <ProgressSpinner text={percentage + "%"}/>]}/>
          }
          index++;
@@ -89,7 +89,7 @@ function ProgressTable(props) {
         <div className="clearfix">
             <h5>Active: {props.data.active_rqm.rqm_number}</h5>
             <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Recipe", "Type", "Sample id", "Run time (s)", "Progress"]}/>
+                <TableHeader items={["Recipe", "Type", "Sample id", "Run time", "Progress"]}/>
                 <tbody>
                 {table}
                 </tbody>
