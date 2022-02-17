@@ -92,8 +92,11 @@ function ProgressTable(props) {
 function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
+        let index = 0;
         for (let item of props.schedule) {
-            table.push(<TableRow key={item.rqm.rqm_number} items={[item.rqm.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm.rqm_number + index} items={[item.rqm.rqm_number,
+            ]}/>)
+            index++;
         }
     }
     return (
@@ -274,7 +277,7 @@ function ErdExperiment() {
             <ScheduleErd url={url}/>
             <RbsControl url={url}/>
             <hr/>
-            <ScheduleTable schedule={state["queue"]} url={url}/>
+            <ScheduleTable schedule={state["schedule"]} url={url}/>
             <ProgressTable data={state} url={url}/>
             <DoneTable done={state["done"]}/>
             <FailedTable failed={state["failed"]}/>
