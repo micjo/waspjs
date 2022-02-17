@@ -11,8 +11,8 @@ import {
 import {ControllerContext} from "../App";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
-import {ButtonSpinner} from "../components/input_elements";
-import {BsCheck, BsDot, BsX} from "react-icons/bs";
+import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
+import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 import {useMpa3} from "./mpa3";
 import {useMdrive} from "./mdrive";
 
@@ -44,34 +44,40 @@ function MDriveCard(props) {
 }
 
 function ProgressTable(props) {
+    let all_recipes = props.data.active_rqm?.rqm?.recipes;
+    let finished_recipes = props.data.active_rqm?.finished_recipes;
+    let active_recipe = props.data.active_rqm?.active_recipe;
+
     let table = []
-    for (let item of props.data.active_rqm.recipes) {
-        table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
-    }
+    if (all_recipes && finished_recipes && active_recipe) {
 
-    let index = 0;
-    for (let item of props.data.active_rqm_status) {
-        let recipe = props.data.active_rqm.recipes[index];
-        let time = new Date(item.run_time * 1000).toISOString().substr(11, 8);
-
-        if (index < props.data.active_rqm_status.length - 1) {
-            table[index] = <SuccessTableRow key={recipe.file_stem}
-                                            items={[recipe.file_stem, recipe.type, recipe.sample_id, time, "100%"]}/>
-        } else {
-            let fraction = parseFloat(item.run_time) / parseFloat(item.run_time_target);
-            let percentage = (fraction * 100).toFixed(2);
-
-
-            table[index] =
-                <WarningTableRow key={recipe.file_stem} items={[recipe.file_stem, recipe.type, recipe.sample_id, time,
-                    <ProgressSpinner text={percentage + "%"}/>]}/>
+        for (let item of all_recipes) {
+            table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
         }
-        index++;
+
+        let index = 0;
+        for (let recipe of finished_recipes) {
+            let time = new Date(recipe.run_time * 1000).toISOString().substr(11, 8);
+            let full_recipe = all_recipes[index];
+            table[index] = <SuccessTableRow key={recipe.recipe_id}
+                                            items={[recipe.recipe_id, full_recipe.type, full_recipe.sample_id, time, "100%"]}/>
+            index++;
+        }
+
+        if (index < all_recipes.length) {
+            let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
+            let fraction = parseFloat(active_recipe.measuring_time) / parseFloat(active_recipe.measuring_time_target);
+            let percentage = (fraction * 100).toFixed(2);
+            table[index] =
+                <WarningTableRow key={active_recipe.recipe_id}
+                                 items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
+                                     <ProgressSpinner text={percentage + "%"}/>]}/>
+        }
     }
 
     return (
         <div className="clearfix">
-            <h5>Active: {props.data.active_rqm.rqm_number}</h5>
+            <h5>Active: {props.data.active_rqm.rqm_number} <AbortRunning url={props.url}/></h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Recipe", "Type", "Sample id", "Run time", "Progress"]}/>
                 <tbody>
@@ -87,12 +93,18 @@ function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
         for (let item of props.schedule) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm.rqm_number} items={[item.rqm.rqm_number]}/>)
         }
     }
     return (
         <>
-            <h5>Scheduled: </h5>
+            <h5>Scheduled:
+            <ClickableSpanWithSpinner callback={async () => {
+                await postData(props.url + "abort_schedule");
+            }}>
+                <BsXSquare/>
+            </ClickableSpanWithSpinner>
+            </h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Name"]}/>
                 <tbody>
@@ -108,7 +120,7 @@ function DoneTable(props) {
     let table = []
     if (Array.isArray(props.done) && props.done.length) {
         for (let item of props.done) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm.rqm_number} items={[item.rqm.rqm_number]}/>)
         }
     }
     return (
@@ -129,7 +141,7 @@ function FailedTable(props) {
     let table = []
     if (Array.isArray(props.failed) && props.failed.length) {
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm_number} items={[item.rqm_number, item.error_state]}/>)
+            table.push(<TableRow key={item.rqm.rqm_number} items={[item.rqm_number, item.rqm.error_state]}/>)
         }
     }
     return (
@@ -261,8 +273,9 @@ function ErdExperiment() {
             </div>
             <ScheduleErd url={url}/>
             <RbsControl url={url}/>
-            <ScheduleTable schedule={state["queue"]}/>
-            <ProgressTable data={state}/>
+            <hr/>
+            <ScheduleTable schedule={state["queue"]} url={url}/>
+            <ProgressTable data={state} url={url}/>
             <DoneTable done={state["done"]}/>
             <FailedTable failed={state["failed"]}/>
         </div>);
@@ -303,4 +316,13 @@ export function ErdOverview() {
 
         </div>
     );
+}
+
+function AbortRunning(props) {
+    return (
+        <ClickableSpanWithSpinner callback={async () => {
+            await postData(props.url + "abort_active", "")
+        }}>
+            <BsXSquare/>
+        </ClickableSpanWithSpinner>);
 }
