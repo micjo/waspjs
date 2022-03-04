@@ -311,7 +311,7 @@ function RbsControl(props) {
         <div>
             <div className="clearfix">
                 <div className="float-end btn-group">
-                    <ButtonSpinner text="Get RBS Logs" callback={async () => {
+                    <ButtonSpinner text="Get Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
 

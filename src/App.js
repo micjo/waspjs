@@ -29,7 +29,7 @@ export const ControllerContext = React.createContext({});
 function useHiveUrl() {
     let hive_url;
     if (process.env.NODE_ENV === "development") {
-        hive_url = "http://localhost:8000"
+        hive_url = "/hive"
     } else {
         hive_url = "/hive"
     }

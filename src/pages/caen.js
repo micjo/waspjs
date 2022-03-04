@@ -66,8 +66,7 @@ export function useCaen(url, title) {
     </>
     let button_extra = <>
         <SimpleButton text="Connect" request={{"open_connection": true}}/>
-        <SimpleButton text="Upload Registry" request={{"upload_registry": true}}/>
-        <SimpleButton text="Download Registry" request={{"download_registry": true}}/>
+        <SimpleButton text="Upload All Registry" request={{"upload_all_registry": true}}/>
         <SimpleButton text="Start" request={{"start": true}}/>
         <SimpleButton text="Stop" request={{"stop": true}}/>
         <SimpleButton text="Clear" request={{"clear": true}}/>

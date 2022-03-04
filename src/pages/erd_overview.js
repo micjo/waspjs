@@ -71,7 +71,7 @@ function ProgressTable(props) {
             table[index] =
                 <WarningTableRow key={active_recipe.recipe_id}
                                  items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
-                                     <ProgressSpinner text={percentage + "%"}/>]}/>
+                                     <ProgressSpinner text={"%"}/>]}/>
         }
     }
 
@@ -240,15 +240,6 @@ function ScheduleErd(props) {
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
                 <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
-                <ButtonSpinner text="Abort / Clear" callback={async () => {
-                    await postData(props.url + "abort", "")
-                    let running = true
-                    while (running) {
-                        await delay(250);
-                        let [, data] = await getJson(props.url + "state")
-                        running = data["run_status"] !== "Idle"
-                    }
-                }}/>
             </div>
         </div>
     );
@@ -263,8 +254,11 @@ function ErdExperiment() {
     }
     let state = useReadOnlyData(url + "state", initialState);
 
-    let run_status = state["run_status"]
-    let rqm_number = state["active_rqm"]["rqm_number"]
+    let run_status = state["run_status"];
+    let rqm_number = state?.["active_rqm"]?.["rqm"]?.["rqm_number"];
+    if (!rqm_number) {
+        rqm_number = "None";
+    }
 
     return (
         <div>

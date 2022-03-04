@@ -51,14 +51,14 @@ function CountingSettings() {
                                 callback={async () => await context.send({"target_charge": targetCharge})}/>
             ]}/>
             <TableRow items={[
-                "Pulses to counts factor:", context.data["counter_factor"],
+                "Pulses to counts factor:", context.data["pulses_to_counts_factor"],
                 <FloatInputButton text="Set" value={pulseToCount} setValue={setPulseToCount}
-                                  callback={async () => await context.send({"pulse_count_factor": pulseToCount})}/>
+                                  callback={async () => await context.send({"set_pulse_to_count_factor": pulseToCount})}/>
             ]}/>
             <TableRow items={[
-                "Counts to charge factor:", context.data["nc_to_pulses_conversion_factor"],
+                "Counts to charge factor:", context.data["counts_to_nC_factor"],
                 <FloatInputButton text="Set" value={countsToCharge} setValue={setCountsToCharge}
-                                  callback={async () => await context.send({"count_charge_factor": countsToCharge})}/>
+                                  callback={async () => await context.send({"set_count_to_charge_factor": countsToCharge})}/>
             ]}/>
             <TableRow items={[
                 "Counting Mode:", context.data["count_mode"],
