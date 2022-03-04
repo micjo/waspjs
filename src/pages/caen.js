@@ -24,10 +24,6 @@ function useStatus(data) {
 }
 
 
-function SimpleButton(props) {
-    const context = useContext(ControllerContext);
-    return (<ButtonSpinner text={props.text} callback={async () => await context.send(props.request)}/>);
-}
 
 
 export function Caen(props) {
@@ -47,6 +43,10 @@ export function Caen(props) {
     );
 }
 
+export function SimpleButton(props) {
+    const context = useContext(ControllerContext);
+    return (<ButtonSpinner text={props.text} callback={async () => await context.send(props.request)}/>);
+}
 
 export function useCaen(url, title) {
     const [modalMessage, show, setShow, cb] = useModal()

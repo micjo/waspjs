@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
 import {GenericControl, ModalView} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {FloatInputButton, DropDownButton, ButtonSpinner} from "../components/input_elements";
+import {FloatInputButton, DropDownButton, SmallButtonSpinner} from "../components/input_elements";
 import {useGenericPage} from "./generic_page";
 
 function useStatus(data) {
@@ -25,6 +25,7 @@ function useStatus(data) {
 function MotorControl() {
     const context = useContext(ControllerContext);
     const [newMotorPosition, setNewMotorPosition] = useState("");
+    const [newLoadPosition, setNewLoadPosition] = useState("");
     const [newOffset, setNewOffset] = useState("");
     const [program, setProgram] = useState("");
 
@@ -37,6 +38,10 @@ function MotorControl() {
             <TableRow items={["Redefine Motor Position", context.data["motor_position"],
                 <FloatInputButton text="Redefine" setValue={setNewMotorPosition} value={newMotorPosition}
                                   callback={async () => await context.send({"redefine_motor_position": newMotorPosition})}/>
+            ]}/>
+            <TableRow items={["Redefine Load Position", context.data["load_position"],
+                <FloatInputButton text="Redefine" setValue={setNewLoadPosition} value={newLoadPosition}
+                                  callback={async () => await context.send({"set_load_position": newLoadPosition})}/>
             ]}/>
             <TableRow items={[
                 "Program:", "",
@@ -64,6 +69,11 @@ function DebugControl() {
                             setState={"debug_log_vlinx"}/>
         </>
     );
+}
+
+export function SimpleButton(props) {
+    const context = useContext(ControllerContext);
+    return (<SmallButtonSpinner text={props.text} callback={async () => await context.send(props.request)}/>);
 }
 
 function AdvancedControl() {
@@ -100,14 +110,11 @@ export function useMdrive(url, title, load) {
 
     let table_extra = <>
         <TableRow items={["Position Steps", config.data["motor_steps"], ""]}/>
+        <TableRow items={["Load Position (config)", config.data["load_position"], <SimpleButton text="Load" request={{"load": true}}/>]}/>
         <SetPositionRow positionTarget={positionTarget} setPositionTarget={setPositionTarget}/>
     </>
 
     let button_extra = <>
-        <ButtonSpinner text="Load"
-                       callback={() => {
-                           setPositionTarget(load);
-                       }}/>
     </>
 
     return [config, show, setShow, modalMessage, table_extra, button_extra]
