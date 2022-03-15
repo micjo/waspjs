@@ -61,12 +61,12 @@ function ProgressTable(props) {
 
         if (index < all_recipes.length) {
             let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
-            let fraction = parseFloat(active_recipe.measuring_time) / parseFloat(active_recipe.measuring_time_target);
+            let fraction = parseFloat(active_recipe.measurement_time) / parseFloat(active_recipe.measurement_time_target);
             let percentage = (fraction * 100).toFixed(2);
             table[index] =
                 <WarningTableRow key={active_recipe.recipe_id}
                                  items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
-                                     <ProgressSpinner text={"%"}/>]}/>
+                                     <ProgressSpinner text={percentage+"%"}/>]}/>
             index++;
         }
 
