@@ -69,9 +69,6 @@ function ProgressTable(props) {
     let table = []
     if (all_recipes && finished_recipes && active_recipe) {
 
-        for (let item of all_recipes) {
-            table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
-        }
 
         let index = 0;
         for (let recipe of finished_recipes) {
@@ -90,6 +87,13 @@ function ProgressTable(props) {
                 <WarningTableRow key={active_recipe.recipe_id}
                                  items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
                                      <ProgressSpinner text={percentage + "%"}/>]}/>
+            index++;
+        }
+
+        while (index < all_recipes.length) {
+            let item = all_recipes[index];
+            table.push(<TableRow key={item.file_stem} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
+            index++;
         }
     }
 
@@ -140,7 +144,6 @@ function ScheduleTable(props) {
 function DoneTable(props) {
     let table = []
     let index = 0;
-
 
 
     if (Array.isArray(props.done) && props.done.length) {
