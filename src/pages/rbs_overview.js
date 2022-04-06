@@ -99,7 +99,7 @@ function ProgressTable(props) {
 
     return (
         <div className="clearfix">
-            <h5>Active: {props.data.active_rqm.rqm_number} <AbortRunning url={props.url}/></h5>
+            <h5>Active: {props.data.active_rqm.job_id} <AbortRunning url={props.url}/></h5>
             <table className="table table-striped table-hover table-sm">
                 <TableHeader items={["Recipe", "Type", "Sample id", "Run time", "Progress"]}/>
                 <tbody>
@@ -116,7 +116,7 @@ function ScheduleTable(props) {
     if (Array.isArray(props.schedule) && props.schedule.length) {
         let index = 0;
         for (let item of props.schedule) {
-            table.push(<TableRow key={item.rqm.rqm_number + index} items={[item.rqm.rqm_number,
+            table.push(<TableRow key={item.rqm.job_id + index} items={[item.rqm.job_id,
             ]}/>)
             index++;
         }
@@ -148,7 +148,7 @@ function DoneTable(props) {
 
     if (Array.isArray(props.done) && props.done.length) {
         for (let item of props.done) {
-            table.push(<TableRow key={item.rqm.rqm_number + index} items={[item.rqm.rqm_number]}/>)
+            table.push(<TableRow key={item.rqm.job_id + index} items={[item.rqm.job_id]}/>)
             index++;
         }
     }
@@ -171,7 +171,7 @@ function FailedTable(props) {
     if (Array.isArray(props.failed) && props.failed.length) {
         let index = 0;
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm.rqm_number + index} items={[item.rqm.rqm_number, item.error_state]}/>)
+            table.push(<TableRow key={item.rqm.job_id + index} items={[item.rqm.job_id, item.error_state]}/>)
             index++;
         }
     }
@@ -281,14 +281,14 @@ function RbsExperiment() {
 
     let url = root_url + "/api/rbs/"
     let initialState = {
-        "queue": [], "active_rqm": {"recipes": [], "rqm_number": "", "detectors": []}, "active_rqm_status": []
+        "queue": [], "active_rqm": {"recipes": [], "job_id": "", "detectors": []}, "active_rqm_status": []
     }
     let state = useReadOnlyData(url + "state", initialState);
 
     let run_status = state?.["run_status"]
-    let rqm_number = state?.["active_rqm"]?.["rqm"]?.["rqm_number"];
-    if (!rqm_number) {
-        rqm_number = "None";
+    let job_id = state?.["active_rqm"]?.["rqm"]?.["job_id"];
+    if (!job_id) {
+        job_id = "None";
     }
 
     return (
@@ -296,7 +296,7 @@ function RbsExperiment() {
             <div className="clearfix">
                 <h3 className="float-start">RBS RQM</h3>
                 <h5 className="clearfix float-end">
-                    <ConditionalBadge error={false} text={run_status + ": " + rqm_number}/>
+                    <ConditionalBadge error={false} text={run_status + ": " + job_id}/>
                 </h5>
             </div>
             <ScheduleRbs url={url}/>
