@@ -145,8 +145,10 @@ function DoneTable(props) {
 function FailedTable(props) {
     let table = []
     if (Array.isArray(props.failed) && props.failed.length) {
+	let index = 0
         for (let item of props.failed) {
-            table.push(<TableRow key={item.rqm.job_id} items={[item.rqm.job_id, item.rqm.error_state]}/>)
+            table.push(<TableRow key={item.rqm.job_id + index} items={[item.rqm.job_id, item.error_state]}/>)
+	    index++;
         }
     }
     return (
