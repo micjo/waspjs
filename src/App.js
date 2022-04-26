@@ -107,7 +107,7 @@ function SomeHardware(props) {
     if (props.hardware_value.type === "aml") {
         return (<Aml hardware_value={props.hardware_value}/>)
     }
-    if (props.hardware_value.type === "motrona") {
+    if (props.hardware_value.type === "motrona_dx350") {
         return (<Motrona hardware_value={props.hardware_value}/>)
     }
     if (props.hardware_value.type === "caen") {
