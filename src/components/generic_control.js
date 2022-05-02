@@ -1,6 +1,6 @@
 import {TableHeader, TableRow} from "./table_elements";
 import {ButtonSpinner} from "./input_elements";
-import {getJson, sendRequest} from "../http_helper";
+import {getJson, sendRequest, postData} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
@@ -33,7 +33,7 @@ export function ModalView(props) {
 export function LoadButton(props) {
     return (
         <ButtonSpinner extraStyle={"me-2"} text="Load" callback={async () => {
-            await sendRequest(props.url, {"load": true}, props.popup, props.setData)
+		await postData(props.url + "?load=true", {});
         }}/>
     );
 }
@@ -108,7 +108,7 @@ export function ProgressSpinner(props) {
 
 export function BusySpinner(props) {
     return (
-        <span className="spinner-border spinner-border-sm me-2"
+        <span className="spinner-border spinner-border-sm ms-2 me-2"
               style={{"visibility": props.busy ? "visible" : "hidden"}}/>);
 }
 

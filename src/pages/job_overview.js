@@ -241,37 +241,52 @@ function StatusBadge(props) {
 export function HardwareStatus() {
 
     const root_url = useContext(HiveUrl);
-    let [config, show, setShow, modalMessage] = useGenericPage(root_url+ "/api/rbs/status", "RBS")
+    let [rbs_config, rbs_show, rbs_setShow, rbs_modalMessage] = useGenericPage(root_url+ "/api/rbs/status", "RBS")
 
-    let aml_x = config.data?.["aml_x_y"]?.["motor_1_position"];
-    let aml_y = config.data?.["aml_x_y"]?.["motor_2_position"];
-    let aml_phi = config.data?.["aml_phi_zeta"]?.["motor_1_position"];
-    let aml_zeta = config.data?.["aml_phi_zeta"]?.["motor_2_position"];
-    let aml_det = config.data?.["aml_det_theta"]?.["motor_1_position"];
-    let aml_theta = config.data?.["aml_det_theta"]?.["motor_2_position"];
-    let current = config.data?.["motrona"]?.["current(nA)"];
+    let aml_x = rbs_config.data?.["aml_x_y"]?.["motor_1_position"];
+    let aml_y = rbs_config.data?.["aml_x_y"]?.["motor_2_position"];
+    let aml_phi = rbs_config.data?.["aml_phi_zeta"]?.["motor_1_position"];
+    let aml_zeta = rbs_config.data?.["aml_phi_zeta"]?.["motor_2_position"];
+    let aml_det = rbs_config.data?.["aml_det_theta"]?.["motor_1_position"];
+    let aml_theta = rbs_config.data?.["aml_det_theta"]?.["motor_2_position"];
+    let current = rbs_config.data?.["motrona"]?.["current(nA)"];
+
+    let aml_moving = rbs_config.data?.["aml_x_y"]?.["busy"] || rbs_config.data?.["aml_phi_zeta"]?.["busy"] ||
+			rbs_config.data?.["aml_det_theta"]?.["busy"];
+
+    let [erd_config, erd_show, erd_setShow, erd_modalMessage] = useGenericPage(root_url+ "/api/erd/status", "ERD")
+    let mdrive_z = erd_config.data?.["mdrive_z"]?.["motor_position"];
+    let mdrive_theta = erd_config.data?.["mdrive_theta"]?.["motor_position"];
+    let mpa3_ad1_count_rate = erd_config.data?.["mpa3"]?.["ad1"]?.["total_rate"];
+    let mpa3_ad2_count_rate = erd_config.data?.["mpa3"]?.["ad2"]?.["total_rate"];
+
+    let mdrive_moving = erd_config.data?.["mdrive_z"]?.["moving_to_target"] || 
+			erd_config.data?.["mdrive_theta"]?.["moving_to_target"]
 
     return (<>
-        <ModalView show={show} setShow={setShow} message={modalMessage} />
+        <ModalView show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage} />
         <h1>Hardware Status</h1>
         <div className="clearfix mb-2">
             <h4>
                 <TitleBadge>RBS</TitleBadge>
-                <LoadButton url={root_url + "/api/rbs/load"} popup={config.popup} setData={config.setData}/>
+                <LoadButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup} setData={rbs_config.setData}/>
                 <StatusBadge>Position (x,y,phi,zeta,det,theta) =
-                    ({aml_x},{aml_y},{aml_phi},{aml_zeta},{aml_det},{aml_theta}) </StatusBadge>
+                    ({aml_x}, {aml_y}, {aml_phi}, {aml_zeta}, {aml_det}, {aml_theta}) 
+	    		<BusySpinner busy={aml_moving}/>
+		    </StatusBadge>
                 <StatusBadge>Current = {current} nA </StatusBadge>
-                <StatusBadge>Event counter = </StatusBadge>
             </h4>
         </div>
 
         <div className="clearfix">
             <h4>
                 <TitleBadge>ERD</TitleBadge>
-                <ButtonSpinner text={"Load"} extraStyle={"me-2"}/>
-                <StatusBadge>Position (phi, z) = </StatusBadge>
-                <StatusBadge>AD1 count rate = </StatusBadge>
-                <StatusBadge>AD2 count rate = </StatusBadge>
+                <LoadButton url={root_url + "/api/erd/load"} popup={erd_config.popup} setData={erd_config.setData}/>
+                <StatusBadge>Position (theta, z) = ({mdrive_theta}, {mdrive_z}) 
+	    		<BusySpinner busy={mdrive_moving}/>
+		</StatusBadge>
+                <StatusBadge>AD1 count rate = {mpa3_ad1_count_rate} </StatusBadge>
+                <StatusBadge>AD2 count rate = {mpa3_ad2_count_rate} </StatusBadge>
             </h4>
         </div>
     </>)
