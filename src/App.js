@@ -19,6 +19,7 @@ import {getJson} from "./http_helper";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
 import {ErdOverview} from "./pages/erd_overview";
+import {JobOverview} from "./pages/job_overview";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -137,18 +138,21 @@ function Navigation() {
     let routes = [<Route path="/nectar/" key="dashboard" element={<Dashboard/>}/>];
     let navBarElements = [<NavLi url="/nectar/" key="dashboard">Dashboard </NavLi>];
 
+    routes.push(<Route path="/nectar/job_overview" key="job_overview" element={<JobOverview/>}/>);
+    navBarElements.push(<NavLi url="/nectar/job_overview" key ="job_overview">Jobs </NavLi>);
+
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
 
-        if (key === "rbs") {
-            dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
-            routes.push(<Route path="/nectar/rbs/overview" element={<RbsOverview/>} key={key}/>)
-        }
-
-        if (key === "erd") {
-            dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
-            routes.push(<Route path="/nectar/erd/overview" element={<ErdOverview/>} key={key}/>)
-        }
+        // if (key === "rbs") {
+        //     dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
+        //     routes.push(<Route path="/nectar/rbs/overview" element={<RbsOverview/>} key={key}/>)
+        // }
+        //
+        // if (key === "erd") {
+        //     dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
+        //     routes.push(<Route path="/nectar/erd/overview" element={<ErdOverview/>} key={key}/>)
+        // }
 
         for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {
             const full_key = key + "/" + hardware_key

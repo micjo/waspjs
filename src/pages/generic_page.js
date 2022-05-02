@@ -1,10 +1,9 @@
 import {useData, useModal} from "../components/generic_control";
 import {sendRequest} from "../http_helper";
 
-
 export function useGenericPage(url, title) {
     const [modalMessage, show, setShow, cb] = useModal()
-    const [data, setData, running] = useData(url, {"loggers": {}})
+    const [data, setData, running] = useData(url)
 
     let config = {
         title: title, url: url, running:running, data: data, popup: (message) => cb(message),

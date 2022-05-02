@@ -30,6 +30,14 @@ export function ModalView(props) {
 }
 
 
+export function LoadButton(props) {
+    return (
+        <ButtonSpinner extraStyle={"me-2"} text="Load" callback={async () => {
+            await sendRequest(props.url, {"load": true}, props.popup, props.setData)
+        }}/>
+    );
+}
+
 function HideButton(props) {
     const controller = useContext(ControllerContext);
     return (
@@ -98,7 +106,7 @@ export function ProgressSpinner(props) {
     );
 }
 
-function BusySpinnner(props) {
+export function BusySpinner(props) {
     return (
         <span className="spinner-border spinner-border-sm me-2"
               style={{"visibility": props.busy ? "visible" : "hidden"}}/>);
@@ -140,7 +148,7 @@ export function PageTitle() {
             <div className="clearfix">
                 <h3 className="float-start">{controller.title}</h3>
                 <h5 className="clearfix float-end">
-                    <BusySpinnner busy={controller.busy}/>
+                    <BusySpinner busy={controller.busy}/>
                     <BriefBadge brief={controller.brief}/>
                     <RunningBadge running={controller.running} error={controller.data["error"]}/>
                 </h5>
@@ -159,7 +167,7 @@ export function GenericCard(props) {
                  aria-expanded="false" onClick={() => {setExpanded(!expanded);}}>
                 <div className="float-start">{context.title}</div>
                 <div className="clearfix float-end">
-                    <BusySpinnner busy={context.busy}/>
+                    <BusySpinner busy={context.busy}/>
                     <BriefBadge brief={context.brief}/>
                     <RunningBadge running={context.running} error={context.data["error"]}/>
                     <span> {expanded ? <BsCaretDownSquare size={20}/> : <BsCaretUpSquare size={20}/>} </span>
@@ -190,7 +198,7 @@ export function GenericControl(props) {
 
 export function useModal() {
     const [show, setShow] = useState(false);
-    const [modalMessage, setModalMessage] = useState("");
+    const [modalMessage, setModalMessage] = useState({});
 
     const cb = useCallback((message) => {
         setModalMessage(message);

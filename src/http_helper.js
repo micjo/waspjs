@@ -54,7 +54,8 @@ export async function sendRequest(url, request, popup, setData) {
 
     if (data.status !== 200) {
         let failMessage = await data.text()
-        popup(failMessage.slice(1,-1));
+        popup("Failed to process request: Error message:\n " + failMessage.slice(1,-1));
+        return;
     }
 
     try {
