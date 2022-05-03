@@ -26,6 +26,10 @@ function AbortRunning(props) {
 }
 
 function ScheduleTable(props) {
+    
+    const root_url = useContext(HiveUrl);
+    let url = root_url + "/api/job/"
+
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
         let index = 0;
@@ -38,7 +42,7 @@ function ScheduleTable(props) {
         <>
             <h5>Scheduled:
                 <ClickableSpanWithSpinner callback={async () => {
-                    await postData(props.url + "abort_schedule");
+                    await postData(url + "abort_schedule");
                 }}>
                     <BsXSquare/>
                 </ClickableSpanWithSpinner>
@@ -250,6 +254,8 @@ export function HardwareStatus() {
     let aml_det = rbs_config.data?.["aml_det_theta"]?.["motor_1_position"];
     let aml_theta = rbs_config.data?.["aml_det_theta"]?.["motor_2_position"];
     let current = rbs_config.data?.["motrona"]?.["current(nA)"];
+    let charge = rbs_config.data?.["motrona"]?.["charge(nC)"];
+    let target_charge = rbs_config.data?.["motrona"]?.["target_charge(nC)"];
 
     let aml_moving = rbs_config.data?.["aml_x_y"]?.["busy"] || rbs_config.data?.["aml_phi_zeta"]?.["busy"] ||
 			rbs_config.data?.["aml_det_theta"]?.["busy"];
@@ -270,11 +276,12 @@ export function HardwareStatus() {
             <h4>
                 <TitleBadge>RBS</TitleBadge>
                 <LoadButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup} setData={rbs_config.setData}/>
-                <StatusBadge>Position (x,y,phi,zeta,det,theta) =
+                <StatusBadge>Position (x, y, phi, zeta, det, theta) =
                     ({aml_x}, {aml_y}, {aml_phi}, {aml_zeta}, {aml_det}, {aml_theta}) 
 	    		<BusySpinner busy={aml_moving}/>
 		    </StatusBadge>
                 <StatusBadge>Current = {current} nA </StatusBadge>
+                <StatusBadge>Charge = {charge} nC -> {target_charge} nC </StatusBadge>
             </h4>
         </div>
 
@@ -309,7 +316,7 @@ export function JobOverview() {
             </div>
 
             <ScheduleJob/>
-            <ScheduleTable/>
+            <ScheduleTable schedule={state["schedule"]}/>
             <ProgressTable data={state}/>
             <DoneTable done={state["done"]}/>
             <FailedTable failed={state["failed"]}/>
