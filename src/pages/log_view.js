@@ -24,8 +24,7 @@ export function LogView() {
     let table = []
 
     if (Array.isArray(state)) {
-        const reversed = state.reverse()
-        for (let item of reversed) {
+        for (let item of state) {
             console.log(item);
             table.push(<TableRow key={item.log_id} items={[epochToString(item.epoch), item.mode, item.note, item.meta, item.job_id, item.recipe_name, item.sample_id,
             epochToString(item.start_time), epochToString(item.end_time)]}/>)
