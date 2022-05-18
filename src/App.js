@@ -20,11 +20,13 @@ import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
 import {ErdOverview} from "./pages/erd_overview";
 import {JobOverview} from "./pages/job_overview";
+import {LogView} from "./pages/log_view";
 
 document.body.style.backgroundColor = "floralwhite";
 
 export const HiveConfig = React.createContext({});
 export const HiveUrl = React.createContext({})
+export const LogbookUrl = React.createContext({})
 export const ControllerContext = React.createContext({});
 
 function useHiveUrl() {
@@ -35,6 +37,16 @@ function useHiveUrl() {
         hive_url = "/hive"
     }
     return hive_url
+}
+
+function useLogbookUrl() {
+    let logbook_url;
+    if (process.env.NODE_ENV === "development") {
+        logbook_url = "http://localhost:8001"
+    } else {
+        logbook_url = "/logbook"
+    }
+    return logbook_url
 }
 
 function useHiveConfig(hive_url) {
@@ -53,14 +65,17 @@ function useHiveConfig(hive_url) {
 
 export default function App() {
     let hiveUrl = useHiveUrl()
+    let logbookUrl = useLogbookUrl()
     let hiveConfig = useHiveConfig(hiveUrl);
     return (
         <HiveUrl.Provider value={hiveUrl}>
-            <HiveConfig.Provider value={hiveConfig}>
-                <div>
-                    <Navigation/>
-                </div>
-            </HiveConfig.Provider>
+            <LogbookUrl.Provider value={logbookUrl}>
+                <HiveConfig.Provider value={hiveConfig}>
+                    <div>
+                        <Navigation/>
+                    </div>
+                </HiveConfig.Provider>
+            </LogbookUrl.Provider>
         </HiveUrl.Provider>
     );
 }
@@ -139,7 +154,10 @@ function Navigation() {
     let navBarElements = [<NavLi url="/nectar/" key="dashboard">Dashboard </NavLi>];
 
     routes.push(<Route path="/nectar/job_overview" key="job_overview" element={<JobOverview/>}/>);
-    navBarElements.push(<NavLi url="/nectar/job_overview" key ="job_overview">Jobs </NavLi>);
+    navBarElements.push(<NavLi url="/nectar/job_overview" key="job_overview">Jobs </NavLi>);
+
+    routes.push(<Route path="/nectar/log_view" key="log_view" element={<LogView/>}/>);
+    navBarElements.push(<NavLi url="/nectar/log_view" key="log_view">Logbook</NavLi>);
 
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []

@@ -66,7 +66,7 @@ function ProgressTable(props) {
             table[index] =
                 <WarningTableRow key={active_recipe.recipe_id}
                                  items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
-                                     <ProgressSpinner text={percentage+"%"}/>]}/>
+                                     <ProgressSpinner text={percentage + "%"}/>]}/>
             index++;
         }
 

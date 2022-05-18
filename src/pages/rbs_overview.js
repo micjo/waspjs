@@ -114,7 +114,7 @@ function ProgressTable(props) {
 function ScheduleTable(props) {
     let table = []
     if (Array.isArray(props.schedule) && props.schedule.length) {
-        let index = 0;
+        let index = 0
         for (let item of props.schedule) {
             table.push(<TableRow key={item.rqm.job_id + index} items={[item.rqm.job_id,
             ]}/>)
