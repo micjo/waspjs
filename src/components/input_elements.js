@@ -52,7 +52,6 @@ export function SmallButtonSpinner(props) {
 export function ClickableSpan(props) {
     return (
         <a href="#" onClick={async () => {
-            console.log("clicked");
             await props.callback();
         }}>
             {props.children}
