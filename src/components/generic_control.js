@@ -1,14 +1,31 @@
 import {TableHeader, TableRow} from "./table_elements";
 import {ButtonSpinner} from "./input_elements";
-import {getJson, sendRequest, postData} from "../http_helper";
+import {getJson, postData, sendRequest} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
 import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/all";
 
+
+function NewlineText(props) {
+    const text = props.text;
+    let lines = []
+    let i = 0;
+    for(let line of text.split("\\n")) {
+        console.log(line);
+        lines.push(<p key={i}>{line}</p>)
+        i++;
+    }
+    return lines;
+}
+
 export function ModalView(props) {
 
     const handleClose = () => props.setShow(false);
+
+    const regex = /(")/g;
+    let msg = props.message.replaceAll(regex, '');
+
 
     return (
         <>
@@ -17,7 +34,7 @@ export function ModalView(props) {
                     <h5 className="modal-title">Failure</h5>
                 </div>
                 <div className="modal-body" id="modalFailBody">
-                    {props.message}
+                    <NewlineText text = {msg} />
                 </div>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleClose}>
@@ -198,7 +215,7 @@ export function GenericControl(props) {
 
 export function useModal() {
     const [show, setShow] = useState(false);
-    const [modalMessage, setModalMessage] = useState({});
+    const [modalMessage, setModalMessage] = useState("");
 
     const cb = useCallback((message) => {
         setModalMessage(message);

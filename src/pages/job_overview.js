@@ -101,7 +101,7 @@ function ScheduleJob() {
     }
 
     async function scheduleJob() {
-        await postData(url + "schedule", JSON.stringify(job))
+        await postData(url + job?.type, JSON.stringify(job))
         setJob({})
         setFilename("");
         setFileValid("")
