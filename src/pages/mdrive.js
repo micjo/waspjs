@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
-import {GenericControl, ModalView} from "../components/generic_control";
+import {GenericControl, FailureModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
 import {FloatInputButton, DropDownButton, SmallButtonSpinner} from "../components/input_elements";
 import {useGenericPage} from "./generic_page";
@@ -132,7 +132,7 @@ export function Mdrive(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericControl table_extra={table_extra} button_extra={button_extra}/>
             <AdvancedControl/>
         </ControllerContext.Provider>);

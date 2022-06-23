@@ -2,7 +2,7 @@ import { TableHeader, TableRow, ToggleTableRow } from "../components/table_eleme
 import { ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner, Toggle } from "../components/input_elements";
 import { sendRequest } from "../http_helper";
 import React, { useContext, useEffect, useState } from "react";
-import { GenericControl, ModalView, useData, useModal } from "../components/generic_control";
+import { GenericControl, FailureModal, useData, useModal } from "../components/generic_control";
 import { ControllerContext, HiveUrl } from "../App";
 
 function FirstPositionRow(props) {
@@ -252,7 +252,7 @@ export function Aml(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage} />
+            <FailureModal show={show} setShow={setShow} message={modalMessage} />
             <GenericControl table_extra={table_extra} button_extra={button_extra} />
             <AdvancedControl />
         </ControllerContext.Provider>);

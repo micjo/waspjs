@@ -1,12 +1,12 @@
 import React, {useContext} from "react";
 import {HiveConfig, HiveUrl} from "../App";
 import {TableHeader, TableRow} from "../components/table_elements";
-import {useData} from "../components/generic_control";
+import {FailureModal, LogModal, useData, useModal} from "../components/generic_control";
 import {ConditionalBadge} from "../components/generic_control";
 import {GoLinkExternal} from "react-icons/all";
 import {Link} from "react-router-dom";
 import {SmallButtonSpinner} from "../components/input_elements";
-import {postData} from "../http_helper";
+import {getUniqueIdentifier, postData} from "../http_helper";
 
 
 export function StatusRow(props) {
@@ -27,37 +27,48 @@ export function StatusRow(props) {
 
     let start_stop = <></>
     if (props.value.type !== "mpa3") {
-        start_stop = <>
-        <SmallButtonSpinner text="Start" callback={async () => {
-            await postData(root_url + "/api/service" + start_query, "" );
-        }}/>
-        <SmallButtonSpinner text="Stop" callback={async () => {
-            await postData(root_url + "/api/service" + stop_query, "");
-        }}/>
-        </>
+        start_stop =
+            <div className="btn-group">
+                <SmallButtonSpinner text="Start" callback={async () => {
+                    await postData(root_url + "/api/service" + start_query, "");
+                }}/>
+                <SmallButtonSpinner text="Stop" callback={async () => {
+                    await postData(root_url + "/api/service" + stop_query, "");
+                }}/>
+                <SmallButtonSpinner text="Logs" callback={async () => {
+                    let response = await fetch(root_url + "/api/service_log?daemon=" + props.id);
+                    let response_text = await response.text();
+                    props.cb(response_text.slice(1,-1));
+                }}/>
+            </div>
     }
 
     return (
         <TableRow items={[title, runBadge, errorBadge, data["request_id"],
             <div className="clearfix">
                 <div className="float-start">
-                {start_stop}
+                    {start_stop}
                 </div>
             </div>,
-                <Link to={href}><GoLinkExternal/></Link>
-            ]}
+            <Link to={href}><GoLinkExternal/></Link>
+        ]}
         />);
 }
 
 export function Dashboard() {
     const context = useContext(HiveConfig);
 
+    let [modalMessage, show, setShow, cb] = useModal();
+
     let full_page = []
+
+    full_page.push(<LogModal show={show} setShow={setShow} message={modalMessage}/>);
 
     for (const [setup_key, setup_value] of Object.entries(context)) {
         let table = []
         for (const [hardware_key, hardware_value] of Object.entries(setup_value.hardware)) {
-            table.push(<StatusRow key={hardware_key} id={hardware_key} value={hardware_value} setup={setup_key}/>)}
+            table.push(<StatusRow key={hardware_key} id={hardware_key} value={hardware_value} setup={setup_key} cb={cb}/>)
+        }
         const capitalized_key = setup_key[0].toUpperCase() + setup_key.slice(1);
 
         let link = <></>

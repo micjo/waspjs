@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {ModalView, useModal} from "./generic_control";
+import {FailureModal, useModal} from "./generic_control";
 import {getJson} from "../http_helper";
 import {DropDown, SimpleToggle} from "./input_elements";
 import {Brush, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
@@ -50,7 +50,7 @@ export function HistogramCaen(props) {
 
     return (
         <div>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <h3>Histogram</h3>
             <div className="input-group input-sm mb-3">
                 <label className="input-group-text">Board:</label>

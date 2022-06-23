@@ -2,7 +2,7 @@ import {useGenericPage} from "./generic_page";
 import {TableRow} from "../components/table_elements";
 import React, {useContext, useEffect, useState} from "react";
 import {ControllerContext, HiveUrl} from "../App";
-import {GenericControl, ModalView} from "../components/generic_control";
+import {GenericControl, FailureModal} from "../components/generic_control";
 
 function useStatus(data) {
     const [acquiring, setAcquiring] = useState(false);
@@ -55,7 +55,7 @@ export function Mpa3(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericControl table_extra={table_extra} button_extra={button_extra}/>
         </ControllerContext.Provider>);
 }

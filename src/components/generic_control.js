@@ -13,23 +13,22 @@ function NewlineText(props) {
     let i = 0;
     for(let line of text.split("\\n")) {
         console.log(line);
-        lines.push(<p key={i}>{line}</p>)
+        lines.push(<div key={i}>{line}</div>)
         i++;
     }
     return lines;
 }
 
-export function ModalView(props) {
+export function FailureModal(props) {
 
     const handleClose = () => props.setShow(false);
 
     const regex = /(")/g;
     let msg = props.message.replaceAll(regex, '');
 
-
     return (
         <>
-            <Modal show={props.show} onHide={handleClose}>
+            <Modal show={props.show} onHide={handleClose} scrollable={true}>
                 <div className="modal-header alert alert-danger">
                     <h5 className="modal-title">Failure</h5>
                 </div>
@@ -43,7 +42,31 @@ export function ModalView(props) {
                 </Modal.Footer>
             </Modal>
         </>);
+}
 
+export function LogModal(props) {
+
+    const handleClose = () => props.setShow(false);
+
+    const regex = /(\\\")/g;
+    let msg = props.message.replaceAll(regex, '"');
+
+    return (
+        <>
+            <Modal show={props.show} onHide={handleClose} scrollable={true} size="xl">
+                <div className="modal-header alert alert-danger">
+                    <h5 className="modal-title">Logs</h5>
+                </div>
+                <div className="modal-body" id="modalFailBody">
+                    <NewlineText text = {msg} />
+                </div>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Dismiss
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>);
 }
 
 

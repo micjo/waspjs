@@ -5,7 +5,7 @@ import {
     ProgressSpinner,
     ConditionalBadge,
     GenericCard,
-    ModalView,
+    FailureModal,
     useModal,
     useReadOnlyData
 } from "../components/generic_control";
@@ -27,7 +27,7 @@ function AmlCard(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
         </ControllerContext.Provider>);
 }
@@ -40,7 +40,7 @@ function MotronaCard(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
         </ControllerContext.Provider>);
 }
@@ -54,7 +54,7 @@ function CaenCard(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}
                          extra={histogram}/>
         </ControllerContext.Provider>);
@@ -258,7 +258,7 @@ function ScheduleRbs(props) {
 
     return (
         <div className="clearfix">
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
                 <span className="input-group-text" id="inputGroup-sizing-sm">Add</span>
                 <span className="input-group-text flex-grow-1">{filename}</span>
@@ -317,7 +317,6 @@ function RbsControl(props) {
                     <ButtonSpinner text="Get Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
-
                         const link = document.createElement("a");
                         link.href = URL.createObjectURL(blob);
                         link.download = getUniqueIdentifier() + "_logs.txt";

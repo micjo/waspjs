@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
-import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
+import {GenericControl, FailureModal, useData, useModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
 import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
 
@@ -226,7 +226,7 @@ export function Motrona(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericControl table_extra={table_extra} button_extra={button_extra}/>
             <AdvancedControl/>
         </ControllerContext.Provider>);

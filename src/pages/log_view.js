@@ -1,6 +1,6 @@
 import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useState} from "react";
-import {ModalView, useModal, useReadOnlyData} from "../components/generic_control";
+import {FailureModal, useModal, useReadOnlyData} from "../components/generic_control";
 import {HiveUrl, LogbookUrl} from "../App";
 import {ButtonSpinner, ClickableSpanWithSpinner, SmallButtonSpinner} from "../components/input_elements";
 import {postData} from "../http_helper";
@@ -26,7 +26,7 @@ function LogNote() {
 
     return (
         <>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <label className="input-group-text" htmlFor="inputGroupFile01">Mode:</label>
             <input type="text" aria-label="mode" className="form-control" value={mode}
                    onInput={e => setMode(e.target.value)}/>

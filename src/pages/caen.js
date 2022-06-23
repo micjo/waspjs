@@ -1,4 +1,4 @@
-import {GenericControl, ModalView, useData, useModal} from "../components/generic_control";
+import {GenericControl, FailureModal, useData, useModal} from "../components/generic_control";
 import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRowLog} from "../components/table_elements";
@@ -35,7 +35,7 @@ export function Caen(props) {
     let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, title)
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericControl table_extra={table_extra} button_extra={button_extra}/>
             <DebugControl/>
             <HistogramCaen url={url}/>

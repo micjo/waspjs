@@ -4,7 +4,7 @@ import {
     ProgressSpinner,
     ConditionalBadge,
     GenericCard,
-    ModalView,
+    FailureModal,
     useModal,
     useReadOnlyData
 } from "../components/generic_control";
@@ -26,7 +26,7 @@ function Mpa3Card(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
         </ControllerContext.Provider>);
 }
@@ -38,7 +38,7 @@ function MDriveCard(props) {
 
     return (
         <ControllerContext.Provider value={config}>
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <GenericCard table_extra={table_extra} button_extra={button_extra} collapse={props.collapse}/>
         </ControllerContext.Provider>);
 }
@@ -231,7 +231,7 @@ function ScheduleErd(props) {
 
     return (
         <div className="clearfix">
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
                 <span className="input-group-text" id="inputGroup-sizing-sm">Add</span>
                 <span className="input-group-text flex-grow-1">{filename}</span>

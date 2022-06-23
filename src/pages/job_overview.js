@@ -3,7 +3,7 @@ import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../compon
 import {
     ConditionalBadge,
     LoadButton,
-    ModalView,
+    FailureModal,
     ProgressSpinner,
     useModal,
     useReadOnlyData
@@ -109,7 +109,7 @@ function ScheduleJob() {
 
     return (
         <div className="clearfix">
-            <ModalView show={show} setShow={setShow} message={modalMessage}/>
+            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
                 <span className="input-group-text" id="inputGroup-sizing-sm">Add</span>
                 <span className="input-group-text flex-grow-1">{filename}</span>
@@ -270,7 +270,7 @@ export function HardwareStatus() {
 			erd_config.data?.["mdrive_theta"]?.["moving_to_target"]
 
     return (<>
-        <ModalView show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage} />
+        <FailureModal show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage} />
         <h1>Hardware Status</h1>
         <div className="clearfix mb-2">
             <h4>
