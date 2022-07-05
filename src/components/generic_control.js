@@ -266,6 +266,21 @@ export function useReadOnlyData(url, initialState) {
     return data
 }
 
+export function useReadOnlyDataOnce(url, initialState) {
+    const [data, setData] = useState(initialState);
+
+    useEffect(() => {
+            const getControllerData = async () => {
+                let [, json_response] = await getJson(url);
+                setData(json_response);
+            }
+            getControllerData();
+        }, [url]
+    );
+
+    return data
+}
+
 export function useData(url, initialData={} ) {
     const [data, setData] = useState(initialData);
     const [running, setRunning] = useState();

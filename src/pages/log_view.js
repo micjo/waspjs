@@ -1,15 +1,15 @@
 import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useState} from "react";
-import {FailureModal, useModal, useReadOnlyData} from "../components/generic_control";
+import {FailureModal, useModal, useReadOnlyData, useReadOnlyDataOnce} from "../components/generic_control";
 import {HiveUrl, LogbookUrl} from "../App";
 import {ButtonSpinner, ClickableSpanWithSpinner, SmallButtonSpinner} from "../components/input_elements";
-import {postData} from "../http_helper";
+import {getJson, postData} from "../http_helper";
 import {BsXSquare} from "react-icons/bs";
 
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
-    if (seconds_since_epoch === "") {
+    if (seconds_since_epoch === "" || seconds_since_epoch === null) {
         return ""
     }
 
@@ -53,19 +53,29 @@ function LogNote() {
         </>);
 }
 
-
 export function LogView() {
 
     const logbook_url = useContext(LogbookUrl);
-    let state = useReadOnlyData(logbook_url + "/get_log_book", {});
+    let end_time = new Date(document.lastModified).toISOString();
+    let oneMonthAgo = new Date(document.lastModified);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1 )
+    let start_time = oneMonthAgo.toISOString()
+
+    const [start, setStart] = useState(start_time);
+    const [end, setEnd] = useState(end_time);
+    const [filter, setFilter] = useState("job");
+
+    let start_state = useReadOnlyDataOnce(logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end, {});
+    const [state, setState] = useState(start_state);
+
     let table = []
 
 
     if (Array.isArray(state)) {
-        state = state.slice(-50);
         for (let item of state) {
-            let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_id, item.recipe_name, item.sample_id,
-                epochToString(item.start_time), epochToString(item.end_time)];
+            console.log(item)
+            let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
+                epochToString(item.start_epoch), epochToString(item.end_epoch)];
 
             if (item.mode === "rbs" || item.mode === "erd") {
                 items.push(null);
@@ -85,11 +95,28 @@ export function LogView() {
         <>
             <div className="input-group mb-3">
                 <LogNote/>
-
             </div>
-            <table className="table table-striped table-hover table-sm">
+
+            <div className="input-group mb-3">
+                <label className="input-group-text" htmlFor="inputGroupFile01">Mode Filter:</label>
+                <input type="text" aria-label="mode" className="form-control" value={filter}
+                       onInput={e => setFilter(e.target.value)}/>
+                <label className="input-group-text" htmlFor="inputGroupFile01">Start:</label>
+                <input type="text" aria-label="mode" className="form-control" value={start}
+                       onInput={e => setStart(e.target.value)}/>
+                <label className="input-group-text" htmlFor="inputGroupFile01">End: </label>
+                <input type="text" aria-label="note" className="form-control" value={end}
+                       onInput={e => setEnd(e.target.value)}/>
+                <ButtonSpinner text="Refresh" callback={async () => {
+                    let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
+                    let [, json_response] = await getJson(url);
+                    setState(json_response);
+                }}/>
+            </div>
+                <table className="table table-striped table-hover table-sm">
+
                 <TableHeader
-                    items={["Timestamp", "Mode", "Notes", "meta", "job id", "recipe name", "sample_id", "start", "end", "delete"]}/>
+                    items={["Timestamp", "Mode", "Notes", "meta", "job id", "recipe name", "sample_id", "move", "start", "end", "delete"]}/>
                 <tbody>
                 {table}
                 </tbody>
@@ -97,3 +124,4 @@ export function LogView() {
         </>);
 
 }
+

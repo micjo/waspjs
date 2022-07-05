@@ -34,7 +34,7 @@ function ScheduleTable(props) {
     if (Array.isArray(props.schedule) && props.schedule.length) {
         let index = 0;
         for (let item of props.schedule) {
-            table.push(<TableRow key={item.job.job_id + index} items={[item.job.job_id]}/>)
+            table.push(<TableRow key={item.job.name + index} items={[item.job.name]}/>)
             index++;
         }
     }
@@ -137,7 +137,7 @@ function ProgressTable(props) {
     let all_recipes = props.data?.active_job?.job?.recipes;
     let finished_recipes = props.data?.active_job?.finished_recipes;
     let active_recipe = props.data?.active_job?.active_recipe;
-    let active_job_id = props.data?.active_job?.job?.job_id;
+    let active_job_id = props.data?.active_job?.job?.name;
 
     const root_url = useContext(HiveUrl);
 
@@ -148,7 +148,7 @@ function ProgressTable(props) {
             let time = new Date(recipe.run_time * 1000).toISOString().substr(11, 8);
             let full_recipe = all_recipes[index];
             table[index] = <SuccessTableRow key={uuidv4()}
-                                            items={[recipe.recipe_id, full_recipe.type, full_recipe.sample_id, time, "100%"]}/>
+                                            items={[recipe.name, full_recipe.type, full_recipe.sample, time, "100%"]}/>
             index++;
         }
 
@@ -156,14 +156,14 @@ function ProgressTable(props) {
             let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
             table[index] =
                 <WarningTableRow key={uuidv4()}
-                                 items={[active_recipe.recipe_id, all_recipes[index].type, all_recipes[index].sample_id, time,
+                                 items={[active_recipe.name, all_recipes[index].type, all_recipes[index].sample, time,
                                      <ProgressSpinner text={active_recipe.progress}/>]}/>
             index++;
         }
 
         while (index < all_recipes.length) {
             let item = all_recipes[index];
-            table.push(<TableRow key={uuidv4()} items={[item.file_stem, item.type, item.sample_id, "0", "0%"]}/>)
+            table.push(<TableRow key={uuidv4()} items={[item.name, item.type, item.sample, "0", "0%"]}/>)
             index++;
         }
     }
@@ -179,54 +179,6 @@ function ProgressTable(props) {
             </table>
             <hr/>
         </div>
-    )
-}
-
-function DoneTable(props) {
-    let table = []
-    let index = 0;
-
-
-    if (Array.isArray(props.done) && props.done.length) {
-        for (let item of props.done) {
-            table.push(<TableRow key={item.job.job_id + index} items={[item.job.job_id]}/>)
-            index++;
-        }
-    }
-    return (
-        <>
-            <h5>Done: </h5>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Name"]}/>
-                <tbody>
-                {table}
-                </tbody>
-            </table>
-            <hr/>
-        </>
-    )
-}
-
-function FailedTable(props) {
-    let table = []
-    if (Array.isArray(props.failed) && props.failed.length) {
-        let index = 0;
-        for (let item of props.failed) {
-            table.push(<TableRow key={item.job.job_id + index} items={[item.job.job_id, item.error_state]}/>)
-            index++;
-        }
-    }
-    return (
-        <>
-            <h5>Failed: </h5>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Name", "Failure"]}/>
-                <tbody>
-                {table}
-                </tbody>
-            </table>
-            <hr/>
-        </>
     )
 }
 
@@ -304,7 +256,7 @@ export function JobOverview() {
     let state = useReadOnlyData(root_url + "/api/job/state", {})
 
     let run_status = state?.["run_status"]
-    let job_id = state?.["active_job"]?.["job"]?.["job_id"];
+    let job_id = state?.["active_job"]?.["job"]?.["name"];
 
     return (
         <div>
@@ -318,8 +270,6 @@ export function JobOverview() {
             <ScheduleJob/>
             <ScheduleTable schedule={state["schedule"]}/>
             <ProgressTable data={state}/>
-            <DoneTable done={state["done"]}/>
-            <FailedTable failed={state["failed"]}/>
             <HardwareStatus/>
 
 
