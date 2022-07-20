@@ -49,7 +49,6 @@ export function Mpa3(props) {
 
     const url = root_url + props.hardware_value.proxy;
     const title = props.hardware_value.title;
-    console.log(url);
 
     let [config, show, setShow, modalMessage, table_extra, button_extra] = useMpa3(url, title)
 

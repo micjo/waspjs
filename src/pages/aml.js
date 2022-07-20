@@ -1,4 +1,4 @@
-import { TableHeader, TableRow, ToggleTableRow } from "../components/table_elements";
+import { TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog } from "../components/table_elements";
 import { ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner, Toggle } from "../components/input_elements";
 import { sendRequest } from "../http_helper";
 import React, { useContext, useEffect, useState } from "react";
@@ -152,16 +152,15 @@ function FirstControl() {
 
 function DebugControl() {
     const context = useContext(ControllerContext);
-    let loggers = context.data["loggers"];
-    let debugging_event_loop = loggers["log_event_loop"] === "debug";
-    let debugging_aml = loggers["log_aml"] === "debug";
-    let debugging_vlinx = loggers["log_vlinx"] === "debug";
+    let debugging_event_loop = context.data?.loggers?.event_loop === "debug";
+    let debugging_aml = context.data?.loggers?.aml === "debug";
+    let debugging_rs232 = context.data?.loggers?.rs232 === "debug";
 
     return (
         <>
-            <ToggleTableRow text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} setState={"debug_log_event_loop"} />
-            <ToggleTableRow text={"Debugging Aml:"} state={debugging_aml} send={context.send} setState={"debug_log_aml"} />
-            <ToggleTableRow text={"Debugging Vlinx(rs232):"} state={debugging_vlinx} send={context.send} setState={"debug_log_vlinx"} />
+            <ToggleTableRowLog text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} name={"event_loop"}/>
+            <ToggleTableRowLog text={"Debugging Aml:"} state={debugging_aml} send={context.send} name={"aml"}/>
+            <ToggleTableRowLog text={"Debugging Rs232:"} state={debugging_rs232} send={context.send} name={"rs232"}/>
         </>
     );
 }

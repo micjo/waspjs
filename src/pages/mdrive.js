@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {TableHeader, TableRow, ToggleTableRow} from "../components/table_elements";
+import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, FailureModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
 import {FloatInputButton, DropDownButton, SmallButtonSpinner} from "../components/input_elements";
@@ -54,19 +54,15 @@ function MotorControl() {
 
 function DebugControl() {
     const context = useContext(ControllerContext);
-    let loggers = context.data["loggers"];
-    let debugging_event_loop = loggers["log_event_loop"] === "debug";
-    let debugging_mdrive = loggers["log_mdrive"] === "debug";
-    let debugging_vlinx = loggers["log_vlinx"] === "debug";
+    let debugging_event_loop = context.data?.loggers?.event_loop === "debug";
+    let debugging_mdrive = context.data?.loggers?.mdrive === "debug";
+    let debugging_rs232 = context.data?.loggers?.rs232 === "debug";
 
     return (
         <>
-            <ToggleTableRow text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send}
-                            setState={"debug_log_event_loop"}/>
-            <ToggleTableRow text={"Debugging Mdrive:"} state={debugging_mdrive} send={context.send}
-                            setState={"debug_log_mdrive"}/>
-            <ToggleTableRow text={"Debugging Vlinx(rs232):"} state={debugging_vlinx} send={context.send}
-                            setState={"debug_log_vlinx"}/>
+	    <ToggleTableRowLog text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send} name={"event_loop"}/>
+	    <ToggleTableRowLog text={"Debugging Mdrive:"} state={debugging_mdrive} send={context.send} name={"mdrive"}/>
+	    <ToggleTableRowLog text={"Debugging Rs232:"} state={debugging_rs232} send={context.send} name={"rs232"}/>
         </>
     );
 }

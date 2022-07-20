@@ -13,7 +13,7 @@ function epochToString(seconds_since_epoch) {
         return ""
     }
 
-    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
+    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString("nl-BE").replaceAll(',', '');
     return isoDate;
 }
 
@@ -124,4 +124,3 @@ export function LogView() {
         </>);
 
 }
-
