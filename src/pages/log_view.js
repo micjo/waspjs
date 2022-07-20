@@ -1,5 +1,5 @@
 import {TableHeader, TableRow} from "../components/table_elements";
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
 import {LogbookUrl} from "../App";
 import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
@@ -72,7 +72,7 @@ export function LogView() {
 
     const [start, setStart] = useState(start_time);
     const [end, setEnd] = useState(end_time);
-    const [filter, setFilter] = useState("job");
+    const [filter, setFilter] = useState("");
 
     let start_state = useReadOnlyDataOnce(logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end, {});
     const [state, setState] = useState(start_state);
@@ -81,7 +81,6 @@ export function LogView() {
 
     if (Array.isArray(state)) {
         for (let item of state) {
-            console.log(item)
             let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
                 epochToString(item.start_epoch), epochToString(item.end_epoch)];
 
@@ -98,6 +97,12 @@ export function LogView() {
             table.push(<TableRow key={item.log_id} items={items}/>)
         }
     }
+
+    useEffect( async () => {
+	let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;
+	let [, json_response] = await getJson(url);
+        setState(json_response);
+    }, []);
 
     return (
         <>
