@@ -34,7 +34,7 @@ function useHiveUrl() {
     if (process.env.NODE_ENV === "development") {
         hive_url = "http://localhost:8000"
     } else {
-        hive_url = "/hive"
+        hive_url = "https://hive.capitan.imec.be"
     }
     return hive_url
 }
@@ -44,7 +44,7 @@ function useLogbookUrl() {
     if (process.env.NODE_ENV === "development") {
         logbook_url = "http://localhost:8001"
     } else {
-        logbook_url = "/logbook"
+        logbook_url = "https://logbook.capitan.imec.be"
     }
     return logbook_url
 }
@@ -137,7 +137,7 @@ function SomeHardware(props) {
     }
     return (<>
         <h3>This hardware type has no associated UI</h3>
-        Go back to the <Link to={"/nectar"}>Dashboard</Link>
+        Go back to the <Link to={"/"}>Dashboard</Link>
     </>)
 }
 
@@ -150,14 +150,14 @@ function Navigation() {
         return <h1></h1>
     }
 
-    let routes = [<Route path="/nectar/" key="dashboard" element={<Dashboard/>}/>];
-    let navBarElements = [<NavLi url="/nectar/" key="dashboard">Dashboard </NavLi>];
+    let routes = [<Route path="/" key="dashboard" element={<Dashboard/>}/>];
+    let navBarElements = [<NavLi url="/" key="dashboard">Dashboard </NavLi>];
 
-    routes.push(<Route path="/nectar/job_overview" key="job_overview" element={<JobOverview/>}/>);
-    navBarElements.push(<NavLi url="/nectar/job_overview" key="job_overview">Jobs </NavLi>);
+    routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
+    navBarElements.push(<NavLi url="/job_overview" key="job_overview">Jobs </NavLi>);
 
-    routes.push(<Route path="/nectar/log_view" key="log_view" element={<LogView/>}/>);
-    navBarElements.push(<NavLi url="/nectar/log_view" key="log_view">Logbook</NavLi>);
+    routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
+    navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);
 
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
@@ -174,8 +174,8 @@ function Navigation() {
 
         for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {
             const full_key = key + "/" + hardware_key
-            dropDownElements.push(<NavLi url={"/nectar/" + full_key} key={full_key}> {hardware_value.title} </NavLi>)
-            const path = "/nectar/" + full_key
+            dropDownElements.push(<NavLi url={"/" + full_key} key={full_key}> {hardware_value.title} </NavLi>)
+            const path = "/" + full_key
             routes.push(<Route key={full_key} path={path} element={<SomeHardware hardware_value={hardware_value}/>}/>)
         }
         navBarElements.push(<Dropdown dropKey={key} elements={dropDownElements} key={key}/>)
