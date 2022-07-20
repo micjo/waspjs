@@ -1,8 +1,8 @@
 import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useState} from "react";
-import {FailureModal, useModal, useReadOnlyData, useReadOnlyDataOnce} from "../components/generic_control";
-import {HiveUrl, LogbookUrl} from "../App";
-import {ButtonSpinner, ClickableSpanWithSpinner, SmallButtonSpinner} from "../components/input_elements";
+import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
+import {LogbookUrl} from "../App";
+import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
 import {getJson, postData} from "../http_helper";
 import {BsXSquare} from "react-icons/bs";
 
@@ -13,7 +13,7 @@ function epochToString(seconds_since_epoch) {
         return ""
     }
 
-    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString("nl-BE").replaceAll(',', '');
+    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
     return isoDate;
 }
 
@@ -53,17 +53,29 @@ function LogNote() {
         </>);
 }
 
-export function LogView() {
 
+function getLocaleIsoTime() {
+    let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    return (new Date(Date.now() - tzoffset)).toISOString().slice(0, -1);
+}
+
+function getLocaleOneMonthAgoIsoTime() {
+    let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    let now = new Date(Date.now() - tzoffset);
+    now.setMonth(now.getMonth() - 1)
+    return now.toISOString().slice(0,-1);
+}
+
+export function LogView() {
     const logbook_url = useContext(LogbookUrl);
-    let end_time = new Date(document.lastModified).toISOString();
-    let oneMonthAgo = new Date(document.lastModified);
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1 )
-    let start_time = oneMonthAgo.toISOString()
+    let end_time = getLocaleIsoTime()
+    let start_time = getLocaleOneMonthAgoIsoTime()
 
     const [start, setStart] = useState(start_time);
     const [end, setEnd] = useState(end_time);
     const [filter, setFilter] = useState("job");
+
+    console.log(start_time);
 
     let start_state = useReadOnlyDataOnce(logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end, {});
     const [state, setState] = useState(start_state);
@@ -109,6 +121,7 @@ export function LogView() {
                        onInput={e => setEnd(e.target.value)}/>
                 <ButtonSpinner text="Refresh" callback={async () => {
                     let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
+                    console.log(start);
                     let [, json_response] = await getJson(url);
                     setState(json_response);
                 }}/>
