@@ -43,7 +43,6 @@ function LogNote() {
                 }
                 else {
                     let response = await postData(logbook_url + "/log_message?message=" + note + "&mode=" + mode + "&timestamp=" + time, "");
-                    console.log(response);
                     if (response.status !== 200) {
                         cb("Invalid time format. Example: <2022-01-01 12:00:00>");
                     }
@@ -75,13 +74,10 @@ export function LogView() {
     const [end, setEnd] = useState(end_time);
     const [filter, setFilter] = useState("job");
 
-    console.log(start_time);
-
     let start_state = useReadOnlyDataOnce(logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end, {});
     const [state, setState] = useState(start_state);
 
     let table = []
-
 
     if (Array.isArray(state)) {
         for (let item of state) {
@@ -121,7 +117,6 @@ export function LogView() {
                        onInput={e => setEnd(e.target.value)}/>
                 <ButtonSpinner text="Refresh" callback={async () => {
                     let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
-                    console.log(start);
                     let [, json_response] = await getJson(url);
                     setState(json_response);
                 }}/>
