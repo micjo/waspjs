@@ -74,29 +74,35 @@ export function LogView() {
     const [end, setEnd] = useState(end_time);
     const [filter, setFilter] = useState("");
 
-    let start_state = useReadOnlyDataOnce(logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end, {});
-    const [state, setState] = useState(start_state);
+    const [state, setState] = useState({});
 
     let table = []
 
-    if (Array.isArray(state)) {
-        for (let item of state) {
-            let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
-                epochToString(item.start_epoch), epochToString(item.end_epoch)];
+    useEffect(async () => {
+            if (Array.isArray(json_response)) {
+                for (let item of json_response) {
+                    console.log(item)
+                    let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
+                        epochToString(item.start_epoch), epochToString(item.end_epoch)];
 
-            if (item.mode === "rbs" || item.mode === "erd") {
-                items.push(null);
-            } else {
-                items.push(<ClickableSpanWithSpinner callback={async () => {
-                    await postData(logbook_url + "/remove_message?log_id=" + item.log_id, "");
-                }}>
-                    <BsXSquare/>
-                </ClickableSpanWithSpinner>);
+                    if (item.mode === "rbs" || item.mode === "erd") {
+                        items.push(null);
+                    } else {
+                        items.push(<ClickableSpanWithSpinner callback={async () => {
+                            await postData(logbook_url + "/remove_message?log_id=" + item.log_id, "");
+                        }}>
+                            <BsXSquare/>
+                        </ClickableSpanWithSpinner>);
+                    }
+
+                    table.push(<TableRow key={item.log_id} items={items}/>)
+                }
             }
+        }, [state]
+    );
 
-            table.push(<TableRow key={item.log_id} items={items}/>)
-        }
-    }
+    let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;
+    let [, json_response] = await getJson(url);
 
     useEffect( async () => {
 	let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;

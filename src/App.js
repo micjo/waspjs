@@ -21,6 +21,7 @@ import {Mdrive} from "./pages/mdrive";
 import {ErdOverview} from "./pages/erd_overview";
 import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
+import proxy from 'http-proxy-middleware'
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -29,12 +30,20 @@ export const HiveUrl = React.createContext({})
 export const LogbookUrl = React.createContext({})
 export const ControllerContext = React.createContext({});
 
+
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const app = express();
+
+app.use('/hive', createProxyMiddleware({ target: 'https://localhost:8000', changeOrigin: true }));
+app.listen(3000);
+
 function useHiveUrl() {
     let hive_url;
     if (process.env.NODE_ENV === "development") {
         hive_url = "http://localhost:8000"
     } else {
-        hive_url = "https://hive.capitan.imec.be"
+        hive_url = "/hive"
     }
     return hive_url
 }
@@ -44,7 +53,7 @@ function useLogbookUrl() {
     if (process.env.NODE_ENV === "development") {
         logbook_url = "http://localhost:8001"
     } else {
-        logbook_url = "https://logbook.capitan.imec.be"
+        logbook_url = "/logbook"
     }
     return logbook_url
 }
