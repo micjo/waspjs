@@ -78,6 +78,8 @@ export function LogView() {
 
     let table = []
 
+    let json_response = {}
+
     useEffect(async () => {
             if (Array.isArray(json_response)) {
                 for (let item of json_response) {
@@ -100,9 +102,6 @@ export function LogView() {
             }
         }, [state]
     );
-
-    let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;
-    let [, json_response] = await getJson(url);
 
     useEffect( async () => {
 	let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;

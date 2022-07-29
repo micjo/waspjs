@@ -21,7 +21,7 @@ import {Mdrive} from "./pages/mdrive";
 import {ErdOverview} from "./pages/erd_overview";
 import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
-import proxy from 'http-proxy-middleware'
+import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -30,13 +30,6 @@ export const HiveUrl = React.createContext({})
 export const LogbookUrl = React.createContext({})
 export const ControllerContext = React.createContext({});
 
-
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const app = express();
-
-app.use('/hive', createProxyMiddleware({ target: 'https://localhost:8000', changeOrigin: true }));
-app.listen(3000);
 
 function useHiveUrl() {
     let hive_url;
@@ -171,10 +164,12 @@ function Navigation() {
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
 
-        // if (key === "rbs") {
-        //     dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
-        //     routes.push(<Route path="/nectar/rbs/overview" element={<RbsOverview/>} key={key}/>)
-        // }
+        if (key === "rbs") {
+            const full_key = key + "/" + "detectors"
+            const path = "/" + full_key
+            dropDownElements.push(<NavLi url={path} key={key + "/detectors"}>Detectors</NavLi>)
+            routes.push(<Route key={full_key} path={path} element={<RbsDetectorOverview/>}/>);
+        }
         //
         // if (key === "erd") {
         //     dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
@@ -183,8 +178,8 @@ function Navigation() {
 
         for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {
             const full_key = key + "/" + hardware_key
-            dropDownElements.push(<NavLi url={"/" + full_key} key={full_key}> {hardware_value.title} </NavLi>)
             const path = "/" + full_key
+            dropDownElements.push(<NavLi url={path} key={full_key}> {hardware_value.title} </NavLi>)
             routes.push(<Route key={full_key} path={path} element={<SomeHardware hardware_value={hardware_value}/>}/>)
         }
         navBarElements.push(<Dropdown dropKey={key} elements={dropDownElements} key={key}/>)
