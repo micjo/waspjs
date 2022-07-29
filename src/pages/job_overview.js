@@ -261,7 +261,7 @@ export function JobOverview() {
     return (
         <div>
             <div className="clearfix">
-                <h3 className="float-start">Jobs</h3>
+                <h1 className="float-start">Jobs</h1>
                 <h5 className="clearfix float-end">
                     <ConditionalBadge error={false} text={run_status + ": " + job_id}/>
                 </h5>
