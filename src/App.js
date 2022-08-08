@@ -22,6 +22,7 @@ import {ErdOverview} from "./pages/erd_overview";
 import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
+import {Accelerator} from "./pages/accelerator";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -157,6 +158,9 @@ function Navigation() {
 
     routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
     navBarElements.push(<NavLi url="/job_overview" key="job_overview">Jobs </NavLi>);
+
+    routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
+    navBarElements.push(<NavLi url="/accelerator" key="accelerator">Accelerator</NavLi>);
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);
