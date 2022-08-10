@@ -4,7 +4,7 @@ import {getJson, postData, sendRequest} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
-import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/all";
+import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/bs";
 
 
 function NewlineText(props) {

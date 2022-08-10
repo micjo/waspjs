@@ -3,7 +3,7 @@ import {HiveConfig, HiveUrl} from "../App";
 import {TableHeader, TableRow} from "../components/table_elements";
 import {FailureModal, LogModal, useData, useModal} from "../components/generic_control";
 import {ConditionalBadge} from "../components/generic_control";
-import {GoLinkExternal} from "react-icons/all";
+import {GoLinkExternal} from "react-icons/go";
 import {Link} from "react-router-dom";
 import {SmallButtonSpinner} from "../components/input_elements";
 import {getUniqueIdentifier, postData} from "../http_helper";
@@ -62,7 +62,7 @@ export function Dashboard() {
 
     let full_page = []
 
-    full_page.push(<LogModal show={show} setShow={setShow} message={modalMessage}/>);
+    full_page.push(<LogModal show={show} key="modal" setShow={setShow} message={modalMessage}/>);
 
     for (const [setup_key, setup_value] of Object.entries(context)) {
         let table = []

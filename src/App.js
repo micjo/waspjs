@@ -23,6 +23,7 @@ import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
 import {Accelerator} from "./pages/accelerator";
+import {Trends} from "./pages/trends";
 
 document.body.style.backgroundColor = "floralwhite";
 
@@ -162,6 +163,9 @@ function Navigation() {
     routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
     navBarElements.push(<NavLi url="/accelerator" key="accelerator">Accelerator</NavLi>);
 
+    routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
+    navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
+
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);
 
@@ -200,7 +204,6 @@ function Navigation() {
                 <div className="fluid-container mt-3 ms-3 me-3 mb-3">
                     <Routes>
                         {routes}
-                        <Route path="test" element={<Dashboard/>}/>
                     </Routes>
                 </div>
             </BrowserRouter>

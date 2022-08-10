@@ -81,6 +81,10 @@ export async function postData(host, textBody) {
     });
 }
 
+export async function deleteData(host) {
+    return fetch(host, {method: 'DELETE'});
+}
+
 export async function getJson(url)
 {
     let response = await fetch(url);

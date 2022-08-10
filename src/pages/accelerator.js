@@ -1,8 +1,10 @@
-import React, {useContext, useEffect, useState, Suspense} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {LogbookUrl} from "../App";
-import {getJson, postData} from "../http_helper";
+import {deleteData, getJson, postData} from "../http_helper";
 import MaterialTable from "@material-table/core";
 import {ExportCsv, ExportPdf} from '@material-table/exporters';
+import {Button, Dialog, IconButton, Snackbar} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -14,27 +16,41 @@ function epochToString(seconds_since_epoch) {
     return isoDate;
 }
 
-export function Accelerator() {
+
+function useUpdateHeader() {
+    const [header, setHeader] = useState([]);
     const logbookUrl = useContext(LogbookUrl)
-
-    const [data, setData] = useState([]);
-    const [columns, setColumns] = useState([]);
-
-    useEffect(() => {
-            async function fetch_params() {
-                let [, accelerator_keys] = await getJson(logbookUrl + "/check_accelerator_parameters")
-                let header = []
-                for (let key of accelerator_keys) {
-                    header.push({field: key, title: key})
+    const update = useCallback(() => {
+        async function fetch_params() {
+            console.log("updating header")
+            let [, accelerator_keys] = await getJson(logbookUrl + "/check_accelerator_parameters")
+            let keys = []
+            for (let key of accelerator_keys) {
+                if (key === "id") {
+                    keys.push({field:key, title:key, editable:"never", width:"10px"})
                 }
-                setColumns(header)
+                else if (key === "epoch") {
+                    keys.push({field:key, title:key, editable:"never", width:"200px"})
+                }
+                else {
+                    keys.push({field: key, title: key, width:"200px"})
+                }
             }
+            setHeader(keys)
+        }
 
-            fetch_params().then()
-        }, [logbookUrl]
-    )
+        fetch_params().then()
+    }, [])
 
-    useEffect(() => {
+    useEffect(update,[])
+
+    return [header, update]
+}
+
+function useUpdateData() {
+    const [data, setData] = useState([]);
+    const logbookUrl = useContext(LogbookUrl)
+    const update = useCallback(() => {
             async function fetch_content() {
                 let [, acceleratorParams] = await getJson(logbookUrl + "/get_accelerator_parameters")
                 let params = []
@@ -46,69 +62,87 @@ export function Accelerator() {
             }
 
             fetch_content().then()
-        }, [logbookUrl]
+        }, []
     )
+
+    useEffect(update,[])
+
+    return [data,update]
+}
+
+
+export function Accelerator() {
+    const [header, updateHeader] = useUpdateHeader()
+    const [data, updateData] = useUpdateData()
+    const logbookUrl = useContext(LogbookUrl)
+
+    const [dialogOpen,setDialogOpen] = useState(false)
+
+    const action = (
+        <React.Fragment>
+            <Button color="secondary" size="small" onClick={()=> setDialogOpen(false)}>
+                UNDO
+            </Button>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={()=> setDialogOpen(false)}
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </React.Fragment>
+    );
 
     return (
         <div>
             <h1> Accelerator Parameters (Does not work fully yet - Work in progress) </h1>
             <div>
             </div>
-            <MaterialTable options={{
-                // Allow user to hide/show
-                // columns from Columns Button
-                columnsButton: true,
-                exportMenu: [{
-                    label: 'Export PDF',
-                    exportFunc: (cols, datas) => ExportPdf(cols, datas, 'myPdfFileName')
-                }, {
-                    label: 'Export CSV',
-                    exportFunc: (cols, datas) => ExportCsv(cols, datas, 'myCsvFileName')
-                }]
-            }}
+            <MaterialTable
+                title="Accelerator Parameters" columns={header} data={data}
+                options={{
+                    tableLayout: "fixed",
+                    // Allow user to hide/show
+                    // columns from Columns Button
+                    columnsButton: true,
+                    exportMenu: [{
+                        label: 'Export PDF',
+                        exportFunc: (cols, datas) => ExportPdf(cols, datas, 'myPdfFileName')
+                    }, {
+                        label: 'Export CSV',
+                        exportFunc: (cols, datas) => ExportCsv(cols, datas, 'myCsvFileName')
+                    }]
+                }}
 
-                           editable={{
-                               onRowAdd: newData =>
-                                   new Promise((resolve, reject) => {
-                                       setTimeout(() => {
-                                           {
-                                               const data = this.state.data;
-                                               data.push(newData);
-                                               this.setState({ data }, () => resolve());
-                                           }
-                                           resolve()
-                                       }, 1000)
-                                   }),
-                               onRowUpdate: (newData, oldData) =>
-                                   new Promise((resolve, reject) => {
-                                       setTimeout(() => {
-                                           {
-                                               const data = this.state.data;
-                                               const index = data.indexOf(oldData);
-                                               data[index] = newData;
-                                               this.setState({ data }, () => resolve());
-                                           }
-                                           resolve()
-                                       }, 1000)
-                                   }),
-                               onRowDelete: oldData =>
-                                   new Promise((resolve, reject) => {
-                                       setTimeout(() => {
-                                           {
-                                               let data = this.state.data;
-                                               const index = data.indexOf(oldData);
-                                               data.splice(index, 1);
-                                               this.setState({ data }, () => resolve());
-                                           }
-                                           resolve()
-                                       }, 1000)
-                                   }),
-                           }}
-
-                           title="Accelerator Parameters" columns={columns} data={data}
+                editable={{
+                        onRowAdd: async (newData) => {
+                        console.log(newData)
+                        await postData(logbookUrl + "/log_accelerator_paramaters", JSON.stringify(newData))
+                        updateData()
+                    },
+                    onRowUpdate: async (newData, oldData) => {
+                        console.log(newData);
+                        console.log(oldData);
+                        setDialogOpen(true)
+                    },
+                    onRowDelete: async (oldData) => {
+                        await deleteData(logbookUrl + "/accelerator_parameters?id=" + oldData.id)
+                        updateData()
+                    }
+                }}
 
 
             />
+
+            <Snackbar
+                open={dialogOpen}
+                autoHideDuration={6000}
+                onClose={()=> setDialogOpen(false)}
+                message="This is not supported yet"
+                action ={action}
+            />
+
         </div>
     );
 }
