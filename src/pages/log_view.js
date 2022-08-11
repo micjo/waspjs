@@ -80,7 +80,8 @@ export function LogView() {
 
     let json_response = {}
 
-    useEffect(async () => {
+    useEffect(() => {
+        async function fill_table() {
             if (Array.isArray(json_response)) {
                 for (let item of json_response) {
                     console.log(item)
@@ -100,13 +101,18 @@ export function LogView() {
                     table.push(<TableRow key={item.log_id} items={items}/>)
                 }
             }
+        }
+        fill_table().then()
         }, [state]
     );
 
-    useEffect( async () => {
-	let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start+ "&end=" + end;
-	let [, json_response] = await getJson(url);
-        setState(json_response);
+    useEffect( () => {
+        async function fetch_content() {
+            let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start + "&end=" + end;
+            let [, json_response] = await getJson(url);
+            setState(json_response);
+        }
+        fetch_content().then()
     }, []);
 
     return (

@@ -163,8 +163,8 @@ function Navigation() {
     routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
     navBarElements.push(<NavLi url="/accelerator" key="accelerator">Accelerator</NavLi>);
 
-    routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
-    navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
+    // routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
+    // navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);
