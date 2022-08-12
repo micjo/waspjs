@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, FailureModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {FloatInputButton, DropDownButton, SmallButtonSpinner} from "../components/input_elements";
+import {FloatInputButton, DropDownButton, SmallLoadButton} from "../components/input_elements";
 import {useGenericPage} from "./generic_page";
 
 function useStatus(data) {
@@ -69,7 +69,7 @@ function DebugControl() {
 
 export function SimpleButton(props) {
     const context = useContext(ControllerContext);
-    return (<SmallButtonSpinner text={props.text} callback={async () => await context.send(props.request)}/>);
+    return (<SmallLoadButton text={props.text} callback={async () => await context.send(props.request)}/>);
 }
 
 function AdvancedControl() {

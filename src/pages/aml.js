@@ -1,5 +1,5 @@
 import { TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog } from "../components/table_elements";
-import { ButtonSpinner, FloatInputButton, IntInputButton, SmallButtonSpinner, Toggle } from "../components/input_elements";
+import { ProgressButton, FloatInputButton, IntInputButton, SmallLoadButton, Toggle } from "../components/input_elements";
 import { sendRequest } from "../http_helper";
 import React, { useContext, useEffect, useState } from "react";
 import { GenericControl, FailureModal, useData, useModal } from "../components/generic_control";
@@ -34,8 +34,8 @@ function SecondPositionRow(props) {
 function MoveButton(props) {
     const context = useContext(ControllerContext)
     return (
-        <ButtonSpinner text="Move Both"
-            callback={
+        <ProgressButton text="Move Both"
+                        callback={
                 async () => await context.send({
                     "set_m1_target_position": props.firstTarget,
                     "set_m2_target_position": props.secondTarget
@@ -43,20 +43,9 @@ function MoveButton(props) {
             } />);
 }
 
-function LoadButton(props) {
-    const context = useContext(ControllerContext)
-    return (
-        <ButtonSpinner text="Load"
-            callback={() => {
-                props.setFirstTarget(context.loads[0]);
-                props.setSecondTarget(context.loads[1]);
-            }} />
-    );
-}
-
 export function SimpleButton(props) {
     const context = useContext(ControllerContext);
-    return (<SmallButtonSpinner text={props.text} callback={async () => await context.send(props.request)} />);
+    return (<SmallLoadButton text={props.text} callback={async () => await context.send(props.request)} />);
 }
 
 
@@ -69,12 +58,12 @@ function SecondControl() {
     return (
         <>
             <TableRow items={["Temperature", context.data["motor_2_temperature"],
-                <SmallButtonSpinner text="Get Temperature"
-                    callback={async () => await context.send({ "get_m2_temperature": true })} />]} />
+                <SmallLoadButton text="Get Temperature"
+                                 callback={async () => await context.send({ "get_m2_temperature": true })} />]} />
 
             <TableRow items={["Position", context.data["motor_2_position"],
-                <SmallButtonSpinner text="Get Position"
-                    callback={async () => await context.send({ "get_m2_position": true })} />
+                <SmallLoadButton text="Get Position"
+                                 callback={async () => await context.send({ "get_m2_position": true })} />
             ]} />
             <TableRow items={["Redefine Step Counter", context.data["motor_2_steps"],
                 <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}
@@ -114,12 +103,12 @@ function FirstControl() {
     return (
         <>
             <TableRow items={["Temperature", context.data["motor_1_temperature"],
-                <SmallButtonSpinner text="Get Temperature"
-                    callback={async () => await context.send({ "get_m1_temperature": true })} />]} />
+                <SmallLoadButton text="Get Temperature"
+                                 callback={async () => await context.send({ "get_m1_temperature": true })} />]} />
 
             <TableRow items={["Position", context.data["motor_1_position"],
-                <SmallButtonSpinner text="Get Position"
-                    callback={async () => await context.send({ "get_m1_position": true })} />
+                <SmallLoadButton text="Get Position"
+                                 callback={async () => await context.send({ "get_m1_position": true })} />
             ]} />
             <TableRow items={["Redefine Step Counter", context.data["motor_1_steps"],
                 <IntInputButton text="Redefine" setValue={setNewStepCounter} value={newStepCounter}

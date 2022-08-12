@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRowLog} from "../components/table_elements";
 import {ControllerContext, HiveUrl} from "../App";
-import {ButtonSpinner} from "../components/input_elements";
+import {ProgressButton} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 
 
@@ -45,7 +45,7 @@ export function Caen(props) {
 
 export function SimpleButton(props) {
     const context = useContext(ControllerContext);
-    return (<ButtonSpinner text={props.text} callback={async () => await context.send(props.request)}/>);
+    return (<ProgressButton text={props.text} callback={async () => await context.send(props.request)}/>);
 }
 
 export function useCaen(url, title) {

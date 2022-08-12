@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-import {ButtonSpinner} from "./input_elements";
+import {ProgressButton} from "./input_elements";
 import {TableRow, TableHeader} from "./table_elements";
 import {sendRequest} from "../http_helper";
 import {BsCaretDown, BsCaretUp} from "react-icons/bs";
@@ -55,13 +55,13 @@ export default function RootCard(props) {
                 <div className="clearfix">
                     <div className="btn-group float-end">
                         {props.button_extra}
-                        <ButtonSpinner text="Continue" callback={async () => {
+                        <ProgressButton text="Continue" callback={async () => {
                             await sendRequest(props.url, {"continue": true})
                         }}/>
-                        <ButtonSpinner text="Show" callback={async () => {
+                        <ProgressButton text="Show" callback={async () => {
                             await sendRequest(props.url, {"hide": false});
                         }}/>
-                        <ButtonSpinner text="Hide" callback={async () => {
+                        <ProgressButton text="Hide" callback={async () => {
                             await sendRequest(props.url, {"hide":true});
                         }}/>
                     </div>

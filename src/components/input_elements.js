@@ -1,4 +1,6 @@
 import React, {useState} from "react"
+import {Button, LinearProgress} from "@mui/material";
+import {LoadingButton} from "@mui/lab";
 
 export function Toggle(props) {
     const [requestOngoing, setRequestOngoing] = useState(false);
@@ -43,9 +45,9 @@ export function SimpleToggle(props) {
 }
 
 
-export function SmallButtonSpinner(props) {
+export function SmallLoadButton(props) {
     return (
-        <ButtonSpinner extraStyle="btn-sm float-end" text={props.text} callback={props.callback}/>
+        <ProgressButton small={true} text={props.text} callback={props.callback}/>
     );
 }
 
@@ -78,19 +80,17 @@ export function ClickableSpanWithSpinner(props) {
 }
 
 
-export function ButtonSpinner(props) {
-    const [spinner, setSpinner] = useState(false);
+export function ProgressButton(props) {
+    const [loading, setLoading] = useState(false);
     return (
         <>
-            <button className={"btn btn-outline-primary " + props.extraStyle} onClick={async () => {
-                setSpinner(true);
+            <LoadingButton disabled={props.disabled} loading={loading} variant="outlined" endIcon={props.icon} onClick={async () => {
+                setLoading(true);
                 await props.callback();
-                setSpinner(false);
+                setLoading(false);
             }}>
                 {props.text}
-                <span className="ms-1 spinner-border spinner-border-sm" role="status"
-                      style={{display: spinner ? "inline-block" : "none"}}> </span>
-            </button>
+            </LoadingButton>
         </>);
 }
 
@@ -100,7 +100,7 @@ export function InputButton(props) {
             <input type="number" className="form-control" placeholder="New Value"
                    value={props.value}
                    onInput={e => props.onInputChange(e.target.value)}/>
-            <ButtonSpinner callback={props.callback} text={props.text}/>
+            <ProgressButton callback={props.callback} text={props.text}/>
         </div>);
 }
 
@@ -164,7 +164,7 @@ export function DropDownButton(props) {
                 <option value="unselected">Choose...</option>
                 {items}
             </select>
-            <SmallButtonSpinner callback={props.callback} text={props.text}/>
+            <SmallLoadButton callback={props.callback} text={props.text}/>
         </div>
     )
 }

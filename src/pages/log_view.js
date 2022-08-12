@@ -2,7 +2,7 @@ import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useEffect, useState} from "react";
 import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
 import {LogbookUrl} from "../App";
-import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
 import {getJson, postData} from "../http_helper";
 import {BsXSquare} from "react-icons/bs";
 
@@ -37,7 +37,7 @@ function LogNote() {
             <input type="text" aria-label="timestamp" className="form-control" value={time}
                    onInput={e => setTime(e.target.value)}/>
 
-            <ButtonSpinner text="Submit" callback={async () => {
+            <ProgressButton text="Submit" callback={async () => {
                 if (time.startsWith("now")) {
                     await postData(logbook_url + "/log_message?message=" + note + "&mode=" + mode, "");
                 }
@@ -131,7 +131,7 @@ export function LogView() {
                 <label className="input-group-text" htmlFor="inputGroupFile01">End: </label>
                 <input type="text" aria-label="note" className="form-control" value={end}
                        onInput={e => setEnd(e.target.value)}/>
-                <ButtonSpinner text="Refresh" callback={async () => {
+                <ProgressButton text="Refresh" callback={async () => {
                     let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
                     let [, json_response] = await getJson(url);
                     setState(json_response);

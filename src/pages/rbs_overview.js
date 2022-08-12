@@ -14,7 +14,7 @@ import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {postData, getUniqueIdentifier} from "../http_helper";
-import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
 import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 
@@ -270,7 +270,7 @@ function ScheduleRbs(props) {
                            }}
                            onChange={async (e) => await handleFileChange(e)}/>
                 </label>
-                <ButtonSpinner text="Schedule CSV" callback={scheduleRqm}/>
+                <ProgressButton text="Schedule CSV" callback={scheduleRqm}/>
             </div>
         </div>
     );
@@ -314,7 +314,7 @@ function RbsControl(props) {
         <div>
             <div className="clearfix">
                 <div className="float-end btn-group">
-                    <ButtonSpinner text="Get Logs" callback={async () => {
+                    <ProgressButton text="Get Logs" callback={async () => {
                         let response = await fetch(props.url + "logs");
                         let blob = await response.blob()
                         const link = document.createElement("a");

@@ -2,18 +2,20 @@ import React, {useContext, useState} from "react";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {
     ConditionalBadge,
-    LoadButton,
     FailureModal,
     ProgressSpinner,
     useModal,
     useReadOnlyData
 } from "../components/generic_control";
-import {ButtonSpinner, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
 import {postData} from "../http_helper";
 import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 import {HiveUrl} from "../App";
 import {BusySpinner} from "../components/generic_control";
 import {useGenericPage, useGenericReadOnlyPage} from "./generic_page";
+import {Box, Button} from "@mui/material";
+import {AttachFile, Error, PlayArrow, PriorityHigh} from "@material-ui/icons";
+import {Check, Circle} from "@mui/icons-material";
 
 
 function AbortRunning(props) {
@@ -60,17 +62,17 @@ function ScheduleTable(props) {
 
 function FileValidBadge(props) {
     if (props.fileValid === "valid") {
-        return <span className="input-group-text bg-success">
-                        <BsCheck style={{color: "white"}}/>
-                </span>
+        return <Box bgcolor={"success.light"} pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
+            <Check/>
+        </Box>
     } else if (props.fileValid === "invalid") {
-        return <span className="input-group-text bg-danger">
-                        <BsX style={{color: "white"}}/>
-                </span>
+        return <Box bgcolor={"error.light"} pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
+            <PriorityHigh/>
+        </Box>
     } else {
-        return <span className="input-group-text">
-                        <BsDot/>
-                </span>
+        return <Box pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
+            <Circle/>
+        </Box>
     }
 }
 
@@ -79,6 +81,7 @@ function ScheduleJob() {
     let [modalMessage, show, setShow, cb] = useModal();
     const [filename, setFilename] = useState("");
     const [fileValid, setFileValid] = useState("");
+    const [disabled, setDisabled] = useState(true);
 
     const root_url = useContext(HiveUrl);
     let url = root_url + "/api/job/"
@@ -93,10 +96,12 @@ function ScheduleJob() {
         if (response.status !== 200) {
             cb(JSON.stringify(json_job));
             setFileValid("invalid");
+            setDisabled(true)
             setJob({})
         } else {
             setJob(json_job);
             setFileValid("valid");
+            setDisabled(false)
         }
     }
 
@@ -109,19 +114,18 @@ function ScheduleJob() {
 
     return (
         <div className="clearfix">
-            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
             <div className="input-group mt-2 mb-2">
-                <span className="input-group-text" id="inputGroup-sizing-sm">Add</span>
-                <span className="input-group-text flex-grow-1">{filename}</span>
-                <FileValidBadge fileValid={fileValid}/>
-                <label className="btn btn-outline-primary align-middle">Upload CSV
-                    <input type="file" id="csv_input" hidden
+                <Button variant="outlined" component="label" endIcon={<AttachFile/>}>
+                    Upload
+                    <input hidden accept="text/csv" multiple type="file"
                            onClick={(e) => {
                                e.target.value = null;
                            }}
                            onChange={async (e) => await handleFileChange(e)}/>
-                </label>
-                <ButtonSpinner text="Schedule CSV" callback={scheduleJob}/>
+
+                </Button>
+
+                <ProgressButton disabled={disabled} text="Schedule" callback={scheduleJob} icon={<PlayArrow/> }/>
             </div>
         </div>
     );
@@ -227,7 +231,7 @@ export function HardwareStatus() {
         <div className="clearfix mb-2">
             <h4>
                 <TitleBadge>RBS</TitleBadge>
-                <LoadButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup} setData={rbs_config.setData}/>
+                <ProgressButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup} setData={rbs_config.setData}/>
                 <StatusBadge>Position (x, y, phi, zeta, det, theta) =
                     ({aml_x}, {aml_y}, {aml_phi}, {aml_zeta}, {aml_det}, {aml_theta}) 
 	    		<BusySpinner busy={aml_moving}/>
@@ -240,7 +244,7 @@ export function HardwareStatus() {
         <div className="clearfix">
             <h4>
                 <TitleBadge>ERD</TitleBadge>
-                <LoadButton url={root_url + "/api/erd/load"} popup={erd_config.popup} setData={erd_config.setData}/>
+                <ProgressButton url={root_url + "/api/erd/load"} popup={erd_config.popup} setData={erd_config.setData}/>
                 <StatusBadge>Position (theta, z) = ({mdrive_theta}, {mdrive_z}) 
 	    		<BusySpinner busy={mdrive_moving}/>
 		</StatusBadge>

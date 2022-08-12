@@ -1,18 +1,36 @@
-import React, {useContext} from "react";
+import React, {useContext, useState} from "react";
 import {HiveConfig, HiveUrl} from "../App";
-import {TableHeader, TableRow} from "../components/table_elements";
-import {FailureModal, LogModal, useData, useModal} from "../components/generic_control";
+import {TableHeader} from "../components/table_elements";
+import {LogModal, useData, useModal} from "../components/generic_control";
 import {ConditionalBadge} from "../components/generic_control";
 import {GoLinkExternal} from "react-icons/go";
 import {Link} from "react-router-dom";
-import {SmallButtonSpinner} from "../components/input_elements";
-import {getUniqueIdentifier, postData} from "../http_helper";
+import {ProgressButton} from "../components/input_elements";
+import {postData} from "../http_helper";
+import {ButtonGroup, Divider, Grid, Typography} from "@mui/material";
+import ScrollDialog from "../components/ScrollDialog";
 
+function SimpleTableHeader(props) {
+    let width = 12 / props.header.length
 
-export function StatusRow(props) {
+    let title = []
+    for (let item of props.header) {
+        title.push(<Grid xs={width} key={item} sx={{fontWeight: 'bold'}} mb={1}>{item}</Grid>)
+    }
+
+    return <>{title}</>
+}
+
+function GridItem(props) {
+    return <Grid item xs={2} sx={{backgroundColor: props.bgcolor}} pt={0.5} pb={0.5}>{props.content}</Grid>
+}
+
+export function UseStatus(props) {
     const root_url = useContext(HiveUrl);
     let url = root_url + props.value.proxy;
     const [data, , running] = useData(url);
+    const [text, setText] = useState("")
+    const [open, setOpen] = useState(false)
     let title = props.value.title;
     let href = "/nectar/" + props.setup + "/" + props.id;
 
@@ -28,31 +46,33 @@ export function StatusRow(props) {
     let start_stop = <></>
     if (props.value.type !== "mpa3") {
         start_stop =
-            <div className="btn-group">
-                <SmallButtonSpinner text="Start" callback={async () => {
+            <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
+                <ProgressButton text="Start" callback={async () => {
                     await postData(root_url + "/api/service" + start_query, "");
                 }}/>
-                <SmallButtonSpinner text="Stop" callback={async () => {
+                <ProgressButton text="Stop" callback={async () => {
                     await postData(root_url + "/api/service" + stop_query, "");
                 }}/>
-                <SmallButtonSpinner text="Logs" callback={async () => {
-                    let response = await fetch(root_url + "/api/service_log?daemon=" + props.id);
-                    let response_text = await response.text();
-                    props.cb(response_text.slice(1,-1));
+                <ProgressButton text="Logs" callback={async () => {
+                        let response = await fetch(root_url + "/api/service_log?daemon=" + props.id);
+                        let response_text = await response.text();
+                        setText(response_text)
+                        setOpen(true)
                 }}/>
-            </div>
+            </ButtonGroup>
     }
 
     return (
-        <TableRow items={[title, runBadge, errorBadge, data["request_id"],
-            <div className="clearfix">
-                <div className="float-start">
-                    {start_stop}
-                </div>
-            </div>,
-            <Link to={href}><GoLinkExternal/></Link>
-        ]}
-        />);
+        <>
+            <ScrollDialog title={"Logs"} text={text} open={open} onClose={()=>{setOpen(false)}}/>
+            <GridItem bgcolor={props.bgcolor} content={title}/>
+            <GridItem bgcolor={props.bgcolor} content={runBadge}/>
+            <GridItem bgcolor={props.bgcolor} content={errorBadge}/>
+            <GridItem bgcolor={props.bgcolor} content={data["request_id"]}/>
+            <GridItem bgcolor={props.bgcolor} content={start_stop}/>
+            <GridItem bgcolor={props.bgcolor} content={<Link to={href}><GoLinkExternal/></Link>}/>
+        </>
+    );
 }
 
 export function Dashboard() {
@@ -64,10 +84,18 @@ export function Dashboard() {
 
     full_page.push(<LogModal show={show} key="modal" setShow={setShow} message={modalMessage}/>);
 
+    let even = true
     for (const [setup_key, setup_value] of Object.entries(context)) {
         let table = []
         for (const [hardware_key, hardware_value] of Object.entries(setup_value.hardware)) {
-            table.push(<StatusRow key={hardware_key} id={hardware_key} value={hardware_value} setup={setup_key} cb={cb}/>)
+
+            let backgroundColor = even ? 'background.paper' : 'background.default'
+
+            table.push(
+                <UseStatus bgcolor={backgroundColor} key={hardware_key} id={hardware_key} value={hardware_value}
+                           setup={setup_key} cb={cb}/>
+            )
+            even = !even;
         }
         const capitalized_key = setup_key[0].toUpperCase() + setup_key.slice(1);
 
@@ -77,19 +105,23 @@ export function Dashboard() {
         }
 
         full_page.push(
-            <div key={setup_key}>
-                <div className="clearfix"><h3 className="float-start"> {capitalized_key}</h3> {link}
-                </div>
-                <hr/>
-                <table className="table table-striped table-hover table-sm">
-                    <TableHeader items={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}/>
-                    <tbody>
+            <Typography key={setup_key}>
+                <h1>{capitalized_key}</h1>
+                <Grid container columnSpacing={1} ml={2} mb={2}>
+                    <SimpleTableHeader header={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}
+                                       data={table}/>
+                    <Grid xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
                     {table}
-                    </tbody>
-                </table>
-            </div>
+                    <Grid xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
+                </Grid>
+            </Typography>
+
         );
     }
+    return (
+        <>{full_page}
+        </>
+    )
 
-    return (full_page)
+
 }

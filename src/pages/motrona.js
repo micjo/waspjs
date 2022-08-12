@@ -3,7 +3,7 @@ import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, FailureModal, useData, useModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {ButtonSpinner, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
+import {ProgressButton, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
 
 function useStatus(data) {
     const [counts, setCounts] = useState("");
@@ -26,13 +26,13 @@ function useStatus(data) {
 
 function PauseButton() {
     const context = useContext(ControllerContext)
-    return (<ButtonSpinner text="Pause" callback={async () => await context.send({"pause_counting": true})}/>);
+    return (<ProgressButton text="Pause" callback={async () => await context.send({"pause_counting": true})}/>);
 }
 
 function ClearStartButton() {
     const context = useContext(ControllerContext)
     return (
-        <ButtonSpinner text="Clear Start" callback={async () => await context.send({"clear-start_counting": true})}/>);
+        <ProgressButton text="Clear Start" callback={async () => await context.send({"clear-start_counting": true})}/>);
 }
 
 function CountingSettings() {

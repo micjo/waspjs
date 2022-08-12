@@ -24,14 +24,28 @@ import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
 import {Accelerator} from "./pages/accelerator";
 import {Trends} from "./pages/trends";
+import CssBaseline from "@mui/material/CssBaseline";
+import {createTheme, ThemeProvider} from "@mui/material/styles";
+import {blue, grey, yellow} from '@mui/material/colors';
 
-document.body.style.backgroundColor = "floralwhite";
+// document.body.style.backgroundColor = "floralwhite";
 
 export const HiveConfig = React.createContext({});
 export const HiveUrl = React.createContext({})
 export const LogbookUrl = React.createContext({})
 export const ControllerContext = React.createContext({});
 
+const darkTheme = createTheme({
+    palette: {
+        mode: 'light',
+        primary: {
+            main: blue[500]
+        },
+        secondary: {
+            main: yellow[500]
+        }
+    }
+});
 
 function useHiveUrl() {
     let hive_url;
@@ -72,6 +86,8 @@ export default function App() {
     let logbookUrl = useLogbookUrl()
     let hiveConfig = useHiveConfig(hiveUrl);
     return (
+    <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
         <HiveUrl.Provider value={hiveUrl}>
             <LogbookUrl.Provider value={logbookUrl}>
                 <HiveConfig.Provider value={hiveConfig}>
@@ -81,6 +97,7 @@ export default function App() {
                 </HiveConfig.Provider>
             </LogbookUrl.Provider>
         </HiveUrl.Provider>
+    </ThemeProvider>
     );
 }
 
@@ -163,8 +180,8 @@ function Navigation() {
     routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
     navBarElements.push(<NavLi url="/accelerator" key="accelerator">Accelerator</NavLi>);
 
-    // routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
-    // navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
+    routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
+    navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);

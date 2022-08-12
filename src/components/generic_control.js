@@ -1,10 +1,11 @@
 import {TableHeader, TableRow} from "./table_elements";
-import {ButtonSpinner} from "./input_elements";
+import {ProgressButton} from "./input_elements";
 import {getJson, postData, sendRequest} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
 import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/bs";
+import {Chip} from "@mui/material";
 
 
 function NewlineText(props) {
@@ -70,18 +71,10 @@ export function LogModal(props) {
 }
 
 
-export function LoadButton(props) {
-    return (
-        <ButtonSpinner extraStyle={"me-2"} text="Load" callback={async () => {
-		await postData(props.url + "?load=true", {});
-        }}/>
-    );
-}
-
 function HideButton(props) {
     const controller = useContext(ControllerContext);
     return (
-        <ButtonSpinner text="Hide" callback={async () => {
+        <ProgressButton text="Hide" callback={async () => {
             await sendRequest(props.url, {"hide": true}, controller.popup, controller.setData)
         }}/>
     );
@@ -90,7 +83,7 @@ function HideButton(props) {
 function ShowButton(props) {
     const controller = useContext(ControllerContext);
     return (
-        <ButtonSpinner text="Show" callback={async () => {
+        <ProgressButton text="Show" callback={async () => {
             await sendRequest(props.url, {"hide": false}, controller.popup, controller.setData)
         }}/>
     );
@@ -99,7 +92,7 @@ function ShowButton(props) {
 function IgnoreErrorButton() {
     const controller = useContext(ControllerContext);
     return (
-        <ButtonSpinner text="Ignore Error" callback={async () => {
+        <ProgressButton text="Ignore Error" callback={async () => {
             await sendRequest(controller.url, {"ignore_error": true}, controller.popup, controller.setData)
         }}/>
     );
@@ -108,9 +101,9 @@ function IgnoreErrorButton() {
 export function ConditionalBadge(props) {
     let element;
     if (props.error) {
-        element = <span className="badge bg-danger">{props.text}</span>
+        element = <Chip label={props.text} color="error" size="small"/>
     } else {
-        element = <span className="badge bg-success">{props.text}</span>
+        element = <Chip label={props.text} color="success" size="small"/>
     }
     return element;
 }
