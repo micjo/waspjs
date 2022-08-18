@@ -8,14 +8,12 @@ import React, {useEffect, useRef, useState} from "react";
 import {Paper} from "@mui/material";
 
 function NewlineText(props) {
-    const text = props.text.substring(1);
     let lines = []
     let i = 0;
-    for(let line of text.split("\\n")) {
+    for(let line of props.text.split("\\n")) {
         lines.push(<Paper key={i}>{line}</Paper>)
         i++;
     }
-    lines.pop()
     return lines;
 }
 
@@ -32,9 +30,7 @@ export default function ScrollDialog(props) {
             >
                 <DialogTitle id="scroll-dialog-title">{props.title}</DialogTitle>
                 <DialogContent dividers={true}>
-                    <DialogContentText>
                         <NewlineText text={props.text}/>
-                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={props.onClose}>Close</Button>

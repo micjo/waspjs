@@ -3,8 +3,11 @@ import React, {useContext, useEffect, useState} from "react";
 import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
 import {LogbookUrl} from "../App";
 import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
-import {getJson, postData} from "../http_helper";
+import {deleteData, getJson, postData} from "../http_helper";
 import {BsXSquare} from "react-icons/bs";
+import {TableEdit} from "../components/table_edit";
+import {Snackbar} from "@mui/material";
+import {ToastPopup} from "../components/toast_popup";
 
 
 function epochToString(seconds_since_epoch) {
@@ -80,11 +83,46 @@ export function LogView() {
 
     let json_response = {}
 
+
+    const header = [
+        { field:'timestamp', title:'Timestamp'},
+        { field: 'mode', title: 'Mode'},
+        { field: 'notes', title: 'Notes'},
+        { field: 'job', title: 'Job'},
+        { field: 'recipe', title: 'Recipe'},
+        { field: 'sample', title: 'Sample'},
+        { field: 'move', title: 'Move'},
+        { field: 'start', title: 'Start'},
+        { field: 'end', title: 'End'},
+    ]
+
+    const [rows, setRows] = useState([])
+    const [dialogOpen,setDialogOpen] = useState(false)
+
+    useEffect ( () => {
+        async function fill_rows() {
+            let newRows = []
+            if (Array.isArray(state)) {
+                let index = 0;
+                for (let item of state) {
+                    newRows.push({'id': index, 'timestamp': epochToString(item.epoch), 'mode': item.mode,
+                        'notes': item.notes, 'job': item.job_name, 'recipe': item.recipe_name, 'sample': item.sample,
+                        'move': item.move, 'start': epochToString(item.start_epoch),
+                        'end': epochToString(item.end_epoch)})
+                    index++;
+                }
+                setRows(newRows)
+            }
+        }
+        fill_rows()
+    }, [state] )
+
+
+
     useEffect(() => {
         async function fill_table() {
             if (Array.isArray(json_response)) {
                 for (let item of json_response) {
-                    console.log(item)
                     let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
                         epochToString(item.start_epoch), epochToString(item.end_epoch)];
 
@@ -117,6 +155,17 @@ export function LogView() {
 
     return (
         <>
+            <TableEdit
+                title="Accelerator Parameters" columns={header} data={rows}
+                onRowAdd={ async(newData) => {
+                }}
+                onRowUpdate={ async(newData, oldData) => {
+                    setDialogOpen(true)
+                }}
+                onRowDelete={ async(oldData) => {
+                }}/>
+            <ToastPopup open={dialogOpen} setOpen={setDialogOpen}/>
+
             <div className="input-group mb-3">
                 <LogNote/>
             </div>
@@ -134,6 +183,7 @@ export function LogView() {
                 <ProgressButton text="Refresh" callback={async () => {
                     let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
                     let [, json_response] = await getJson(url);
+                    console.log(json_response)
                     setState(json_response);
                 }}/>
             </div>

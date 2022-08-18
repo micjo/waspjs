@@ -1,5 +1,7 @@
 import React from "react";
 import {Toggle} from "./input_elements";
+import {alpha, gridClasses, styled} from "@mui/material";
+import {DataGrid} from "@mui/x-data-grid";
 
 export function TableHeader(props) {
     const header = []
@@ -62,4 +64,3 @@ export function ToggleTableRowLog(props) {
                 callback={async () => await props.send(request)}/>]}/>
 
 }
-

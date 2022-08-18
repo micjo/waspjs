@@ -1,87 +1,121 @@
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
-import {
-    ConditionalBadge,
-    FailureModal,
-    ProgressSpinner,
-    useModal,
-    useReadOnlyData
-} from "../components/generic_control";
-import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
+import {FailureModal, ProgressSpinner, useModal, useReadOnlyData} from "../components/generic_control";
+import {ProgressButton, ClickableSpanWithSpinner, SmallProgressButton} from "../components/input_elements";
 import {postData} from "../http_helper";
-import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 import {HiveUrl} from "../App";
 import {BusySpinner} from "../components/generic_control";
 import {useGenericPage, useGenericReadOnlyPage} from "./generic_page";
-import {Box, Button} from "@mui/material";
-import {AttachFile, Error, PlayArrow, PriorityHigh} from "@material-ui/icons";
-import {Check, Circle} from "@mui/icons-material";
+import {
+    Button,
+    Chip,
+    Grid,
+    LinearProgress,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText,
+    Stack
+} from "@mui/material";
+import {AttachFile, Cancel, PlayArrow, PriorityHigh, Check, Circle} from "@mui/icons-material";
+import ScrollDialog from "../components/ScrollDialog";
+import {styled} from '@mui/material/styles';
+import {DataGrid, gridClasses} from '@mui/x-data-grid';
+import {LinearWithValueLabel} from "../components/linear_progress_with_label";
+import Box from "@mui/material/Box";
+import {List} from "@mui/material"
 
+const ODD_OPACITY = 0.2;
+
+const StripedDataGrid = styled(DataGrid)(({theme}) => ({
+    [`& .${gridClasses.row}.even`]: {
+        backgroundColor: theme.palette.grey[200],
+        '&:hover, &.Mui-hovered': {
+            backgroundColor: theme.palette.grey[300]
+        },
+    },
+    [`& .${gridClasses.row}.odd`]: {
+        '&:hover, &.Mui-hovered': {
+            backgroundColor: theme.palette.grey[300]
+        },
+    }
+}));
+
+function DefaultStripedDataGrid(props) {
+    return(
+    <div style={{ height: props.height, width: '100%' }}>
+        <StripedDataGrid
+        density={"compact"}
+        disableColumnMenu={true}
+        disableSelectionOnClick={true}
+        hideFooter={true}
+        components={{
+            NoRowsOverlay: () => (
+                <Stack height="100%" alignItems="center" justifyContent="center">
+                    {props.noRowsText}
+                </Stack>
+            )
+        }}
+        getRowClassName={(params) => {
+            let even_or_odd = params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+            let done = "done"
+            return `${even_or_odd} ${done}`
+        }}
+        {...props}/>
+    </div>)
+}
 
 function AbortRunning(props) {
     return (
         <ClickableSpanWithSpinner callback={async () => {
             await postData(props.url, "")
         }}>
-            <BsXSquare/>
+            <Cancel/>
         </ClickableSpanWithSpinner>);
 }
 
 function ScheduleTable(props) {
-    
+
     const root_url = useContext(HiveUrl);
     let url = root_url + "/api/job/"
 
-    let table = []
-    if (Array.isArray(props.schedule) && props.schedule.length) {
-        let index = 0;
-        for (let item of props.schedule) {
-            table.push(<TableRow key={item.job.name + index} items={[item.job.name]}/>)
-            index++;
+    const columns = [{ field: 'job_name', headerName: "Job", sortable:false, flex:true}]
+    const [rows, setRows] = useState([])
+
+    useEffect ( () => {
+        let newRows = []
+        if (Array.isArray(props.schedule) && props.schedule.length) {
+            let index = 0;
+            for (let item of props.schedule) {
+                newRows.push({'id': index, 'job_name': item.job.name})
+                index++;
+            }
         }
-    }
+        setRows(newRows)
+    }, [props.schedule])
+
     return (
         <>
             <h5>Scheduled:
                 <ClickableSpanWithSpinner callback={async () => {
                     await postData(url + "abort_schedule");
                 }}>
-                    <BsXSquare/>
+                    <Cancel/>
                 </ClickableSpanWithSpinner>
             </h5>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Name"]}/>
-                <tbody>
-                {table}
-                </tbody>
-            </table>
-            <hr/>
+            <DefaultStripedDataGrid rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200}/>
         </>
     )
 }
 
-function FileValidBadge(props) {
-    if (props.fileValid === "valid") {
-        return <Box bgcolor={"success.light"} pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
-            <Check/>
-        </Box>
-    } else if (props.fileValid === "invalid") {
-        return <Box bgcolor={"error.light"} pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
-            <PriorityHigh/>
-        </Box>
-    } else {
-        return <Box pl={1} pr={1} display="flex" alignItems="center" justifyContent="center">
-            <Circle/>
-        </Box>
-    }
-}
 
 function ScheduleJob() {
     const [job, setJob] = useState({});
     let [modalMessage, show, setShow, cb] = useModal();
     const [filename, setFilename] = useState("");
-    const [fileValid, setFileValid] = useState("");
-    const [disabled, setDisabled] = useState(true);
+    const [scheduleDisable, setScheduleDisable] = useState(true);
+    const [text, setText] = useState("")
+    const [open, setOpen] = useState(false)
 
     const root_url = useContext(HiveUrl);
     let url = root_url + "/api/job/"
@@ -94,14 +128,13 @@ function ScheduleJob() {
         let json_job = await response.json();
 
         if (response.status !== 200) {
-            cb(JSON.stringify(json_job));
-            setFileValid("invalid");
-            setDisabled(true)
-            setJob({})
+            console.log(JSON.stringify(json_job))
+            setText(JSON.stringify(json_job).slice(1, -1))
+            setOpen(true)
+            setScheduleDisable(true)
         } else {
             setJob(json_job);
-            setFileValid("valid");
-            setDisabled(false)
+            setScheduleDisable(false)
         }
     }
 
@@ -109,11 +142,13 @@ function ScheduleJob() {
         await postData(url + job?.type, JSON.stringify(job))
         setJob({})
         setFilename("");
-        setFileValid("")
     }
 
     return (
         <div className="clearfix">
+            <ScrollDialog title={"Error"} text={text} open={open} onClose={() => {
+                setOpen(false)
+            }}/>
             <div className="input-group mt-2 mb-2">
                 <Button variant="outlined" component="label" endIcon={<AttachFile/>}>
                     Upload
@@ -122,17 +157,15 @@ function ScheduleJob() {
                                e.target.value = null;
                            }}
                            onChange={async (e) => await handleFileChange(e)}/>
-
                 </Button>
-
-                <ProgressButton disabled={disabled} text="Schedule" callback={scheduleJob} icon={<PlayArrow/> }/>
+                <ProgressButton disabled={scheduleDisable} text="Schedule" callback={scheduleJob} icon={<PlayArrow/>}/>
             </div>
         </div>
     );
 }
 
 function uuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
@@ -143,65 +176,71 @@ function ProgressTable(props) {
     let active_recipe = props.data?.active_job?.active_recipe;
     let active_job_id = props.data?.active_job?.job?.name;
 
+    const [rows, setRows] = useState([])
+
     const root_url = useContext(HiveUrl);
+    const columns=[
+        { field: 'progress', headerName: "Progress", width: 100, sortable:false,  renderCell: params => {
+                return <Box sx={{ width: '100%' }}>
+                    <LinearWithValueLabel value={params.value} />
+                </Box>
+            }},
+        { field: 'recipe', headerName: "Recipe", sortable:false, flex:true},
+        { field: 'type', headerName: "Type", sortable:false, flex:true},
+        { field: 'sample', headerName: "Sample ID", sortable:false, flex:true},
+        { field: 'run_time', headerName: "Run Time", sortable:false, flex:true},
+    ]
 
-    let table = []
-    if (all_recipes && finished_recipes && active_recipe) {
-        let index = 0;
-        for (let recipe of finished_recipes) {
-            let time = new Date(recipe.run_time * 1000).toISOString().substr(11, 8);
-            let full_recipe = all_recipes[index];
-            table[index] = <SuccessTableRow key={uuidv4()}
-                                            items={[recipe.name, full_recipe.type, full_recipe.sample, time, "100%"]}/>
-            index++;
-        }
+    useEffect( () => {
+        let newRows = []
 
-        if (index < all_recipes.length) {
-            let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
-            table[index] =
-                <WarningTableRow key={uuidv4()}
-                                 items={[active_recipe.name, all_recipes[index].type, all_recipes[index].sample, time,
-                                     <ProgressSpinner text={active_recipe.progress}/>]}/>
-            index++;
-        }
+        if (all_recipes && finished_recipes && active_recipe) {
+            let index = 0;
+            for (let recipe of finished_recipes) {
+                let time = new Date(recipe.run_time * 1000).toISOString().substr(11, 8);
+                let full_recipe = all_recipes[index];
+                newRows[index] = {id: index, 'progress' : 100, 'recipe': recipe.name, 'type': full_recipe.type,
+                    'sample': full_recipe.sample, run_time: time};
+                index++;
+            }
 
-        while (index < all_recipes.length) {
-            let item = all_recipes[index];
-            table.push(<TableRow key={uuidv4()} items={[item.name, item.type, item.sample, "0", "0%"]}/>)
-            index++;
+            if (index < all_recipes.length) {
+                let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
+                console.log(active_recipe)
+                newRows[index] = {id: index, 'progress': parseFloat(active_recipe.progress), 'recipe': active_recipe.name, 'type': all_recipes[index].type,
+                    'sample': all_recipes[index].sample, 'run_time': time};
+                index++;
+            }
+
+            while (index < all_recipes.length) {
+                let item = all_recipes[index];
+                newRows.push( {id:index, 'progress' : 0, 'recipe': item.name, 'type': item.type, 'sample': item.sample,
+                    'run_time':"0"})
+                index++;
+            }
         }
-    }
+        setRows(newRows)
+    }, [props.data])
+
 
     return (
         <div className="clearfix">
             <h5>Active: {active_job_id} <AbortRunning url={root_url + "/api/job/abort_active"}/></h5>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Recipe", "Type", "Sample id", "Run time", "Progress"]}/>
-                <tbody>
-                {table}
-                </tbody>
-            </table>
+            <DefaultStripedDataGrid
+                rows={rows}
+                columns={columns}
+                noRowsText={"Nothing active"}
+                height={300}
+            />
             <hr/>
         </div>
     )
 }
 
-function TitleBadge(props) {
-    return (
-        <span className={"badge bg-secondary me-2"}>{props.children}</span>
-    );
-}
-
-function StatusBadge(props) {
-    return (
-        <span className={"badge bg-success me-2"}>{props.children}</span>
-    );
-}
-
 export function HardwareStatus() {
 
     const root_url = useContext(HiveUrl);
-    let [rbs_config, rbs_show, rbs_setShow, rbs_modalMessage] = useGenericPage(root_url+ "/api/rbs/status", "RBS")
+    let [rbs_config, rbs_show, rbs_setShow, rbs_modalMessage] = useGenericPage(root_url + "/api/rbs/status", "RBS")
 
     let aml_x = rbs_config.data?.["aml_x_y"]?.["motor_1_position"];
     let aml_y = rbs_config.data?.["aml_x_y"]?.["motor_2_position"];
@@ -214,44 +253,50 @@ export function HardwareStatus() {
     let target_charge = rbs_config.data?.["motrona"]?.["target_charge(nC)"];
 
     let aml_moving = rbs_config.data?.["aml_x_y"]?.["busy"] || rbs_config.data?.["aml_phi_zeta"]?.["busy"] ||
-			rbs_config.data?.["aml_det_theta"]?.["busy"];
+        rbs_config.data?.["aml_det_theta"]?.["busy"];
 
-    let [erd_config, erd_show, erd_setShow, erd_modalMessage] = useGenericPage(root_url+ "/api/erd/status", "ERD")
+    let [erd_config, erd_show, erd_setShow, erd_modalMessage] = useGenericPage(root_url + "/api/erd/status", "ERD")
     let mdrive_z = erd_config.data?.["mdrive_z"]?.["motor_position"];
     let mdrive_theta = erd_config.data?.["mdrive_theta"]?.["motor_position"];
     let mpa3_ad1_count_rate = erd_config.data?.["mpa3"]?.["ad1"]?.["total_rate"];
     let mpa3_ad2_count_rate = erd_config.data?.["mpa3"]?.["ad2"]?.["total_rate"];
 
-    let mdrive_moving = erd_config.data?.["mdrive_z"]?.["moving_to_target"] || 
-			erd_config.data?.["mdrive_theta"]?.["moving_to_target"]
+    let mdrive_moving = erd_config.data?.["mdrive_z"]?.["moving_to_target"] ||
+        erd_config.data?.["mdrive_theta"]?.["moving_to_target"]
 
     return (<>
-        <FailureModal show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage} />
+        <FailureModal show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage}/>
         <h1>Hardware Status</h1>
-        <div className="clearfix mb-2">
-            <h4>
-                <TitleBadge>RBS</TitleBadge>
-                <ProgressButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup} setData={rbs_config.setData}/>
-                <StatusBadge>Position (x, y, phi, zeta, det, theta) =
-                    ({aml_x}, {aml_y}, {aml_phi}, {aml_zeta}, {aml_det}, {aml_theta}) 
-	    		<BusySpinner busy={aml_moving}/>
-		    </StatusBadge>
-                <StatusBadge>Current = {current} nA </StatusBadge>
-                <StatusBadge>Charge = {charge} nC -> {target_charge} nC </StatusBadge>
-            </h4>
-        </div>
 
-        <div className="clearfix">
-            <h4>
-                <TitleBadge>ERD</TitleBadge>
-                <ProgressButton url={root_url + "/api/erd/load"} popup={erd_config.popup} setData={erd_config.setData}/>
-                <StatusBadge>Position (theta, z) = ({mdrive_theta}, {mdrive_z}) 
-	    		<BusySpinner busy={mdrive_moving}/>
-		</StatusBadge>
-                <StatusBadge>AD1 count rate = {mpa3_ad1_count_rate} </StatusBadge>
-                <StatusBadge>AD2 count rate = {mpa3_ad2_count_rate} </StatusBadge>
-            </h4>
-        </div>
+        <Grid container mb={1}>
+            <Grid item={true} xs={12} mb={1}><h2>RBS</h2></Grid>
+            <Grid item={true} xs={12} mb={1}>
+                <Chip label={`Position (x, y, phi, zeta, det, theta) =
+                        (${aml_x}, ${aml_y}, ${aml_phi}, ${aml_zeta}, ${aml_det}, ${aml_theta})`}/>
+                <BusySpinner busy={aml_moving}/>
+            </Grid>
+            <Grid item={true} xs={1} mb={1}><Chip label={`Current = ${current} nA`}/></Grid>
+            <Grid item={true} xs={1}><Chip label={`Charge = ${charge} nC -> ${target_charge} nC`}/></Grid>
+            <Grid item={true} xs={10}/>
+
+            <Grid item={true} xs={1} mb={1}>
+                <SmallProgressButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup}
+                                     setData={rbs_config.setData} text={"load"}/>
+            </Grid>
+
+            <Grid item={true} xs={12} mb={1}><h2>ERD</h2></Grid>
+            <Grid item={true} xs={2} mb={1}>
+                <Chip label={`Position (theta, z) = (${mdrive_theta}, ${mdrive_z})`}/>
+                <BusySpinner busy={mdrive_moving}/>
+            </Grid>
+            <Grid item={true} xs={1}><Chip label={`AD1 count rate = ${mpa3_ad1_count_rate}`}/></Grid>
+            <Grid item={true} xs={1}><Chip label={`AD2 count rate = ${mpa3_ad2_count_rate}`}/></Grid>
+            <Grid item={true} xs={8}/>
+            <Grid item={true}><SmallProgressButton url={root_url + "/api/erd/load"} popup={erd_config.popup}
+                                                   setData={erd_config.setData} text={"load"}/>
+            </Grid>
+
+        </Grid>
     </>)
 }
 
@@ -259,26 +304,15 @@ export function JobOverview() {
     const root_url = useContext(HiveUrl);
     let state = useReadOnlyData(root_url + "/api/job/state", {})
 
-    let run_status = state?.["run_status"]
-    let job_id = state?.["active_job"]?.["job"]?.["name"];
-
     return (
         <div>
-            <div className="clearfix">
-                <h1 className="float-start">Jobs</h1>
-                <h5 className="clearfix float-end">
-                    <ConditionalBadge error={false} text={run_status + ": " + job_id}/>
-                </h5>
-            </div>
+            <h1>Jobs</h1>
 
             <ScheduleJob/>
             <ScheduleTable schedule={state["schedule"]}/>
             <ProgressTable data={state}/>
             <HardwareStatus/>
 
-
         </div>
     );
 }
-
-

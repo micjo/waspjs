@@ -79,12 +79,16 @@ export function ClickableSpanWithSpinner(props) {
         </div>);
 }
 
+export function SmallProgressButton(props) {
+    return <ProgressButton size="small" {...props}/>
+}
+
 
 export function ProgressButton(props) {
     const [loading, setLoading] = useState(false);
     return (
         <>
-            <LoadingButton disabled={props.disabled} loading={loading} variant="outlined" endIcon={props.icon} onClick={async () => {
+            <LoadingButton disabled={props.disabled} size={props.size} loading={loading} variant="outlined" endIcon={props.icon} onClick={async () => {
                 setLoading(true);
                 await props.callback();
                 setLoading(false);

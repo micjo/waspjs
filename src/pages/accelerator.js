@@ -5,6 +5,8 @@ import MaterialTable from "@material-table/core";
 import {ExportCsv, ExportPdf} from '@material-table/exporters';
 import {Button, Dialog, IconButton, Snackbar} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import {TableEdit} from "../components/table_edit";
+import {ToastPopup} from "../components/toast_popup";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -76,74 +78,33 @@ export function Accelerator() {
     const [header, updateHeader] = useUpdateHeader()
     const [data, updateData] = useUpdateData()
     const logbookUrl = useContext(LogbookUrl)
-
     const [dialogOpen,setDialogOpen] = useState(false)
-
-    const action = (
-        <React.Fragment>
-            <Button color="secondary" size="small" onClick={()=> setDialogOpen(false)}>
-                UNDO
-            </Button>
-            <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={()=> setDialogOpen(false)}
-            >
-                <CloseIcon fontSize="small" />
-            </IconButton>
-        </React.Fragment>
-    );
 
     return (
         <div>
             <h1> Accelerator Parameters (Does not work fully yet - Work in progress) </h1>
             <div>
             </div>
-            <MaterialTable
+            <TableEdit
                 title="Accelerator Parameters" columns={header} data={data}
-                options={{
-                    tableLayout: "fixed",
-                    // Allow user to hide/show
-                    // columns from Columns Button
-                    columnsButton: true,
-                    exportMenu: [{
-                        label: 'Export PDF',
-                        exportFunc: (cols, datas) => ExportPdf(cols, datas, 'myPdfFileName')
-                    }, {
-                        label: 'Export CSV',
-                        exportFunc: (cols, datas) => ExportCsv(cols, datas, 'myCsvFileName')
-                    }]
+                onRowAdd={ async(newData) => {
+                    console.log(newData)
+                    await postData(logbookUrl + "/log_accelerator_paramaters", JSON.stringify(newData))
+                    updateData()
                 }}
-
-                editable={{
-                        onRowAdd: async (newData) => {
-                        console.log(newData)
-                        await postData(logbookUrl + "/log_accelerator_paramaters", JSON.stringify(newData))
-                        updateData()
-                    },
-                    onRowUpdate: async (newData, oldData) => {
-                        console.log(newData);
-                        console.log(oldData);
-                        setDialogOpen(true)
-                    },
-                    onRowDelete: async (oldData) => {
-                        await deleteData(logbookUrl + "/accelerator_parameters?id=" + oldData.id)
-                        updateData()
-                    }
+                onRowUpdate={ async(newData, oldData) => {
+                    console.log(newData);
+                    console.log(oldData);
+                    setDialogOpen(true)
                 }}
+                onRowDelete={ async(oldData) => {
+                    await deleteData(logbookUrl + "/accelerator_parameters?id=" + oldData.id)
+                    updateData()
 
-
+                }}
             />
 
-            <Snackbar
-                open={dialogOpen}
-                autoHideDuration={6000}
-                onClose={()=> setDialogOpen(false)}
-                message="This is not supported yet"
-                action ={action}
-            />
-
+            <ToastPopup open={dialogOpen} setOpen={setDialogOpen}/>
         </div>
     );
 }

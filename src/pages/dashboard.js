@@ -9,13 +9,15 @@ import {ProgressButton} from "../components/input_elements";
 import {postData} from "../http_helper";
 import {ButtonGroup, Divider, Grid, Typography} from "@mui/material";
 import ScrollDialog from "../components/ScrollDialog";
+import LinkIcon from '@mui/icons-material/Link';
+
 
 function SimpleTableHeader(props) {
     let width = 12 / props.header.length
 
     let title = []
     for (let item of props.header) {
-        title.push(<Grid xs={width} key={item} sx={{fontWeight: 'bold'}} mb={1}>{item}</Grid>)
+        title.push(<Grid item={true} xs={width} key={item} sx={{fontWeight: 'bold'}} mb={1}>{item}</Grid>)
     }
 
     return <>{title}</>
@@ -70,7 +72,7 @@ export function UseStatus(props) {
             <GridItem bgcolor={props.bgcolor} content={errorBadge}/>
             <GridItem bgcolor={props.bgcolor} content={data["request_id"]}/>
             <GridItem bgcolor={props.bgcolor} content={start_stop}/>
-            <GridItem bgcolor={props.bgcolor} content={<Link to={href}><GoLinkExternal/></Link>}/>
+            <GridItem bgcolor={props.bgcolor} content={<Link to={href}><LinkIcon/></Link>}/>
         </>
     );
 }
@@ -105,16 +107,16 @@ export function Dashboard() {
         }
 
         full_page.push(
-            <Typography key={setup_key}>
+            <div key={setup_key}>
                 <h1>{capitalized_key}</h1>
-                <Grid container columnSpacing={1} ml={2} mb={2}>
+                <Grid item={true} container columnSpacing={1} ml={2} mb={2}>
                     <SimpleTableHeader header={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}
                                        data={table}/>
-                    <Grid xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
+                    <Grid item={true} xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
                     {table}
-                    <Grid xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
+                    <Grid item={true} xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
                 </Grid>
-            </Typography>
+            </div>
 
         );
     }
