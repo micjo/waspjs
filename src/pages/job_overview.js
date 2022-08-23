@@ -1,69 +1,18 @@
 import React, {useContext, useEffect, useState} from "react";
-import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
-import {FailureModal, ProgressSpinner, useModal, useReadOnlyData} from "../components/generic_control";
-import {ProgressButton, ClickableSpanWithSpinner, SmallProgressButton} from "../components/input_elements";
+import {BusySpinner, FailureModal, useModal, useReadOnlyData} from "../components/generic_control";
+import {ClickableSpanWithSpinner, ProgressButton, SmallProgressButton} from "../components/elements";
 import {postData} from "../http_helper";
 import {HiveUrl} from "../App";
-import {BusySpinner} from "../components/generic_control";
-import {useGenericPage, useGenericReadOnlyPage} from "./generic_page";
-import {
-    Button,
-    Chip,
-    Grid,
-    LinearProgress,
-    ListItem,
-    ListItemButton,
-    ListItemIcon,
-    ListItemText,
-    Stack
-} from "@mui/material";
-import {AttachFile, Cancel, PlayArrow, PriorityHigh, Check, Circle} from "@mui/icons-material";
+import {useGenericPage} from "./generic_page";
+import {Button, Chip, Grid} from "@mui/material";
+import {AttachFile, Cancel, PlayArrow} from "@mui/icons-material";
 import ScrollDialog from "../components/ScrollDialog";
 import {styled} from '@mui/material/styles';
 import {DataGrid, gridClasses} from '@mui/x-data-grid';
 import {LinearWithValueLabel} from "../components/linear_progress_with_label";
 import Box from "@mui/material/Box";
-import {List} from "@mui/material"
+import {StripedTable} from "../components/table_templates";
 
-const ODD_OPACITY = 0.2;
-
-const StripedDataGrid = styled(DataGrid)(({theme}) => ({
-    [`& .${gridClasses.row}.even`]: {
-        backgroundColor: theme.palette.grey[200],
-        '&:hover, &.Mui-hovered': {
-            backgroundColor: theme.palette.grey[300]
-        },
-    },
-    [`& .${gridClasses.row}.odd`]: {
-        '&:hover, &.Mui-hovered': {
-            backgroundColor: theme.palette.grey[300]
-        },
-    }
-}));
-
-function DefaultStripedDataGrid(props) {
-    return(
-    <div style={{ height: props.height, width: '100%' }}>
-        <StripedDataGrid
-        density={"compact"}
-        disableColumnMenu={true}
-        disableSelectionOnClick={true}
-        hideFooter={true}
-        components={{
-            NoRowsOverlay: () => (
-                <Stack height="100%" alignItems="center" justifyContent="center">
-                    {props.noRowsText}
-                </Stack>
-            )
-        }}
-        getRowClassName={(params) => {
-            let even_or_odd = params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
-            let done = "done"
-            return `${even_or_odd} ${done}`
-        }}
-        {...props}/>
-    </div>)
-}
 
 function AbortRunning(props) {
     return (
@@ -103,7 +52,7 @@ function ScheduleTable(props) {
                     <Cancel/>
                 </ClickableSpanWithSpinner>
             </h5>
-            <DefaultStripedDataGrid rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200}/>
+            <StripedTable rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200}/>
         </>
     )
 }
@@ -226,7 +175,7 @@ function ProgressTable(props) {
     return (
         <div className="clearfix">
             <h5>Active: {active_job_id} <AbortRunning url={root_url + "/api/job/abort_active"}/></h5>
-            <DefaultStripedDataGrid
+            <StripedTable
                 rows={rows}
                 columns={columns}
                 noRowsText={"Nothing active"}

@@ -1,6 +1,7 @@
 import React, {useState} from "react";
-import {Button, IconButton, Snackbar} from "@mui/material";
+import {Alert, Button, IconButton, Snackbar} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+
 
 export function ToastPopup(props) {
     const action = (
@@ -20,8 +21,12 @@ export function ToastPopup(props) {
             open={props.open}
             autoHideDuration={6000}
             onClose={() => props.setOpen(false)}
-            message="This is not supported"
             action={action}
-        />
+        >
+            <Alert severity={props.severity}  sx={{ width: '100%' }}>
+                {props.text}
+            </Alert>
+        </Snackbar>
+
     )
 }

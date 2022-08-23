@@ -1,11 +1,12 @@
 import {TableHeader, TableRow} from "./table_elements";
-import {ProgressButton} from "./input_elements";
+import {ProgressButton} from "./elements";
 import {getJson, postData, sendRequest} from "../http_helper";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {Button, Modal} from "react-bootstrap";
 import {ControllerContext} from "../App";
 import {BsCaretDownSquare, BsCaretUpSquare} from "react-icons/bs";
 import {Chip} from "@mui/material";
+import {generateUniqueID} from "web-vitals/dist/modules/lib/generateUniqueID";
 
 
 function NewlineText(props) {
@@ -296,3 +297,27 @@ export function useData(url, initialData={} ) {
 
     return [data, setData, running]
 }
+
+
+export function usePollData(url){
+    const [data, setData] = useState({})
+    const [error, setError] = useState("")
+
+    useEffect(() => {
+            const getControllerData = async () => {
+                let [status, json_response] = await getJson(url);
+                if (status === 404) {
+                    setError("Cannot reach controller: HTTP 404")
+                } else {
+                    setError("");
+                    setData(json_response);
+                }
+            }
+            const interval = setInterval(getControllerData, 1000);
+            return () => clearInterval(interval);
+        }, [url]
+    );
+
+    return [data, setData, error, setError]
+}
+

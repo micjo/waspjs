@@ -1,5 +1,5 @@
 import React from "react";
-import {Toggle} from "./input_elements";
+import {Toggle} from "./elements";
 import {alpha, gridClasses, styled} from "@mui/material";
 import {DataGrid} from "@mui/x-data-grid";
 

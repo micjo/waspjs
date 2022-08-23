@@ -5,7 +5,7 @@ import MaterialTable from "@material-table/core";
 import {ExportCsv, ExportPdf} from '@material-table/exporters';
 import {Button, Dialog, IconButton, Snackbar} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {TableEdit} from "../components/table_edit";
+import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
 
 function epochToString(seconds_since_epoch) {
@@ -29,14 +29,12 @@ function useUpdateHeader() {
             let [, accelerator_keys] = await getJson(logbookUrl + "/check_accelerator_parameters")
             let keys = []
             for (let key of accelerator_keys) {
-                if (key === "id") {
-                    keys.push({field:key, title:key, editable:"never", width:"10px"})
-                }
-                else if (key === "epoch") {
-                    keys.push({field:key, title:key, editable:"never", width:"200px"})
+                if (key ==="id") {continue}
+                if (key === "epoch") {
+                    keys.push({field:key, title:"timestamp", editable:"never", cellStyle: {whiteSpace: 'nowrap'} })
                 }
                 else {
-                    keys.push({field: key, title: key, width:"200px"})
+                    keys.push({field: key, title: key})
                 }
             }
             setHeader(keys)
@@ -78,14 +76,15 @@ export function Accelerator() {
     const [header, updateHeader] = useUpdateHeader()
     const [data, updateData] = useUpdateData()
     const logbookUrl = useContext(LogbookUrl)
-    const [dialogOpen,setDialogOpen] = useState(false)
+    const [dialogText, setDialogText] = useState("")
+    const [dialogOpen, setDialogOpen] = useState(false)
 
     return (
         <div>
-            <h1> Accelerator Parameters (Does not work fully yet - Work in progress) </h1>
+            <h1> Accelerator Parameters</h1>
             <div>
             </div>
-            <TableEdit
+            <MaterialTableTemplate
                 title="Accelerator Parameters" columns={header} data={data}
                 onRowAdd={ async(newData) => {
                     console.log(newData)
@@ -95,16 +94,16 @@ export function Accelerator() {
                 onRowUpdate={ async(newData, oldData) => {
                     console.log(newData);
                     console.log(oldData);
+                    setDialogText("This is not supported")
                     setDialogOpen(true)
                 }}
                 onRowDelete={ async(oldData) => {
                     await deleteData(logbookUrl + "/accelerator_parameters?id=" + oldData.id)
                     updateData()
-
                 }}
             />
 
-            <ToastPopup open={dialogOpen} setOpen={setDialogOpen}/>
+            <ToastPopup text={dialogText} open={dialogOpen} setOpen={setDialogOpen} />
         </div>
     );
 }

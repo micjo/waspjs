@@ -3,7 +3,7 @@ import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, FailureModal, useData, useModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {ProgressButton, FloatInputButton, IntInputButton, DropDownButton} from "../components/input_elements";
+import {ProgressButton, FloatInputButton, IntInputButton, DropDownButton} from "../components/elements";
 
 function useStatus(data) {
     const [counts, setCounts] = useState("");

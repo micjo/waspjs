@@ -1,27 +1,16 @@
 import React, {useContext, useState} from "react";
 import {HiveConfig, HiveUrl} from "../App";
-import {TableHeader} from "../components/table_elements";
-import {LogModal, useData, useModal} from "../components/generic_control";
-import {ConditionalBadge} from "../components/generic_control";
+import {ConditionalBadge, LogModal, useData, useModal} from "../components/generic_control";
 import {GoLinkExternal} from "react-icons/go";
 import {Link} from "react-router-dom";
-import {ProgressButton} from "../components/input_elements";
+import {ProgressButton} from "../components/elements";
 import {postData} from "../http_helper";
-import {ButtonGroup, Divider, Grid, Typography} from "@mui/material";
+import {ButtonGroup, Divider, Grid} from "@mui/material";
 import ScrollDialog from "../components/ScrollDialog";
 import LinkIcon from '@mui/icons-material/Link';
+import {grey} from "@mui/material/colors";
+import {GridHeader} from "../components/grid_helper";
 
-
-function SimpleTableHeader(props) {
-    let width = 12 / props.header.length
-
-    let title = []
-    for (let item of props.header) {
-        title.push(<Grid item={true} xs={width} key={item} sx={{fontWeight: 'bold'}} mb={1}>{item}</Grid>)
-    }
-
-    return <>{title}</>
-}
 
 function GridItem(props) {
     return <Grid item xs={2} sx={{backgroundColor: props.bgcolor}} pt={0.5} pb={0.5}>{props.content}</Grid>
@@ -45,9 +34,9 @@ export function UseStatus(props) {
     let start_query = "?name=" + props.id + "&start=true";
     let stop_query = "?name=" + props.id + "&start=false";
 
-    let start_stop = <></>
+    let start_stop_logs = <></>
     if (props.value.type !== "mpa3") {
-        start_stop =
+        start_stop_logs =
             <ButtonGroup variant="outlined" aria-label="outlined button group" size="small">
                 <ProgressButton text="Start" callback={async () => {
                     await postData(root_url + "/api/service" + start_query, "");
@@ -71,7 +60,7 @@ export function UseStatus(props) {
             <GridItem bgcolor={props.bgcolor} content={runBadge}/>
             <GridItem bgcolor={props.bgcolor} content={errorBadge}/>
             <GridItem bgcolor={props.bgcolor} content={data["request_id"]}/>
-            <GridItem bgcolor={props.bgcolor} content={start_stop}/>
+            <GridItem bgcolor={props.bgcolor} content={start_stop_logs}/>
             <GridItem bgcolor={props.bgcolor} content={<Link to={href}><LinkIcon/></Link>}/>
         </>
     );
@@ -91,7 +80,7 @@ export function Dashboard() {
         let table = []
         for (const [hardware_key, hardware_value] of Object.entries(setup_value.hardware)) {
 
-            let backgroundColor = even ? 'background.paper' : 'background.default'
+            let backgroundColor = even ? grey[200] : 'background.default'
 
             table.push(
                 <UseStatus bgcolor={backgroundColor} key={hardware_key} id={hardware_key} value={hardware_value}
@@ -110,11 +99,8 @@ export function Dashboard() {
             <div key={setup_key}>
                 <h1>{capitalized_key}</h1>
                 <Grid item={true} container columnSpacing={1} ml={2} mb={2}>
-                    <SimpleTableHeader header={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}
-                                       data={table}/>
-                    <Grid item={true} xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
+                    <GridHeader header={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}/>
                     {table}
-                    <Grid item={true} xs={12}><Divider sx={{backgroundColor:"black"}}/></Grid>
                 </Grid>
             </div>
 

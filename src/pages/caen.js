@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {sendRequest} from "../http_helper";
 import {TableHeader, TableRow, ToggleTableRowLog} from "../components/table_elements";
 import {ControllerContext, HiveUrl} from "../App";
-import {ProgressButton} from "../components/input_elements";
+import {ProgressButton} from "../components/elements";
 import {HistogramCaen} from "../components/histogram_caen";
 
 

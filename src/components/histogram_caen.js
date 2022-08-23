@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {FailureModal, useModal} from "./generic_control";
 import {getJson} from "../http_helper";
-import {DropDown, SimpleToggle} from "./input_elements";
+import {DropDown, SimpleToggle} from "./elements";
 import {Brush, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {BsQuestionCircle} from "react-icons/bs"
 

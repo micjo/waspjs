@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-import {ProgressButton} from "./input_elements";
+import {ProgressButton} from "./elements";
 import {TableRow, TableHeader} from "./table_elements";
 import {sendRequest} from "../http_helper";
 import {BsCaretDown, BsCaretUp} from "react-icons/bs";

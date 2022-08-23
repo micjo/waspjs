@@ -2,10 +2,10 @@ import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useEffect, useState} from "react";
 import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
 import {LogbookUrl} from "../App";
-import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/elements";
 import {deleteData, getJson, postData} from "../http_helper";
 import {BsXSquare} from "react-icons/bs";
-import {TableEdit} from "../components/table_edit";
+import {MaterialTableTemplate} from "../components/table_templates";
 import {Snackbar} from "@mui/material";
 import {ToastPopup} from "../components/toast_popup";
 
@@ -79,70 +79,39 @@ export function LogView() {
 
     const [state, setState] = useState({});
 
-    let table = []
 
-    let json_response = {}
-
+    const [message, setMessage] = useState("")
 
     const header = [
-        { field:'timestamp', title:'Timestamp'},
-        { field: 'mode', title: 'Mode'},
-        { field: 'notes', title: 'Notes'},
-        { field: 'job', title: 'Job'},
-        { field: 'recipe', title: 'Recipe'},
-        { field: 'sample', title: 'Sample'},
-        { field: 'move', title: 'Move'},
-        { field: 'start', title: 'Start'},
-        { field: 'end', title: 'End'},
+        { field:'timestamp', title:'Timestamp', initialEditValue:"(now)",cellStyle: {whiteSpace: 'nowrap'} },
+        { field: 'mode', title: 'Mode', initialEditValue:"note"},
+        { field: 'note', title: 'Note'},
+        { field: 'job', title: 'Job', editable:"never"},
+        { field: 'recipe', title: 'Recipe', editable:"never"},
+        { field: 'sample', title: 'Sample', editable:"never"},
+        { field: 'move', title: 'Move', editable:"never"},
+        { field: 'start', title: 'Start', editable:"never"},
+        { field: 'end', title: 'End', editable:"never"},
     ]
 
     const [rows, setRows] = useState([])
     const [dialogOpen,setDialogOpen] = useState(false)
 
     useEffect ( () => {
-        async function fill_rows() {
+        async function fillRows() {
             let newRows = []
             if (Array.isArray(state)) {
-                let index = 0;
                 for (let item of state) {
-                    newRows.push({'id': index, 'timestamp': epochToString(item.epoch), 'mode': item.mode,
-                        'notes': item.notes, 'job': item.job_name, 'recipe': item.recipe_name, 'sample': item.sample,
+                    newRows.push({'id': item.log_id, 'timestamp': epochToString(item.epoch), 'mode': item.mode,
+                        'note': item.note, 'job': item.job_name, 'recipe': item.recipe_name, 'sample': item.sample,
                         'move': item.move, 'start': epochToString(item.start_epoch),
                         'end': epochToString(item.end_epoch)})
-                    index++;
                 }
                 setRows(newRows)
             }
         }
-        fill_rows()
-    }, [state] )
-
-
-
-    useEffect(() => {
-        async function fill_table() {
-            if (Array.isArray(json_response)) {
-                for (let item of json_response) {
-                    let items = [epochToString(item.epoch), item.mode, item.note, item.meta, item.job_name, item.recipe_name, item.sample, item.move,
-                        epochToString(item.start_epoch), epochToString(item.end_epoch)];
-
-                    if (item.mode === "rbs" || item.mode === "erd") {
-                        items.push(null);
-                    } else {
-                        items.push(<ClickableSpanWithSpinner callback={async () => {
-                            await postData(logbook_url + "/remove_message?log_id=" + item.log_id, "");
-                        }}>
-                            <BsXSquare/>
-                        </ClickableSpanWithSpinner>);
-                    }
-
-                    table.push(<TableRow key={item.log_id} items={items}/>)
-                }
-            }
-        }
-        fill_table().then()
-        }, [state]
-    );
+        fillRows()
+    }, [state] );
 
     useEffect( () => {
         async function fetch_content() {
@@ -155,46 +124,34 @@ export function LogView() {
 
     return (
         <>
-            <TableEdit
-                title="Accelerator Parameters" columns={header} data={rows}
+            <MaterialTableTemplate
+                title="Logbook" columns={header} data={rows}
                 onRowAdd={ async(newData) => {
-                }}
-                onRowUpdate={ async(newData, oldData) => {
-                    setDialogOpen(true)
+                    let response
+                    if (newData.timestamp === "(now)") {
+                        response = await postData(`${logbook_url}/message?message=${newData.note}&mode=${newData.mode}`, "");
+                    }
+                    else {
+                        response = await postData(logbook_url + "/message?message=" + newData.note +
+                            "&mode=" + newData.mode + "&timestamp=" + newData.timestamp, "");
+                    }
+
+                    if (response.status !== 200) {
+                        setMessage("Invalid time format. Example: <2022-01-01 12:00:00>");
+                        let text = await response.text()
+                        setMessage(text)
+                        setDialogOpen(true)
+                        return
+                    }
+                    let [, json_response] = await getJson(`${logbook_url}/get_log_book`);
+                    setState(json_response)
                 }}
                 onRowDelete={ async(oldData) => {
+                    await deleteData(`${logbook_url}/message?log_id=${oldData.id}`)
+                    let [, json_response] = await getJson(`${logbook_url}/get_log_book`);
+                    setState(json_response)
                 }}/>
-            <ToastPopup open={dialogOpen} setOpen={setDialogOpen}/>
-
-            <div className="input-group mb-3">
-                <LogNote/>
-            </div>
-
-            <div className="input-group mb-3">
-                <label className="input-group-text" htmlFor="inputGroupFile01">Mode Filter:</label>
-                <input type="text" aria-label="mode" className="form-control" value={filter}
-                       onInput={e => setFilter(e.target.value)}/>
-                <label className="input-group-text" htmlFor="inputGroupFile01">Start:</label>
-                <input type="text" aria-label="mode" className="form-control" value={start}
-                       onInput={e => setStart(e.target.value)}/>
-                <label className="input-group-text" htmlFor="inputGroupFile01">End: </label>
-                <input type="text" aria-label="note" className="form-control" value={end}
-                       onInput={e => setEnd(e.target.value)}/>
-                <ProgressButton text="Refresh" callback={async () => {
-                    let url = logbook_url + "/get_filtered_log_book?mode=" + filter +"&start=" + start+ "&end=" + end;
-                    let [, json_response] = await getJson(url);
-                    console.log(json_response)
-                    setState(json_response);
-                }}/>
-            </div>
-                <table className="table table-striped table-hover table-sm">
-
-                <TableHeader
-                    items={["Timestamp", "Mode", "Notes", "meta", "job id", "recipe name", "sample_id", "move", "start", "end", "delete"]}/>
-                <tbody>
-                {table}
-                </tbody>
-            </table>
+            <ToastPopup open={dialogOpen} setOpen={setDialogOpen} message={message} />
         </>);
 
 }

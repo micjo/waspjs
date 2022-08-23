@@ -14,7 +14,7 @@ import {useMotrona} from "./motrona";
 import {useCaen} from "./caen";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {postData, getUniqueIdentifier} from "../http_helper";
-import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/elements";
 import {HistogramCaen} from "../components/histogram_caen";
 import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 

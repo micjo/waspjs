@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {TableHeader, TableRow, ToggleTableRow, ToggleTableRowLog} from "../components/table_elements";
 import {GenericControl, FailureModal} from "../components/generic_control";
 import {ControllerContext, HiveUrl} from "../App";
-import {FloatInputButton, DropDownButton, SmallLoadButton} from "../components/input_elements";
+import {FloatInputButton, DropDownButton, SmallLoadButton} from "../components/elements";
 import {useGenericPage} from "./generic_page";
 
 function useStatus(data) {

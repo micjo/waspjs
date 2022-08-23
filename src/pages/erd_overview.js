@@ -11,7 +11,7 @@ import {
 import {ControllerContext} from "../App";
 import {SuccessTableRow, TableHeader, TableRow, WarningTableRow} from "../components/table_elements";
 import {delay, getJson, postData, getUniqueIdentifier} from "../http_helper";
-import {ProgressButton, ClickableSpanWithSpinner} from "../components/input_elements";
+import {ProgressButton, ClickableSpanWithSpinner} from "../components/elements";
 import {BsCheck, BsDot, BsX, BsXSquare} from "react-icons/bs";
 import {useMpa3} from "./mpa3";
 import {useMdrive} from "./mdrive";

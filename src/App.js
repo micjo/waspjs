@@ -10,7 +10,6 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
-import {RbsOverview} from './pages/rbs_overview.js'
 import {Dashboard} from "./pages/dashboard";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
