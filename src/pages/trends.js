@@ -1,11 +1,8 @@
 import React, {useContext, useEffect, useState, Suspense} from "react";
 import {LogbookUrl} from "../App";
-import {getJson, postData} from "../http_helper";
-import MaterialTable from "@material-table/core";
-import {ExportCsv, ExportPdf} from '@material-table/exporters';
+import {getJson} from "../http_helper";
 import {MaterialTableTemplate} from "../components/table_templates";
 import {getLocaleIsoTime, getLocaleOneMonthAgoIsoTime} from "../components/time_helpers";
-import {Box, Button, MenuItem, Select} from "@mui/material";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS

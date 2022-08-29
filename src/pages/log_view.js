@@ -1,12 +1,7 @@
-import {TableHeader, TableRow} from "../components/table_elements";
 import React, {useContext, useEffect, useState} from "react";
-import {FailureModal, useModal, useReadOnlyDataOnce} from "../components/generic_control";
 import {LogbookUrl} from "../App";
-import {ProgressButton, ClickableSpanWithSpinner} from "../components/elements";
 import {deleteData, getJson, postData} from "../http_helper";
-import {BsXSquare} from "react-icons/bs";
 import {MaterialTableTemplate} from "../components/table_templates";
-import {Snackbar} from "@mui/material";
 import {ToastPopup} from "../components/toast_popup";
 
 
@@ -19,42 +14,6 @@ function epochToString(seconds_since_epoch) {
     let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
     return isoDate;
 }
-
-function LogNote() {
-    const logbook_url = useContext(LogbookUrl);
-    const [note, setNote] = useState("");
-    const [mode, setMode] = useState("note");
-    const [time, setTime] = useState("now (datetime format)")
-    const [modalMessage, show, setShow, cb] = useModal()
-
-    return (
-        <>
-            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
-            <label className="input-group-text" htmlFor="inputGroupFile01">Mode:</label>
-            <input type="text" aria-label="mode" className="form-control" value={mode}
-                   onInput={e => setMode(e.target.value)}/>
-            <label className="input-group-text" htmlFor="inputGroupFile01">Note: </label>
-            <input type="text" aria-label="note" className="form-control" value={note}
-                   onInput={e => setNote(e.target.value)}/>
-            <label className="input-group-text" htmlFor="inputGroupFile01">Timestamp:</label>
-            <input type="text" aria-label="timestamp" className="form-control" value={time}
-                   onInput={e => setTime(e.target.value)}/>
-
-            <ProgressButton text="Submit" callback={async () => {
-                if (time.startsWith("now")) {
-                    await postData(logbook_url + "/log_message?message=" + note + "&mode=" + mode, "");
-                }
-                else {
-                    let response = await postData(logbook_url + "/log_message?message=" + note + "&mode=" + mode + "&timestamp=" + time, "");
-                    if (response.status !== 200) {
-                        cb("Invalid time format. Example: <2022-01-01 12:00:00>");
-                    }
-
-                }
-            }}/>
-        </>);
-}
-
 
 function getLocaleIsoTime() {
     let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds

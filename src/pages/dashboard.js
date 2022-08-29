@@ -1,11 +1,10 @@
 import React, {useContext, useState} from "react";
 import {HiveConfig, HiveUrl} from "../App";
-import {ConditionalBadge, LogModal, useData, useModal} from "../components/generic_control";
-import {GoLinkExternal} from "react-icons/go";
+import {ConditionalBadge, usePollData} from "../components/generic_control";
 import {Link} from "react-router-dom";
 import {ProgressButton} from "../components/elements";
 import {postData} from "../http_helper";
-import {ButtonGroup, Divider, Grid} from "@mui/material";
+import {ButtonGroup, Grid} from "@mui/material";
 import ScrollDialog from "../components/ScrollDialog";
 import LinkIcon from '@mui/icons-material/Link';
 import {grey} from "@mui/material/colors";
@@ -19,14 +18,14 @@ function GridItem(props) {
 export function UseStatus(props) {
     const root_url = useContext(HiveUrl);
     let url = root_url + props.value.proxy;
-    const [data, , running] = useData(url);
+    const [data, , connectionStatus] = usePollData(url);
     const [text, setText] = useState("")
     const [open, setOpen] = useState(false)
     let title = props.value.title;
     let href = "/nectar/" + props.setup + "/" + props.id;
 
-    let runningStatus = running !== "Running";
-    let runBadge = <ConditionalBadge text={running} error={runningStatus}/>
+    let runningStatus = connectionStatus !== "Connected";
+    let runBadge = <ConditionalBadge text={connectionStatus} error={runningStatus}/>
 
     let successStatus = data["error"] === "Success" || data["error"] === "No error";
     let errorBadge = <ConditionalBadge text={data["error"]} error={!successStatus}/>;
@@ -69,11 +68,7 @@ export function UseStatus(props) {
 export function Dashboard() {
     const context = useContext(HiveConfig);
 
-    let [modalMessage, show, setShow, cb] = useModal();
-
     let full_page = []
-
-    full_page.push(<LogModal show={show} key="modal" setShow={setShow} message={modalMessage}/>);
 
     let even = true
     for (const [setup_key, setup_value] of Object.entries(context)) {
@@ -84,16 +79,11 @@ export function Dashboard() {
 
             table.push(
                 <UseStatus bgcolor={backgroundColor} key={hardware_key} id={hardware_key} value={hardware_value}
-                           setup={setup_key} cb={cb}/>
+                           setup={setup_key}/>
             )
             even = !even;
         }
         const capitalized_key = setup_key[0].toUpperCase() + setup_key.slice(1);
-
-        let link = <></>
-        if (setup_key === "rbs" || setup_key === "erd") {
-            link = <Link className="float-start" to={"/nectar/" + setup_key + "/overview"}><GoLinkExternal/></Link>;
-        }
 
         full_page.push(
             <div key={setup_key}>

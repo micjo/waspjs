@@ -1,104 +1,89 @@
-import {GenericControl, FailureModal, useData, useModal} from "../components/generic_control";
+import {usePollData} from "../components/generic_control";
 import React, {useContext, useEffect, useState} from "react";
-import {sendRequest} from "../http_helper";
-import {TableHeader, TableRow, ToggleTableRowLog} from "../components/table_elements";
-import {ControllerContext, HiveUrl} from "../App";
-import {ProgressButton} from "../components/elements";
-import {HistogramCaen} from "../components/histogram_caen";
-
-
-function useStatus(data) {
-    const [acquiring, setAcquiring] = useState("");
-    const [busy, setBusy] = useState(false);
-
-    useEffect(() => {
-        if ("acquisition_active" in data) {
-            setAcquiring(data["acquisition_active"] ? "Acquiring" : "Idle");
-        }
-        if ("request_finished" in data) {
-            setBusy(!data["request_finished"]);
-        }
-    }, [data])
-
-    return [acquiring, busy]
-}
-
-
-
+import {useSendRequest} from "../http_helper";
+import {HiveUrl} from "../App";
+import {LoadButton, SwitchInput, WideProgressButton} from "../components/elements";
+import {GridHeader, GridTemplate} from "../components/grid_helper";
+import {ButtonGroup, Grid} from "@mui/material";
 
 export function Caen(props) {
+
     const root_url = useContext(HiveUrl);
-
     const url = root_url + props.hardware_value.proxy;
-    const title = props.hardware_value.title
 
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useCaen(url, title)
-    return (
-        <ControllerContext.Provider value={config}>
-            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
-            <GenericControl table_extra={table_extra} button_extra={button_extra}/>
-            <DebugControl/>
-            <HistogramCaen url={url}/>
-        </ControllerContext.Provider>
-    );
-}
+    const [data, setData, error, setError] = usePollData(url)
+    const [open, setOpen] = useState(false)
+    const [text, setText] = useState("")
+    const sendRequest = useSendRequest(url, setData, setError)
+    const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
-export function SimpleButton(props) {
-    const context = useContext(ControllerContext);
-    return (<ProgressButton text={props.text} callback={async () => await context.send(props.request)}/>);
-}
+    useEffect(() => {
+        if (data?.error) {
+            setIgnoreDisabled(data?.error === "Success")
+        }
+    }, [data])
+    useEffect(() => {
+        if (error) {
+            setText(error)
+            setOpen(true)
+        }
+    }, [error])
 
-export function useCaen(url, title) {
-    const [modalMessage, show, setShow, cb] = useModal()
-    const [data, setData, running] = useData(url, {"loggers": {}});
-    const [acquiring, busy] = useStatus(data);
+    let basicControl = [
+        ["Request Acknowledge", data?.request_id, ""],
+        ["Request Finish", data?.request_finished ? "true" : "false", ""],
+        ["Acquiring", data?.acquisition_active ? "true" : "false",
+            <ButtonGroup fullWidth>
+                <LoadButton text={"Start"} callback={async () => await sendRequest({"start": true})}/>
+                <LoadButton text={"Stop"} callback={async () => await sendRequest({"stop": true})}/>
+                <LoadButton text={"Clear"} callback={async () => await sendRequest({"clear": true})}/>
+            </ButtonGroup>
 
-    const config = {
-        title: title,
-        url: url, data: data,
-        busy: busy, brief: acquiring, running: running,
-        popup: (message) => cb(message),
-        setData: (data) => setData(data),
-        send: async (request) => await sendRequest(url, request, cb, setData)
-    }
-    let table_extra = <>
-        <TableRow items={["Acquiring", data["acquisition_active"] ? "True" : "False", ""]}/>
-    </>
-    let button_extra = <>
-        <SimpleButton text="Connect" request={{"open_connection": true}}/>
-        <SimpleButton text="Upload All Registry" request={{"upload_all_registry": true}}/>
-        <SimpleButton text="Start" request={{"start": true}}/>
-        <SimpleButton text="Stop" request={{"stop": true}}/>
-        <SimpleButton text="Clear" request={{"clear": true}}/>
-    </>
+        ],
+        ["Error", data?.error,
+            <WideProgressButton disabled={ignoreDisabled} text={"Ignore"}
+                                callback={async () => await sendRequest({"ignore_error": true})}/>],
+        ["", "",
+            <ButtonGroup fullWidth>
+                <LoadButton text={"Upload Registry"} callback={async () => await sendRequest({"upload_all_registry": true})}/>
+                <LoadButton text={"Connect"} callback={async () => await sendRequest({"open_connection": true})}/>
+            </ButtonGroup>
 
-    return [config, show, setShow, modalMessage, table_extra, button_extra];
-}
+        ]
+    ]
 
-function DebugControl() {
-    const context = useContext(ControllerContext);
-    let loggers = context.data["loggers"];
-
-    let debugging_event_loop = loggers["event_loop"] === "debug";
-    let debugging_dll = loggers["caen_dll"] === "debug";
-    let debugging_command = loggers["caen_command"] === "debug";
-    let debugging_events = loggers["caen_events"] === "debug";
+    let debugControl = [
+        ["Debug event loop", data?.loggers?.event_loop?.toString(),
+            <SwitchInput checked={data?.loggers?.event_loop === "debug"} callback={async (checkRequest) => {
+                let request = {"log": {"name": "event_loop", "debug": checkRequest}};
+                await sendRequest(request)
+            }}/>],
+        ["Debug Library calls", data?.loggers?.caen_lib?.toString(),
+            <SwitchInput checked={data?.loggers?.caen_lib === "debug"} callback={async (checkRequest) => {
+                let request = {"log": {"name": "caen_lib", "debug": checkRequest}};
+                await sendRequest(request)
+            }}/>],
+        ["Debug Commands", data?.loggers?.caen_command?.toString(),
+            <SwitchInput checked={data?.loggers?.caen_command === "debug"} callback={async (checkRequest) => {
+                let request = {"log": {"name": "caen_command", "debug": checkRequest}};
+                await sendRequest(request)
+            }}/>],
+        ["Debug events", data?.loggers?.caen_events?.toString(),
+            <SwitchInput checked={data?.loggers?.caen_events === "debug"} callback={async (checkRequest) => {
+                let request = {"log": {"name": "caen_events", "debug": checkRequest}};
+                await sendRequest(request)
+            }}/>],
+    ]
 
     return (
         <>
-            <table className="table table-striped table-hover table-sm">
-                <TableHeader items={["Debug Control", "Value", "Control"]}/>
-                <tbody>
-                <ToggleTableRowLog text={"Debugging Event Loop:"} state={debugging_event_loop} send={context.send}
-                                       name={"event_loop"}/>
-                <ToggleTableRowLog text={"Debugging dll:"} state={debugging_dll} send={context.send}
-                                name={"caen_dll"}/>
-                <ToggleTableRowLog text={"Debugging Commands:"} state={debugging_command} send={context.send}
-                                name={"caen_command"}/>
-                <ToggleTableRowLog text={"Debugging Events:"} state={debugging_events} send={context.send}
-                                name={"caen_events"}/>
-                </tbody>
-            </table>
+            <h1>{props.hardware_value.title}</h1>
+            <Grid container>
+                <GridHeader header={["Identifier", "Value", "Control"]}/>
+                <GridTemplate rows={basicControl}/>
+                <GridHeader header={["Debug Control", "Value", "Control"]}/>
+                <GridTemplate rows={debugControl}/>
+            </Grid>
         </>
     );
 }

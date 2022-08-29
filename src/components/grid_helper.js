@@ -9,7 +9,6 @@ export function GridTemplate(props)
 
     let key = 0
     for (let row of props.rows) {
-        // console.log(row)
         let backgroundColor = even ? grey[200] : 'background.default'
 
         let grid_elements = row.length;

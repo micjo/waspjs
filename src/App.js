@@ -5,8 +5,11 @@ import {
     NavLink,
     Route,
     Routes,
-    Link
+    Link as RouterLink
 } from "react-router-dom";
+
+
+import Link from "@material-ui/core/Link";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min';
 
@@ -17,7 +20,6 @@ import {Caen} from "./pages/caen";
 import {getJson} from "./http_helper";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
-import {ErdOverview} from "./pages/erd_overview";
 import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
@@ -30,15 +32,16 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-
-// document.body.style.backgroundColor = "floralwhite";
+import {AppBar, IconButton, Toolbar} from "@mui/material";
+import { Menu  }from "@material-ui/icons";
+import Typography from "@mui/material/Typography";
+import {makeStyles} from "@mui/styles";
 
 export const HiveConfig = React.createContext({});
 export const HiveUrl = React.createContext({})
 export const LogbookUrl = React.createContext({})
-export const ControllerContext = React.createContext({});
 
-const darkTheme = createTheme({
+const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
@@ -89,7 +92,7 @@ export default function App() {
     let logbookUrl = useLogbookUrl()
     let hiveConfig = useHiveConfig(hiveUrl);
     return (
-    <ThemeProvider theme={darkTheme}>
+    <ThemeProvider theme={theme}>
         <CssBaseline />
         <HiveUrl.Provider value={hiveUrl}>
             <LogbookUrl.Provider value={logbookUrl}>
@@ -161,10 +164,9 @@ function SomeHardware(props) {
     }
     return (<>
         <h3>This hardware type has no associated UI</h3>
-        Go back to the <Link to={"/"}>Dashboard</Link>
+        Go back to the <Link component={RouterLink} to={"/"}>Dashboard</Link>
     </>)
 }
-
 
 function Navigation() {
     const context = useContext(HiveConfig);

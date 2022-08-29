@@ -1,10 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {LogbookUrl} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
-import MaterialTable from "@material-table/core";
-import {ExportCsv, ExportPdf} from '@material-table/exporters';
-import {Button, Dialog, IconButton, Snackbar} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
 
@@ -17,8 +13,6 @@ function epochToString(seconds_since_epoch) {
     let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
     return isoDate;
 }
-
-
 
 function useUpdateHeader() {
     const [header, setHeader] = useState([]);

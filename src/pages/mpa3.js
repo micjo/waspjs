@@ -1,60 +1,52 @@
-import {useGenericPage} from "./generic_page";
-import {TableRow} from "../components/table_elements";
 import React, {useContext, useEffect, useState} from "react";
-import {ControllerContext, HiveUrl} from "../App";
-import {GenericControl, FailureModal} from "../components/generic_control";
-
-function useStatus(data) {
-    const [acquiring, setAcquiring] = useState(false);
-    const [filename, setFilename] = useState("");
-
-    useEffect(() => {
-        if ("acquisition_status" in data) {
-            setAcquiring(data['acquisition_status']['acquiring'])
-        } else {
-            setAcquiring(false)
-        }
-
-        if ("data_format" in data) {
-            setFilename(data['data_format']['file_name'])
-        } else {
-            setFilename("")
-        }
-    }, [data])
-
-    return [acquiring, filename]
-}
-
-
-export function useMpa3(url, title) {
-    let [config, show, setShow, modalMessage] = useGenericPage(url, title)
-    const [acquiring, filename] = useStatus(config.data);
-
-    config.busy = acquiring;
-
-    let table_extra = <>
-        <TableRow items={["Acquiring", acquiring, ""]}/>
-        <TableRow items={["File Name", filename, ""]}/>
-
-    </>
-
-    let button_extra = <> </>
-
-    return [config, show, setShow, modalMessage, table_extra, button_extra]
-}
-
+import {HiveUrl} from "../App";
+import {usePollData} from "../components/generic_control";
+import {useSendRequest} from "../http_helper";
+import {WideProgressButton} from "../components/elements";
+import {Grid} from "@mui/material";
+import {GridHeader, GridTemplate} from "../components/grid_helper";
+import {ToastPopup} from "../components/toast_popup";
 
 export function Mpa3(props) {
     const root_url = useContext(HiveUrl);
-
     const url = root_url + props.hardware_value.proxy;
-    const title = props.hardware_value.title;
 
-    let [config, show, setShow, modalMessage, table_extra, button_extra] = useMpa3(url, title)
+    const [data, setData, error, setError] = usePollData(url)
+    const [open, setOpen] = useState(false)
+    const [text, setText] = useState("")
+    const sendRequest = useSendRequest(url, setData, setError)
+    const [ignoreDisabled, setIgnoreDisabled] = useState(true)
+
+    useEffect(() => {
+        if (data?.error) {
+            setIgnoreDisabled(data?.error === "Success")
+        }
+    }, [data])
+    useEffect(() => {
+        if (error) {
+            setText(error)
+            setOpen(true)
+        }
+    }, [error])
+
+    let basicControl = [
+        ["Request Acknowledge", data?.request_id, ""],
+        ["Request Finish", data?.request_finished ? "true" : "false", ""],
+        ["Error", data?.error,
+            <WideProgressButton disabled={ignoreDisabled} text={"Ignore"}
+                                callback={async () => await sendRequest({"ignore_error": true})}/>],
+        ["Acquiring", data?.acquisition_status?.acquiring? "true": "false", ""],
+        ["File name", data?.data_format?.filename, ""]
+    ]
 
     return (
-        <ControllerContext.Provider value={config}>
-            <FailureModal show={show} setShow={setShow} message={modalMessage}/>
-            <GenericControl table_extra={table_extra} button_extra={button_extra}/>
-        </ControllerContext.Provider>);
+        <>
+            <h1>{props.hardware_value.title}</h1>
+            <Grid container>
+                <GridHeader header={["Identifier", "Value", "Control"]}/>
+                <GridTemplate rows={basicControl}/>
+            </Grid>
+            <ToastPopup text={text} open={open} setOpen={setOpen} severity={"error"}/>
+        </>
+    )
 }

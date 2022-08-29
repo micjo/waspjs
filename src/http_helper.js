@@ -101,6 +101,7 @@ export async function getText(url) {
     return [response.status, response_txt];
 }
 
+
 export function useSendRequest(url, setData, setError) {
     return useCallback(async (request) => {
         async function send() {

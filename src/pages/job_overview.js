@@ -1,37 +1,25 @@
 import React, {useContext, useEffect, useState} from "react";
-import {BusySpinner, FailureModal, useModal, useReadOnlyData} from "../components/generic_control";
-import {ClickableSpanWithSpinner, ProgressButton, SmallProgressButton} from "../components/elements";
-import {postData} from "../http_helper";
+import {BusySpinner,usePollData} from "../components/generic_control";
+import {LoadButton, ProgressButton, SmallProgressButton} from "../components/elements";
+import {postData, useSendRequest} from "../http_helper";
 import {HiveUrl} from "../App";
-import {useGenericPage} from "./generic_page";
 import {Button, Chip, Grid} from "@mui/material";
 import {AttachFile, Cancel, PlayArrow} from "@mui/icons-material";
 import ScrollDialog from "../components/ScrollDialog";
-import {styled} from '@mui/material/styles';
-import {DataGrid, gridClasses} from '@mui/x-data-grid';
 import {LinearWithValueLabel} from "../components/linear_progress_with_label";
 import Box from "@mui/material/Box";
 import {StripedTable} from "../components/table_templates";
 
-
-function AbortRunning(props) {
-    return (
-        <ClickableSpanWithSpinner callback={async () => {
-            await postData(props.url, "")
-        }}>
-            <Cancel/>
-        </ClickableSpanWithSpinner>);
-}
 
 function ScheduleTable(props) {
 
     const root_url = useContext(HiveUrl);
     let url = root_url + "/api/job/"
 
-    const columns = [{ field: 'job_name', headerName: "Job", sortable:false, flex:true}]
+    const columns = [{field: 'job_name', headerName: "Job", sortable: false, flex: true}]
     const [rows, setRows] = useState([])
 
-    useEffect ( () => {
+    useEffect(() => {
         let newRows = []
         if (Array.isArray(props.schedule) && props.schedule.length) {
             let index = 0;
@@ -45,14 +33,15 @@ function ScheduleTable(props) {
 
     return (
         <>
-            <h5>Scheduled:
-                <ClickableSpanWithSpinner callback={async () => {
-                    await postData(url + "abort_schedule");
-                }}>
-                    <Cancel/>
-                </ClickableSpanWithSpinner>
-            </h5>
+            <h5>Scheduled</h5>
             <StripedTable rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200}/>
+            <Grid container justifyContent="flex-end">
+            <LoadButton text={"Cancel"} icon={<Cancel/>} callback={async () => {
+                await postData(url + "abort_schedule");
+            }}>
+                <Cancel/>
+            </LoadButton>
+            </Grid>
         </>
     )
 }
@@ -60,8 +49,7 @@ function ScheduleTable(props) {
 
 function ScheduleJob() {
     const [job, setJob] = useState({});
-    let [modalMessage, show, setShow, cb] = useModal();
-    const [filename, setFilename] = useState("");
+    const [, setFilename] = useState("");
     const [scheduleDisable, setScheduleDisable] = useState(true);
     const [text, setText] = useState("")
     const [open, setOpen] = useState(false)
@@ -99,7 +87,7 @@ function ScheduleJob() {
                 setOpen(false)
             }}/>
             <div className="input-group mt-2 mb-2">
-                <Button variant="outlined" component="label" endIcon={<AttachFile/>}>
+                <Button size={"small"} variant={"contained"} component="label" endIcon={<AttachFile/>}>
                     Upload
                     <input hidden accept="text/csv" multiple type="file"
                            onClick={(e) => {
@@ -128,19 +116,21 @@ function ProgressTable(props) {
     const [rows, setRows] = useState([])
 
     const root_url = useContext(HiveUrl);
-    const columns=[
-        { field: 'progress', headerName: "Progress", width: 100, sortable:false,  renderCell: params => {
-                return <Box sx={{ width: '100%' }}>
-                    <LinearWithValueLabel value={params.value} />
+    const columns = [
+        {
+            field: 'progress', headerName: "Progress", width: 100, sortable: false, renderCell: params => {
+                return <Box sx={{width: '100%'}}>
+                    <LinearWithValueLabel value={params.value}/>
                 </Box>
-            }},
-        { field: 'recipe', headerName: "Recipe", sortable:false, flex:true},
-        { field: 'type', headerName: "Type", sortable:false, flex:true},
-        { field: 'sample', headerName: "Sample ID", sortable:false, flex:true},
-        { field: 'run_time', headerName: "Run Time", sortable:false, flex:true},
+            }
+        },
+        {field: 'recipe', headerName: "Recipe", sortable: false, flex: true},
+        {field: 'type', headerName: "Type", sortable: false, flex: true},
+        {field: 'sample', headerName: "Sample ID", sortable: false, flex: true},
+        {field: 'run_time', headerName: "Run Time", sortable: false, flex: true},
     ]
 
-    useEffect( () => {
+    useEffect(() => {
         let newRows = []
 
         if (all_recipes && finished_recipes && active_recipe) {
@@ -148,23 +138,33 @@ function ProgressTable(props) {
             for (let recipe of finished_recipes) {
                 let time = new Date(recipe.run_time * 1000).toISOString().substr(11, 8);
                 let full_recipe = all_recipes[index];
-                newRows[index] = {id: index, 'progress' : 100, 'recipe': recipe.name, 'type': full_recipe.type,
-                    'sample': full_recipe.sample, run_time: time};
+                newRows[index] = {
+                    id: index, 'progress': 100, 'recipe': recipe.name, 'type': full_recipe.type,
+                    'sample': full_recipe.sample, run_time: time
+                };
                 index++;
             }
 
             if (index < all_recipes.length) {
                 let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
                 console.log(active_recipe)
-                newRows[index] = {id: index, 'progress': parseFloat(active_recipe.progress), 'recipe': active_recipe.name, 'type': all_recipes[index].type,
-                    'sample': all_recipes[index].sample, 'run_time': time};
+                newRows[index] = {
+                    id: index,
+                    'progress': parseFloat(active_recipe.progress),
+                    'recipe': active_recipe.name,
+                    'type': all_recipes[index].type,
+                    'sample': all_recipes[index].sample,
+                    'run_time': time
+                };
                 index++;
             }
 
             while (index < all_recipes.length) {
                 let item = all_recipes[index];
-                newRows.push( {id:index, 'progress' : 0, 'recipe': item.name, 'type': item.type, 'sample': item.sample,
-                    'run_time':"0"})
+                newRows.push({
+                    id: index, 'progress': 0, 'recipe': item.name, 'type': item.type, 'sample': item.sample,
+                    'run_time': "0"
+                })
                 index++;
             }
         }
@@ -174,13 +174,20 @@ function ProgressTable(props) {
 
     return (
         <div className="clearfix">
-            <h5>Active: {active_job_id} <AbortRunning url={root_url + "/api/job/abort_active"}/></h5>
+            <h5>Active: {active_job_id}</h5>
             <StripedTable
                 rows={rows}
                 columns={columns}
                 noRowsText={"Nothing active"}
                 height={300}
             />
+            <Grid container justifyContent="flex-end">
+                <LoadButton text={"Cancel"} icon={<Cancel/>} callback={async () => {
+                    await postData(root_url + "/api/job/abort_active");
+                }}>
+                    <Cancel/>
+                </LoadButton>
+            </Grid>
             <hr/>
         </div>
     )
@@ -189,74 +196,63 @@ function ProgressTable(props) {
 export function HardwareStatus() {
 
     const root_url = useContext(HiveUrl);
-    let [rbs_config, rbs_show, rbs_setShow, rbs_modalMessage] = useGenericPage(root_url + "/api/rbs/status", "RBS")
+    const [open, setOpen] = useState(false)
+    const [text, setText] = useState("")
 
-    let aml_x = rbs_config.data?.["aml_x_y"]?.["motor_1_position"];
-    let aml_y = rbs_config.data?.["aml_x_y"]?.["motor_2_position"];
-    let aml_phi = rbs_config.data?.["aml_phi_zeta"]?.["motor_1_position"];
-    let aml_zeta = rbs_config.data?.["aml_phi_zeta"]?.["motor_2_position"];
-    let aml_det = rbs_config.data?.["aml_det_theta"]?.["motor_1_position"];
-    let aml_theta = rbs_config.data?.["aml_det_theta"]?.["motor_2_position"];
-    let current = rbs_config.data?.["motrona"]?.["current(nA)"];
-    let charge = rbs_config.data?.["motrona"]?.["charge(nC)"];
-    let target_charge = rbs_config.data?.["motrona"]?.["target_charge(nC)"];
+    let [rbs_data,] = usePollData(root_url + "/api/rbs/status")
 
-    let aml_moving = rbs_config.data?.["aml_x_y"]?.["busy"] || rbs_config.data?.["aml_phi_zeta"]?.["busy"] ||
-        rbs_config.data?.["aml_det_theta"]?.["busy"];
+    let aml_x = rbs_data?.["aml_x_y"]?.["motor_1_position"];
+    let aml_y = rbs_data?.["aml_x_y"]?.["motor_2_position"];
+    let aml_phi = rbs_data?.["aml_phi_zeta"]?.["motor_1_position"];
+    let aml_zeta = rbs_data?.["aml_phi_zeta"]?.["motor_2_position"];
+    let aml_det = rbs_data?.["aml_det_theta"]?.["motor_1_position"];
+    let aml_theta = rbs_data?.["aml_det_theta"]?.["motor_2_position"];
+    let current = rbs_data?.["motrona"]?.["current(nA)"];
+    let charge = rbs_data?.["motrona"]?.["charge(nC)"];
+    let target_charge = rbs_data?.["motrona"]?.["target_charge(nC)"];
 
-    let [erd_config, erd_show, erd_setShow, erd_modalMessage] = useGenericPage(root_url + "/api/erd/status", "ERD")
-    let mdrive_z = erd_config.data?.["mdrive_z"]?.["motor_position"];
-    let mdrive_theta = erd_config.data?.["mdrive_theta"]?.["motor_position"];
-    let mpa3_ad1_count_rate = erd_config.data?.["mpa3"]?.["ad1"]?.["total_rate"];
-    let mpa3_ad2_count_rate = erd_config.data?.["mpa3"]?.["ad2"]?.["total_rate"];
+    let aml_moving = rbs_data?.["aml_x_y"]?.["busy"] || rbs_data?.["aml_phi_zeta"]?.["busy"] ||
+        rbs_data?.["aml_det_theta"]?.["busy"];
 
-    let mdrive_moving = erd_config.data?.["mdrive_z"]?.["moving_to_target"] ||
-        erd_config.data?.["mdrive_theta"]?.["moving_to_target"]
+    let [erd_data,] = usePollData(root_url + "/api/erd/status")
+
+    let mdrive_z = erd_data?.["mdrive_z"]?.["motor_position"];
+    let mdrive_theta = erd_data?.["mdrive_theta"]?.["motor_position"];
+    let mpa3_ad1_count_rate = erd_data?.["mpa3"]?.["ad1"]?.["total_rate"];
+    let mpa3_ad2_count_rate = erd_data?.["mpa3"]?.["ad2"]?.["total_rate"];
+    let mdrive_moving = erd_data?.["mdrive_z"]?.["moving_to_target"] ||
+        erd_data?.["mdrive_theta"]?.["moving_to_target"]
 
     return (<>
-        <FailureModal show={rbs_show} setShow={rbs_setShow} message={rbs_modalMessage}/>
+        <ScrollDialog title={"Load"} text={text} open={open} onClose={() => {
+            setOpen(false)
+        }}/>
         <h1>Hardware Status</h1>
-
-        <Grid container mb={1}>
-            <Grid item={true} xs={12} mb={1}><h2>RBS</h2></Grid>
-            <Grid item={true} xs={12} mb={1}>
-                <Chip label={`Position (x, y, phi, zeta, det, theta) =
-                        (${aml_x}, ${aml_y}, ${aml_phi}, ${aml_zeta}, ${aml_det}, ${aml_theta})`}/>
-                <BusySpinner busy={aml_moving}/>
-            </Grid>
-            <Grid item={true} xs={1} mb={1}><Chip label={`Current = ${current} nA`}/></Grid>
-            <Grid item={true} xs={1}><Chip label={`Charge = ${charge} nC -> ${target_charge} nC`}/></Grid>
-            <Grid item={true} xs={10}/>
-
-            <Grid item={true} xs={1} mb={1}>
-                <SmallProgressButton url={root_url + "/api/rbs/load"} popup={rbs_config.popup}
-                                     setData={rbs_config.setData} text={"load"}/>
-            </Grid>
-
-            <Grid item={true} xs={12} mb={1}><h2>ERD</h2></Grid>
-            <Grid item={true} xs={2} mb={1}>
-                <Chip label={`Position (theta, z) = (${mdrive_theta}, ${mdrive_z})`}/>
-                <BusySpinner busy={mdrive_moving}/>
-            </Grid>
-            <Grid item={true} xs={1}><Chip label={`AD1 count rate = ${mpa3_ad1_count_rate}`}/></Grid>
-            <Grid item={true} xs={1}><Chip label={`AD2 count rate = ${mpa3_ad2_count_rate}`}/></Grid>
-            <Grid item={true} xs={8}/>
-            <Grid item={true}><SmallProgressButton url={root_url + "/api/erd/load"} popup={erd_config.popup}
-                                                   setData={erd_config.setData} text={"load"}/>
-            </Grid>
-
-        </Grid>
+        <h2>RBS</h2>
+        <Chip label={`Position (x, y, phi, zeta, det, theta) =
+                        (${aml_x}, ${aml_y}, ${aml_phi}, ${aml_zeta}, ${aml_det}, ${aml_theta})`}
+                icon={<BusySpinner busy={aml_moving}/>}
+        />
+        <Chip label={`Current = ${current} nA`}/>
+        <Chip label={`Charge = ${charge} nC -> ${target_charge} nC`}/>
+        <SmallProgressButton text={"load"}
+                             callback={async () => await postData(root_url + "/api/rbs/load?load=true")}/>
+        <h2>ERD</h2>
+        <Chip label={`Position (theta, z) = (${mdrive_theta}, ${mdrive_z})`} icon={<BusySpinner busy={mdrive_moving}/>}/>
+        <Chip label={`AD1 count rate = ${mpa3_ad1_count_rate}`}/>
+        <Chip label={`AD2 count rate = ${mpa3_ad2_count_rate}`}/>
+        <SmallProgressButton text={"load"}
+                             callback={async () => await postData(root_url + "/api/erd/load?load=true")}/>
     </>)
 }
 
 export function JobOverview() {
     const root_url = useContext(HiveUrl);
-    let state = useReadOnlyData(root_url + "/api/job/state", {})
+    let [state,] = usePollData(root_url + "/api/job/state", {})
 
     return (
         <div>
             <h1>Jobs</h1>
-
             <ScheduleJob/>
             <ScheduleTable schedule={state["schedule"]}/>
             <ProgressTable data={state}/>

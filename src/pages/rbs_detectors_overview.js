@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useState} from "react";
 import {HiveConfig, HiveUrl} from "../App";
-import {TableHeader, TableRow} from "../components/table_elements";
-import {useData} from "../components/generic_control";
+import {usePollData} from "../components/generic_control";
 import {StripedTable} from "../components/table_templates";
 import {getJson} from "../http_helper";
 
@@ -12,7 +11,7 @@ export function RbsDetectorOverview() {
 
     const hiveUrl = useContext(HiveUrl)
 
-    const [data, ,] = useData(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy);
+    const [data, ,] = usePollData(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy);
     const [rows, setRows] = useState([])
     const columns = [
         {field: 'identifier', headerName: "Identifier", flex: true},
