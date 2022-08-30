@@ -18,13 +18,14 @@ export function Aml(props) {
     const sendRequest = useSendRequest(url, setData, setError)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
+
     useEffect(() => {
         if (data?.error) {
             setIgnoreDisabled(data?.error === "Success")
         }
     }, [data])
     useEffect(() => {
-        if (error) {
+        if (error !== "Connected") {
             setText(error)
             setOpen(true)
         }
@@ -37,11 +38,11 @@ export function Aml(props) {
         ["Error", data?.error,
             <WideProgressButton disabled={ignoreDisabled} text={"Ignore"}
                             callback={async () => await sendRequest({"ignore_error": true})}/>],
-        [`${names[0]} Position`, data?.motor_1_position,
-            <NumberInput key={names[0]} inputLabel={`Move to ${names[0]} Position`} buttonLabel={"go"}
+        [`${names?.[0]} Position`, data?.motor_1_position,
+            <NumberInput key={names?.[0]} inputLabel={`Move to ${names?.[0]} Position`} buttonLabel={"go"}
                          callback={async (input) => await sendRequest({"set_m1_target_position": input})}/>],
-        [`${names[1]} Position`, data?.motor_2_position,
-            <NumberInput key={names[1]} inputLabel={`Move to ${names[1]} Position`} buttonLabel={"go"}
+        [`${names?.[1]} Position`, data?.motor_2_position,
+            <NumberInput key={names?.[1]} inputLabel={`Move to ${names?.[1]} Position`} buttonLabel={"go"}
                          callbak={async (input) => await sendRequest({"set_m2_target_position": input})}/>],
         [`Load Position`, `(${data?.motor_1_load_position}, ${data?.motor_2_load_position})`,
             <WideProgressButton text={"Load"}
@@ -56,16 +57,16 @@ export function Aml(props) {
             <WideProgressButton callback={async () =>
                 await sendRequest({"get_m1_position": true})} text={"Get Position"}/>],
         ["Step Counter", data?.motor_1_steps,
-            <NumberInput key={names[0]} inputLabel={"New Step Counter"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[0]} inputLabel={"New Step Counter"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m1_step_counter": input})}/>],
         ["Offset", data?.motor_1_offset,
-            <NumberInput key={names[0]} inputLabel={"New Offset"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[0]} inputLabel={"New Offset"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m1_offset": input})}/>],
         ["Load Position", data?.motor_1_load_position,
-            <NumberInput key={names[0]} inputLabel={"New Load Position"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[0]} inputLabel={"New Load Position"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m1_load_position": input})}/>],
         ["Motor Position", data?.motor_1_position,
-            <NumberInput key={names[0]} inputLabel={"New Motor Position"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[0]} inputLabel={"New Motor Position"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m1_position": input})}/>],
         ["Updating Position", data?.motor_1_updating_position?.toString(),
             <SwitchInput checked={data?.motor_1_updating_position} callback={async (checkRequest) =>
@@ -83,16 +84,16 @@ export function Aml(props) {
             <WideProgressButton callback={async () =>
                 await sendRequest({"get_m2_position": true})} text={"Get Position"}/>],
         ["Step Counter", data?.motor_2_steps,
-            <NumberInput key={names[0]} inputLabel={"New Step Counter"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[1]} inputLabel={"New Step Counter"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m2_step_counter": input})}/>],
         ["Offset", data?.motor_2_offset,
-            <NumberInput key={names[0]} inputLabel={"New Offset"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[1]} inputLabel={"New Offset"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m2_offset": input})}/>],
         ["Load Position", data?.motor_2_load_position,
-            <NumberInput key={names[0]} inputLabel={"New Load Position"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[1]} inputLabel={"New Load Position"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m2_load_position": input})}/>],
         ["Motor Position", data?.motor_2_position,
-            <NumberInput key={names[0]} inputLabel={"New Motor Position"} buttonLabel={"Redefine"}
+            <NumberInput key={names?.[1]} inputLabel={"New Motor Position"} buttonLabel={"Redefine"}
                          callback={async (input) => await sendRequest({"set_m2_position": input})}/>],
         ["Updating Position", data?.motor_2_updating_position?.toString(),
             <SwitchInput checked={data?.motor_2_updating_position} callback={async (checkRequest) =>
@@ -119,14 +120,12 @@ export function Aml(props) {
 
     return (
         <>
-            <h1>{props.hardware_value.title}</h1>
-
             <Grid container>
                 <GridHeader header={["Identifier", "Value", "Control"]}/>
                 <GridTemplate rows={basicControl}/>
-                <GridHeader header={[`${names[0]} Control`, "Value", "Control"]}/>
+                <GridHeader header={[`${names?.[0]} Control`, "Value", "Control"]}/>
                 <GridTemplate rows={advancedFirstControl}/>
-                <GridHeader header={[`${names[1]} Control`, "Value", "Control"]}/>
+                <GridHeader header={[`${names?.[1]} Control`, "Value", "Control"]}/>
                 <GridTemplate rows={advancedSecondControl}/>
                 <GridHeader header={[`Debug Control`, "Value", "Control"]}/>
                 <GridTemplate rows={debugControl}/>

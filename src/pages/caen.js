@@ -5,6 +5,7 @@ import {HiveUrl} from "../App";
 import {LoadButton, SwitchInput, WideProgressButton} from "../components/elements";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
 import {ButtonGroup, Grid} from "@mui/material";
+import {ToastPopup} from "../components/toast_popup";
 
 export function Caen(props) {
 
@@ -23,7 +24,7 @@ export function Caen(props) {
         }
     }, [data])
     useEffect(() => {
-        if (error) {
+        if (error !== "Connected") {
             setText(error)
             setOpen(true)
         }
@@ -77,13 +78,13 @@ export function Caen(props) {
 
     return (
         <>
-            <h1>{props.hardware_value.title}</h1>
             <Grid container>
                 <GridHeader header={["Identifier", "Value", "Control"]}/>
                 <GridTemplate rows={basicControl}/>
                 <GridHeader header={["Debug Control", "Value", "Control"]}/>
                 <GridTemplate rows={debugControl}/>
             </Grid>
+            <ToastPopup text={text} open={open} setOpen={setOpen} severity={"error"}/>
         </>
     );
 }

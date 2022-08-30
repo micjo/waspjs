@@ -1,5 +1,5 @@
-import React, {useContext, useState} from "react";
-import {HiveConfig, HiveUrl} from "../App";
+import React, {useContext, useEffect, useState} from "react";
+import {HiveConfig, HiveUrl, NectarTitle} from "../App";
 import {ConditionalBadge, usePollData} from "../components/generic_control";
 import {Link} from "react-router-dom";
 import {ProgressButton} from "../components/elements";
@@ -22,7 +22,7 @@ export function UseStatus(props) {
     const [text, setText] = useState("")
     const [open, setOpen] = useState(false)
     let title = props.value.title;
-    let href = "/nectar/" + props.setup + "/" + props.id;
+    let href = props.setup + "/" + props.id;
 
     let runningStatus = connectionStatus !== "Connected";
     let runBadge = <ConditionalBadge text={connectionStatus} error={runningStatus}/>
@@ -67,6 +67,9 @@ export function UseStatus(props) {
 
 export function Dashboard() {
     const context = useContext(HiveConfig);
+    const nectarTitle = useContext(NectarTitle);
+
+    useEffect( () => nectarTitle.setTitle("Dashboard"))
 
     let full_page = []
 
@@ -88,7 +91,7 @@ export function Dashboard() {
         full_page.push(
             <div key={setup_key}>
                 <h1>{capitalized_key}</h1>
-                <Grid item={true} container columnSpacing={1} ml={2} mb={2}>
+                <Grid item={true} container columnSpacing={1} ml={0} mb={2}>
                     <GridHeader header={["Name", "Connected", "Error", "Last Request", "Control", "Go"]}/>
                     {table}
                 </Grid>

@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
-import {LogbookUrl} from "../App";
+import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
 import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
@@ -72,12 +72,11 @@ export function Accelerator() {
     const logbookUrl = useContext(LogbookUrl)
     const [dialogText, setDialogText] = useState("")
     const [dialogOpen, setDialogOpen] = useState(false)
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle("Accelerator"))
 
     return (
-        <div>
-            <h1> Accelerator Parameters</h1>
-            <div>
-            </div>
+        <>
             <MaterialTableTemplate
                 title="Accelerator Parameters" columns={header} data={data}
                 onRowAdd={ async(newData) => {
@@ -98,6 +97,6 @@ export function Accelerator() {
             />
 
             <ToastPopup text={dialogText} open={dialogOpen} setOpen={setDialogOpen} />
-        </div>
+        </>
     );
 }

@@ -1,8 +1,7 @@
 import React, {useContext, useEffect, useState, Suspense} from "react";
-import {LogbookUrl} from "../App";
+import {LogbookUrl, NectarTitle} from "../App";
 import {getJson} from "../http_helper";
 import {MaterialTableTemplate} from "../components/table_templates";
-import {getLocaleIsoTime, getLocaleOneMonthAgoIsoTime} from "../components/time_helpers";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -20,8 +19,9 @@ export function Trends() {
 
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
-    const start = getLocaleOneMonthAgoIsoTime()
-    const end = getLocaleIsoTime()
+
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle("Trends"))
 
     useEffect(() => {
             async function fetch_params() {

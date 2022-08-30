@@ -23,7 +23,7 @@ export function Mdrive(props) {
         }
     }, [data])
     useEffect(() => {
-        if (error) {
+        if (error !== "Connected") {
             setText(error)
             setOpen(true)
         }

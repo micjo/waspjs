@@ -1,11 +1,11 @@
 import './App.css';
-import React, {useContext, useEffect, useState} from "react";
+import React, {useCallback, useContext, useEffect, useState} from "react";
 import {
     BrowserRouter,
     NavLink,
     Route,
     Routes,
-    Link as RouterLink
+    Link as RouterLink, useLocation, useParams
 } from "react-router-dom";
 
 
@@ -32,14 +32,21 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import {AppBar, IconButton, Toolbar} from "@mui/material";
-import { Menu  }from "@material-ui/icons";
+import {AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemText, MenuItem, Toolbar} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {makeStyles} from "@mui/styles";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import NestedList from "./components/nested_list";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import {MonitorHeart, Timeline, Menu, Work, Notes, Dashboard as DashboardIcon, Bolt, Memory} from "@mui/icons-material";
 
 export const HiveConfig = React.createContext({});
-export const HiveUrl = React.createContext({})
-export const LogbookUrl = React.createContext({})
+export const HiveUrl = React.createContext({});
+export const DocsUrl = React.createContext({});
+export const LogbookUrl = React.createContext({});
+export const NectarTitle = React.createContext({title: "", setTitle: (title) => {}});
 
 const theme = createTheme({
     palette: {
@@ -59,6 +66,16 @@ function useHiveUrl() {
         hive_url = "http://localhost:8000"
     } else {
         hive_url = "/hive"
+    }
+    return hive_url
+}
+
+function useDocsUrl() {
+    let hive_url;
+    if (process.env.NODE_ENV === "development") {
+        hive_url = "http://localhost:2000"
+    } else {
+        hive_url = "/docs"
     }
     return hive_url
 }
@@ -89,64 +106,50 @@ function useHiveConfig(hive_url) {
 
 export default function App() {
     let hiveUrl = useHiveUrl()
+    let docsUrl = useDocsUrl()
     let logbookUrl = useLogbookUrl()
     let hiveConfig = useHiveConfig(hiveUrl);
+    const [title, setTitle] = useState("");
+
     return (
-    <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <HiveUrl.Provider value={hiveUrl}>
-            <LogbookUrl.Provider value={logbookUrl}>
-                <HiveConfig.Provider value={hiveConfig}>
-                    <div>
-                        <Navigation/>
-                    </div>
-                </HiveConfig.Provider>
-            </LogbookUrl.Provider>
-        </HiveUrl.Provider>
-    </ThemeProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline/>
+            <HiveUrl.Provider value={hiveUrl}>
+                <NectarTitle.Provider value={{title, setTitle}}>
+                    <LogbookUrl.Provider value={logbookUrl}>
+                        <DocsUrl.Provider value={docsUrl}>
+                        <HiveConfig.Provider value={hiveConfig}>
+                            <div>
+                                <Navigation/>
+                            </div>
+                        </HiveConfig.Provider>
+                    </DocsUrl.Provider>
+                    </LogbookUrl.Provider>
+                </NectarTitle.Provider>
+            </HiveUrl.Provider>
+        </ThemeProvider>
     );
 }
 
 function NavLi(props) {
     return (
-        <li className="nav-item ms-2 me-2 flex-nowrap">
-            <NavLink to={props.url} className="nav-link">{props.children}</NavLink>
-        </li>
+        <ListItemButton onClick={props.onClick} component={NavLink} to={props.to}>
+            <ListItemIcon>
+                <ListItemIcon>
+                    {props.icon}
+                </ListItemIcon>
+            </ListItemIcon>
+            <ListItemText primary={props.label}/>
+        </ListItemButton>
     );
 
 }
 
-function Dropdown(props) {
-    return (<li className="nav-item dropdown navbar-dark ms-1 me-1">
-        <a className="nav-link dropdown-toggle" href="#" id={props.dropKey} role="button"
-           data-bs-toggle="dropdown" aria-expanded="false">
-            {props.dropKey[0].toUpperCase() + props.dropKey.slice(1)}
-        </a>
-        <ul className="dropdown-menu navbar-dark bg-dark" aria-labelledby={props.dropKey}>
-            {props.elements}
-        </ul>
-    </li>);
-}
-
-
-function NavBar(props) {
-    return (<nav className="navbar navbar-expand-lg navbar-dark bg-dark navbar-sm">
-        <div className="container-fluid">
-            <button className="navbar-toggler float-end" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span className="navbar-toggler-icon"/>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                    {props.elements}
-                </ul>
-            </div>
-        </div>
-    </nav>);
-}
-
 function SomeHardware(props) {
+
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle(props.hardware_value.title))
+
     if (props.hardware_value.type === "aml") {
         return (<Aml hardware_value={props.hardware_value}/>)
     }
@@ -168,28 +171,55 @@ function SomeHardware(props) {
     </>)
 }
 
+
+function NectarAppBar(props) {
+    const nectarTitle = useContext(NectarTitle)
+    const root_url = useContext(HiveUrl);
+    const docs_url = useContext(DocsUrl);
+    return (
+        <AppBar position={"sticky"}>
+            <Toolbar>
+                <IconButton size={"small"} onClick={() => props.show()} sx={{ mr: 2 }}>
+                    <Menu/>
+                </IconButton>
+                <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
+                    {nectarTitle.title}
+                </Typography>
+                <Button color="inherit" component={Link} href={docs_url}>Help</Button>
+                <Button color="inherit" component={Link} href={root_url}>Hive</Button>
+            </Toolbar>
+        </AppBar>)
+
+}
+
 function Navigation() {
     const context = useContext(HiveConfig);
-    const root_url = useContext(HiveUrl);
+    const [drawerVisible, setDrawerVisible] = useState(false)
+
+    const hide = useCallback(() => setDrawerVisible(false))
+    const show = useCallback(() => setDrawerVisible(true))
 
     if (context === "") {
         return <h1></h1>
     }
 
-    let routes = [<Route path="/" key="dashboard" element={<Dashboard/>}/>];
-    let navBarElements = [<NavLi url="/" key="dashboard">Dashboard </NavLi>];
+
+    let routes = [<Route path="/" key={"dashboard"} element={<Dashboard/>}/>];
+    let navBarElements = [
+        <NavLi to="/" key={"dashboard"} icon={<DashboardIcon/>} onClick={hide} label={"Dashboard"}/>
+    ];
 
     routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
-    navBarElements.push(<NavLi url="/job_overview" key="job_overview">Jobs </NavLi>);
+    navBarElements.push(<NavLi to="/job_overview" icon={<Work/>} key="job_overview" onClick={hide} label={"Jobs"}/>)
 
     routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
-    navBarElements.push(<NavLi url="/accelerator" key="accelerator">Accelerator</NavLi>);
+    navBarElements.push(<NavLi to="/accelerator" key="accelerator" icon={<Bolt/>} onClick={hide} label={"Accelerator"}/>)
 
     routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
-    navBarElements.push(<NavLi url="/trends" key="trends">Trends</NavLi>);
+    navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
-    navBarElements.push(<NavLi url="/log_view" key="log_view">Logbook</NavLi>);
+    navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
 
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
@@ -197,37 +227,41 @@ function Navigation() {
         if (key === "rbs") {
             const full_key = key + "/" + "detectors"
             const path = "/" + full_key
-            dropDownElements.push(<NavLi url={path} key={key + "/detectors"}>Detectors</NavLi>)
             routes.push(<Route key={full_key} path={path} element={<RbsDetectorOverview/>}/>);
+            dropDownElements.push(<NavLi to={path} icon={<MonitorHeart/>} key={key + "/detectors"} onClick={hide} label={"Detectors"}/>)
         }
-        //
-        // if (key === "erd") {
-        //     dropDownElements.push(<NavLi url={"/nectar/" + key + "/overview"} key={key + "/overview"}>Overview</NavLi>)
-        //     routes.push(<Route path="/nectar/erd/overview" element={<ErdOverview/>} key={key}/>)
-        // }
 
         for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {
             const full_key = key + "/" + hardware_key
             const path = "/" + full_key
-            dropDownElements.push(<NavLi url={path} key={full_key}> {hardware_value.title} </NavLi>)
             routes.push(<Route key={full_key} path={path} element={<SomeHardware hardware_value={hardware_value}/>}/>)
+            dropDownElements.push(<NavLi to={path} icon={<Memory/>} key={full_key} onClick={hide} label={hardware_value.title}/>)
         }
-        navBarElements.push(<Dropdown dropKey={key} elements={dropDownElements} key={key}/>)
+        let keyCap = key[0].toUpperCase() + key.slice(1)
+        navBarElements.push(<NestedList key={key} label={keyCap} items={dropDownElements}/>)
     }
 
-    navBarElements.push(<li className="nav-item ms-2 me-2 flex-nowrap" key="docs">
-        <a href={root_url} className="nav-link" target="_blank">Docs</a>
-    </li>)
 
     return (
         <>
             <BrowserRouter>
-                <NavBar elements={navBarElements}/>
-                <div className="fluid-container mt-3 ms-3 me-3 mb-3">
+                <NectarAppBar show={show}/>
+                <Drawer PaperProps={{
+                    sx: {width: "300px"},
+                }} anchor="left" open={drawerVisible} onClose={() => {
+                    setDrawerVisible(false)
+                }}>
+                    <List>
+                        <ListItem><ListItemText>Links</ListItemText></ListItem>
+                        <Divider/>
+                        {navBarElements}
+                    </List>
+                </Drawer>
+                <Box margin={2}>
                     <Routes>
                         {routes}
                     </Routes>
-                </div>
+                </Box>
             </BrowserRouter>
         </>
     )

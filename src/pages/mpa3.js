@@ -23,7 +23,7 @@ export function Mpa3(props) {
         }
     }, [data])
     useEffect(() => {
-        if (error) {
+        if (error !== "Connected") {
             setText(error)
             setOpen(true)
         }

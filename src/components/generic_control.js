@@ -22,7 +22,7 @@ export function BusySpinner(props) {
 
 export function usePollData(url){
     const [data, setData] = useState({})
-    const [error, setError] = useState("")
+    const [error, setError] = useState("Connected")
 
     useEffect(() => {
             const getControllerData = async () => {

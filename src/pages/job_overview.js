@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from "react";
 import {BusySpinner,usePollData} from "../components/generic_control";
 import {LoadButton, ProgressButton, SmallProgressButton} from "../components/elements";
-import {postData, useSendRequest} from "../http_helper";
-import {HiveUrl} from "../App";
+import {postData} from "../http_helper";
+import {HiveUrl, NectarTitle} from "../App";
 import {Button, Chip, Grid} from "@mui/material";
 import {AttachFile, Cancel, PlayArrow} from "@mui/icons-material";
 import ScrollDialog from "../components/ScrollDialog";
@@ -249,6 +249,8 @@ export function HardwareStatus() {
 export function JobOverview() {
     const root_url = useContext(HiveUrl);
     let [state,] = usePollData(root_url + "/api/job/state", {})
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle("Job Overview"))
 
     return (
         <div>

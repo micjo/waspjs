@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {LogbookUrl} from "../App";
+import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
 import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
@@ -35,6 +35,9 @@ export function LogView() {
     const [start, setStart] = useState(start_time);
     const [end, setEnd] = useState(end_time);
     const [filter, setFilter] = useState("");
+
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle("Logbook"))
 
     const [state, setState] = useState({});
 
