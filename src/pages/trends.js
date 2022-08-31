@@ -41,7 +41,7 @@ export function Trends() {
 
     useEffect(() => {
             async function fetch_content() {
-                let url = `${logbookUrl}/get_trends_last_month`;
+                let url = `${logbookUrl}/get_trends_last_day`;
                 let [, trends] = await getJson(url)
                 console.log(trends)
                 let params = []
