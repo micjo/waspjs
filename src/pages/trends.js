@@ -2,6 +2,7 @@ import React, {useContext, useEffect, useState, Suspense} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {getJson} from "../http_helper";
 import {MaterialTableTemplate} from "../components/table_templates";
+import {ToastPopup} from "../components/toast_popup";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -19,6 +20,7 @@ export function Trends() {
 
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
+    const [open, setOpen] = useState(true)
 
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Trends"))
@@ -57,12 +59,9 @@ export function Trends() {
     )
 
     return (
-        <div>
-            <h1> Trends </h1>
-            <div>
-            </div>
-
+        <>
             <MaterialTableTemplate title="Trends Last Month" columns={columns} data={data}/>
-        </div>
+            <ToastPopup text={"Loading... This may take a couple seconds"} open={open} setOpen={setOpen} severity={"info"}/>
+        </>
     );
 }

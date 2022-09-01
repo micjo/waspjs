@@ -1,15 +1,14 @@
 import React, {useContext, useEffect, useState} from "react";
-import {HiveConfig, HiveUrl} from "../App";
+import {HiveConfig, HiveUrl, NectarTitle} from "../App";
 import {usePollData} from "../components/generic_control";
 import {StripedTable} from "../components/table_templates";
 import {getJson} from "../http_helper";
 
 export function RbsDetectorOverview() {
     const hiveConfig = useContext(HiveConfig);
-    let detectors = hiveConfig?.rbs?.hardware?.caen?.detectors;
-    let table = [];
-
     const hiveUrl = useContext(HiveUrl)
+    const nectarTitle = useContext(NectarTitle);
+    useEffect( () => nectarTitle.setTitle("RBS Detectors"))
 
     const [rows, setRows] = useState([])
     const columns = [
@@ -52,12 +51,9 @@ export function RbsDetectorOverview() {
     }, [caen_data])
 
     return (
-        <div>
-            <h1> RBS Detectors </h1>
             <StripedTable
                 rows={rows}
                 columns={columns}
                 height={600}/>
-        </div>
     );
 }
