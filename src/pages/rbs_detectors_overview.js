@@ -20,11 +20,11 @@ export function RbsDetectorOverview() {
         {field: 'trapezoid_rise_time', headerName: "Trapezoid Rise Time (ns)", flex: true},
         {field: 'trapezoid_flat_top', headerName: "Trapezoid Flat Top (ns)", flex: true},
     ]
+    const [caen_data, , ,] = usePollData(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy)
 
     useEffect(() => {
         async function fillRows() {
             let newRows = []
-            let [, caen_data] = await getJson(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy)
             let detectors = hiveConfig?.rbs?.hardware?.caen?.detectors
             let boards = {}
             if (caen_data.boards) {
@@ -49,7 +49,7 @@ export function RbsDetectorOverview() {
             setRows(newRows)
         }
         fillRows()
-    }, [])
+    }, [caen_data])
 
     return (
         <div>
