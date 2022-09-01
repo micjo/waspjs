@@ -57,7 +57,7 @@ export function RbsDetectorOverview() {
             <StripedTable
                 rows={rows}
                 columns={columns}
-                height={300}/>
+                height={600}/>
         </div>
     );
 }
