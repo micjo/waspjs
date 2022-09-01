@@ -48,6 +48,8 @@ export const DocsUrl = React.createContext({});
 export const LogbookUrl = React.createContext({});
 export const NectarTitle = React.createContext({title: "", setTitle: (title) => {}});
 
+const devMode = process.env.NODE_ENV
+
 const theme = createTheme({
     palette: {
         mode: 'light',
@@ -62,30 +64,30 @@ const theme = createTheme({
 
 function useHiveUrl() {
     let hive_url;
-    if (process.env.NODE_ENV === "development") {
+    if (devMode === "development") {
         hive_url = "http://localhost:8000"
     } else {
-        hive_url = "/hive"
+        hive_url = "https://hive.capitan.imec.be"
     }
     return hive_url
 }
 
 function useDocsUrl() {
     let hive_url;
-    if (process.env.NODE_ENV === "development") {
+    if (devMode === "development") {
         hive_url = "http://localhost:2000"
     } else {
-        hive_url = "/docs"
+        hive_url = "https://wiki.capitan.imec.be"
     }
     return hive_url
 }
 
 function useLogbookUrl() {
     let logbook_url;
-    if (process.env.NODE_ENV === "development") {
+    if (devMode === "development") {
         logbook_url = "http://localhost:8001"
     } else {
-        logbook_url = "/logbook"
+        logbook_url = "https://logbook.capitan.imec.be"
     }
     return logbook_url
 }

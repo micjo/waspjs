@@ -11,7 +11,6 @@ export function RbsDetectorOverview() {
 
     const hiveUrl = useContext(HiveUrl)
 
-    const [data, ,] = usePollData(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy);
     const [rows, setRows] = useState([])
     const columns = [
         {field: 'identifier', headerName: "Identifier", flex: true},
@@ -25,11 +24,11 @@ export function RbsDetectorOverview() {
     useEffect(() => {
         async function fillRows() {
             let newRows = []
-            let caen_data = await getJson(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy)
+            let [, caen_data] = await getJson(hiveUrl + hiveConfig?.rbs?.hardware?.caen?.proxy)
             let detectors = hiveConfig?.rbs?.hardware?.caen?.detectors
             let boards = {}
-            if (data.boards) {
-                for (let board of data?.boards) {
+            if (caen_data.boards) {
+                for (let board of caen_data?.boards) {
                     boards[board.id] = board
                 }
             }
