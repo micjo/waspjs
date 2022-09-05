@@ -43,7 +43,7 @@ export function Aml(props) {
                          callback={async (input) => await sendRequest({"set_m1_target_position": input})}/>],
         [`${names?.[1]} Position`, data?.motor_2_position,
             <NumberInput key={names?.[1]} inputLabel={`Move to ${names?.[1]} Position`} buttonLabel={"go"}
-                         callbak={async (input) => await sendRequest({"set_m2_target_position": input})}/>],
+                         callback={async (input) => await sendRequest({"set_m2_target_position": input})}/>],
         [`Load Position`, `(${data?.motor_1_load_position}, ${data?.motor_2_load_position})`,
             <WideProgressButton text={"Load"}
                             callback={async () => await sendRequest({"m1_load": true, "m2_load":true})} />],
