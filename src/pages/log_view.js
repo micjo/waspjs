@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
-import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
+import CrudGrid from "../components/crud_data_grid";
 
 
 function epochToString(seconds_since_epoch) {
@@ -27,92 +27,73 @@ function getLocaleOneMonthAgoIsoTime() {
     return now.toISOString().slice(0,-1);
 }
 
+
+function useGetData() {
+    const logbookUrl = useContext(LogbookUrl)
+    return async () => {
+        let end_time = getLocaleIsoTime()
+        let start_time = getLocaleOneMonthAgoIsoTime()
+        let url = logbookUrl + "/get_filtered_log_book?mode=" + "&start=" + start_time + "&end=" + end_time;
+        let [, data] = await getJson(url);
+        let newRows = []
+        if (Array.isArray(data)) {
+            for (let item of data) {
+                newRows.push({'id': item.log_id, 'timestamp': epochToString(item.epoch), 'mode': item.mode,
+                    'note': item.note, 'job': item.job_name, 'recipe': item.recipe_name, 'sample': item.sample,
+                    'move': item.move, 'start': epochToString(item.start_epoch),
+                    'end': epochToString(item.end_epoch)})
+            }
+        }
+        return newRows
+    }
+}
+
+
 export function LogView() {
     const logbook_url = useContext(LogbookUrl);
-    let end_time = getLocaleIsoTime()
-    let start_time = getLocaleOneMonthAgoIsoTime()
-
-    const [start, setStart] = useState(start_time);
-    const [end, setEnd] = useState(end_time);
-    const [filter, setFilter] = useState("");
-
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Logbook"))
-
-    const [state, setState] = useState({});
-
-
     const [message, setMessage] = useState("")
 
     const header = [
-        { field:'timestamp', title:'Timestamp', initialEditValue:"(now)",cellStyle: {whiteSpace: 'nowrap'} },
-        { field: 'mode', title: 'Mode', initialEditValue:"note"},
-        { field: 'note', title: 'Note'},
-        { field: 'job', title: 'Job', editable:"never"},
-        { field: 'recipe', title: 'Recipe', editable:"never"},
-        { field: 'sample', title: 'Sample', editable:"never"},
-        { field: 'move', title: 'Move', editable:"never"},
-        { field: 'start', title: 'Start', editable:"never"},
-        { field: 'end', title: 'End', editable:"never"},
+        { field:'timestamp', headerName:'Timestamp', type:"dateTime", editable:true, flex:0.2},
+        { field: 'mode', headerName: 'Mode', editable:true},
+        { field: 'note', headerName: 'Note', editable:true, flex: 0.5},
+        { field: 'job', headerName: 'Job', editable:false},
+        { field: 'recipe', headerName: 'Recipe', editable:false, flex:0.2},
+        { field: 'sample', headerName: 'Sample', editable:false, flex:0.2},
+        { field: 'move', headerName: 'Move', editable:false, flex:0.3},
+        { field: 'start', headerName: 'Start', editable:false, flex:0.2},
+        { field: 'end', headerName: 'End', editable:false, flex: 0.2},
     ]
 
-    const [rows, setRows] = useState([])
     const [dialogOpen,setDialogOpen] = useState(false)
-
-    useEffect ( () => {
-        async function fillRows() {
-            let newRows = []
-            if (Array.isArray(state)) {
-                for (let item of state) {
-                    newRows.push({'id': item.log_id, 'timestamp': epochToString(item.epoch), 'mode': item.mode,
-                        'note': item.note, 'job': item.job_name, 'recipe': item.recipe_name, 'sample': item.sample,
-                        'move': item.move, 'start': epochToString(item.start_epoch),
-                        'end': epochToString(item.end_epoch)})
-                }
-                setRows(newRows)
-            }
-        }
-        fillRows()
-    }, [state] );
-
-    useEffect( () => {
-        async function fetch_content() {
-            let url = logbook_url + "/get_filtered_log_book?mode=" + filter + "&start=" + start + "&end=" + end;
-            let [, json_response] = await getJson(url);
-            setState(json_response);
-        }
-        fetch_content().then()
-    }, []);
+    let getData = useGetData()
 
     return (
         <>
-            <MaterialTableTemplate
-                title="Logbook" columns={header} data={rows}
-                onRowAdd={ async(newData) => {
+            <CrudGrid getData = {getData} columns={header}
+                rowAdd={async (newRow) => {
                     let response
-                    if (newData.timestamp === "(now)") {
-                        response = await postData(`${logbook_url}/message?message=${newData.note}&mode=${newData.mode}`, "");
+                    if (newRow.timestamp) {
+                        response = await postData(logbook_url + "/message?message=" + newRow.note +
+                            "&mode=" + newRow.mode + "&timestamp=" + newRow.timestamp, "");
                     }
                     else {
-                        response = await postData(logbook_url + "/message?message=" + newData.note +
-                            "&mode=" + newData.mode + "&timestamp=" + newData.timestamp, "");
+                        response = await postData(`${logbook_url}/message?message=${newRow.note}&mode=${newRow.mode}`, "");
                     }
-
                     if (response.status !== 200) {
                         setMessage("Invalid time format. Example: <2022-01-01 12:00:00>");
                         let text = await response.text()
                         setMessage(text)
                         setDialogOpen(true)
-                        return
                     }
-                    let [, json_response] = await getJson(`${logbook_url}/get_log_book`);
-                    setState(json_response)
                 }}
-                onRowDelete={ async(oldData) => {
-                    await deleteData(`${logbook_url}/message?log_id=${oldData.id}`)
-                    let [, json_response] = await getJson(`${logbook_url}/get_log_book`);
-                    setState(json_response)
-                }}/>
+              rowDelete={ async(id) => {
+                  await deleteData(`${logbook_url}/message?log_id=${id}`)
+              }}
+             initialEdit="mode"
+            />
             <ToastPopup open={dialogOpen} setOpen={setDialogOpen} message={message} />
         </>);
 

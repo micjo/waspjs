@@ -6,8 +6,6 @@
   "proxy": "",
   "dependencies": {
     "@fontsource/roboto": "^4.5.8",
-    "@material-table/core": "^0.2.35",
-    "@material-table/exporters": "^1.0.12",
     "@material-ui/core": "^4.12.4",
     "@material-ui/data-grid": "^4.0.0-alpha.37",
     "@material-ui/icons": "^4.11.3",
@@ -23,14 +21,11 @@
     "express": "^4.18.1",
     "http-proxy-middleware": "^2.0.6",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.5.0",
-    "react-chartjs-2": "^4.3.1",
     "react-collapsible": "^2.10.0",
     "react-dom": "^18.2.0",
     "react-error-overlay": "^6.0.11",
     "react-icons": "^4.4.0",
     "react-plotly.js": "^2.5.1",
-    "react-router-bootstrap": "^0.26.2",
     "react-scripts": "^5.0.1",
     "recharts": "^2.1.13",
     "uplot": "^1.6.22",
@@ -61,7 +56,6 @@
     ]
   },
   "devDependencies": {
-    "bootstrap": "^5.2.0",
     "react-router-dom": "^6.3.0",
     "serve": "^14.0.1"
   }

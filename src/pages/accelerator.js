@@ -1,8 +1,8 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
-import {MaterialTableTemplate} from "../components/table_templates";
 import {ToastPopup} from "../components/toast_popup";
+import CrudGrid from "../components/crud_data_grid";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -14,32 +14,28 @@ function epochToString(seconds_since_epoch) {
     return isoDate;
 }
 
-function useUpdateHeader() {
+function useHeader() {
     const [header, setHeader] = useState([]);
     const logbookUrl = useContext(LogbookUrl)
-    const update = useCallback(() => {
+    useEffect(() => {
         async function fetch_params() {
-            console.log("updating header")
             let [, accelerator_keys] = await getJson(logbookUrl + "/check_accelerator_parameters")
             let keys = []
             for (let key of accelerator_keys) {
                 if (key ==="id") {continue}
                 if (key === "epoch") {
-                    keys.push({field:key, title:"timestamp", editable:"never", cellStyle: {whiteSpace: 'nowrap'} })
+                    keys.push({field:key, type:'dateTime', width:200, editable: false})
                 }
                 else {
-                    keys.push({field: key, title: key})
+                    keys.push({field: key, headerName: key, editable:true})
                 }
             }
             setHeader(keys)
         }
 
         fetch_params().then()
-    }, [])
-
-    useEffect(update,[])
-
-    return [header, update]
+    },[])
+    return header
 }
 
 function useUpdateData() {
@@ -50,7 +46,7 @@ function useUpdateData() {
                 let [, acceleratorParams] = await getJson(logbookUrl + "/get_accelerator_parameters")
                 let params = []
                 for (let line of acceleratorParams) {
-                    line['epoch'] = epochToString(line['epoch'])
+                    line['epoch'] = line['epoch']
                     params.push(line)
                 }
                 setData(params)
@@ -65,37 +61,37 @@ function useUpdateData() {
     return [data,update]
 }
 
+function useGetData() {
+    const logbookUrl = useContext(LogbookUrl)
+    return async () => {
+                let [, acceleratorParams] = await getJson(logbookUrl + "/get_accelerator_parameters")
+                let params = []
+                for (let line of acceleratorParams) {
+                    line['epoch'] = epochToString(line['epoch'])
+                    params.push(line)
+                }
+                return params
+            }
+}
+
 
 export function Accelerator() {
-    const [header, updateHeader] = useUpdateHeader()
-    const [data, updateData] = useUpdateData()
+    const header = useHeader()
     const logbookUrl = useContext(LogbookUrl)
     const [dialogText, setDialogText] = useState("")
     const [dialogOpen, setDialogOpen] = useState(false)
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Accelerator"))
+    const getData = useGetData()
 
     return (
         <>
-            <MaterialTableTemplate
-                title="Accelerator Parameters" columns={header} data={data}
-                onRowAdd={ async(newData) => {
-                    console.log(newData)
-                    await postData(logbookUrl + "/log_accelerator_paramaters", JSON.stringify(newData))
-                    updateData()
-                }}
-                onRowUpdate={ async(newData, oldData) => {
-                    console.log(newData);
-                    console.log(oldData);
-                    setDialogText("This is not supported")
-                    setDialogOpen(true)
-                }}
-                onRowDelete={ async(oldData) => {
-                    await deleteData(logbookUrl + "/accelerator_parameters?id=" + oldData.id)
-                    updateData()
-                }}
-            />
-
+            <CrudGrid getData={getData} columns={header}
+                      rowAdd={ async(newRow) => {
+                          await postData(logbookUrl + "/log_accelerator_paramaters", JSON.stringify(newRow))}}
+                      rowDelete= { async(id) => {
+                          await deleteData(logbookUrl + "/accelerator_parameters?id=" + id)}}
+                      initialEdit="area"/>
             <ToastPopup text={dialogText} open={dialogOpen} setOpen={setDialogOpen} />
         </>
     );

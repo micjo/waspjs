@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useState, Suspense} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {getJson} from "../http_helper";
-import {MaterialTableTemplate} from "../components/table_templates";
-import {ToastPopup} from "../components/toast_popup";
+import {DataGrid, GridToolbar} from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import {CircularProgress, Stack} from "@mui/material";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -14,54 +15,75 @@ function epochToString(seconds_since_epoch) {
     return isoDate;
 }
 
+function useData() {
+    const logbookUrl = useContext(LogbookUrl)
+    const [data, setData] = useState([]);
+    useEffect( () => {
+        async function fetch_data() {
+            let url = `${logbookUrl}/get_trends_last_day`;
+            let [, trends] = await getJson(url)
+            let params = []
+            let index = 0;
+            for (let line of trends) {
+                line['timestamp'] = epochToString(line['epoch'])
+                line['id'] = index
+                params.push(line)
+                index++
+            }
+            setData(params)
+        }
+        fetch_data().then()
+    }, [logbookUrl])
+    return data
+}
+
+function useHeader() {
+    const logbookUrl = useContext(LogbookUrl)
+    const [header, setHeader] = useState([]);
+    useEffect(() => {
+        async function fetch_params() {
+            let [, accelerator_keys] = await getJson(logbookUrl + "/check_trending")
+            let header = []
+            for (let key of accelerator_keys) {
+                if (key ==="id") {continue}
+                if (key === "epoch") {
+                    header.push({field: "timestamp", headerName: "timestamp", type: "dateTime", flex:0.4})
+                }
+                else {
+                    header.push({field: key, headerName: key, flex:0.2})
+                }
+            }
+            setHeader(header)
+        }
+        fetch_params().then()
+    }, [logbookUrl])
+
+    return header
+}
+
 
 export function Trends() {
-    const logbookUrl = useContext(LogbookUrl)
-
-    const [data, setData] = useState([]);
-    const [columns, setColumns] = useState([]);
-    const [open, setOpen] = useState(true)
+    const header = useHeader()
+    const data = useData()
 
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Trends"))
 
-    useEffect(() => {
-            async function fetch_params() {
-                let [, accelerator_keys] = await getJson(logbookUrl + "/check_trending")
-                let header = []
-                for (let key of accelerator_keys) {
-                    if (key ==="id") {continue}
-                    if (key === "epoch") {key = "timestamp"}
-                    header.push({field: key, title: key, cellStyle: {whiteSpace: 'nowrap'} })
-                }
-                setColumns(header)
-            }
-
-            fetch_params().then()
-        }, [logbookUrl]
-    )
-
-    useEffect(() => {
-            async function fetch_content() {
-                let url = `${logbookUrl}/get_trends_last_day`;
-                let [, trends] = await getJson(url)
-                console.log(trends)
-                let params = []
-                for (let line of trends) {
-                    line['timestamp'] = epochToString(line['epoch'])
-                    params.push(line)
-                }
-                setData(params)
-            }
-
-            fetch_content().then()
-        }, [logbookUrl]
-    )
-
     return (
-        <>
-            <MaterialTableTemplate title="Trends Last Month" columns={columns} data={data}/>
-            <ToastPopup text={"Loading... This may take a couple seconds"} open={open} setOpen={setOpen} severity={"info"}/>
-        </>
+        <Box sx={{height: 800}}>
+        <DataGrid
+            rows={data}
+            columns={header}
+            components={{
+                Toolbar: GridToolbar,
+                NoRowsOverlay: () => (
+                    <Stack height="100%" alignItems="center" justifyContent="center">
+                        <CircularProgress />
+                    </Stack>
+                )
+            }}
+
+        />
+        </Box>
     );
 }

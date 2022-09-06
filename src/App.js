@@ -10,9 +10,6 @@ import {
 
 
 import Link from "@material-ui/core/Link";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min';
-
 import {Dashboard} from "./pages/dashboard";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";

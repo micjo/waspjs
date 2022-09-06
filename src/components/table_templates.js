@@ -1,4 +1,3 @@
-import MaterialTable from "@material-table/core";
 import {ExportCsv, ExportPdf} from "@material-table/exporters";
 import React from "react";
 import {Stack} from "@mui/material";
@@ -18,33 +17,6 @@ const StripedDataGrid = styled(DataGrid)(({theme}) => ({
         },
     }
 }));
-
-export function MaterialTableTemplate(props) {
-    return (
-    <MaterialTable
-        {...props}
-        options={{
-            // tableLayout: "fixed",
-            // Allow user to hide/show
-            // columns from Columns Button
-            columnsButton: true,
-            exportMenu: [{
-                label: 'Export PDF',
-                exportFunc: (cols, datas) => ExportPdf(cols, datas, 'myPdfFileName')
-            }, {
-                label: 'Export CSV',
-                exportFunc: (cols, datas) => ExportCsv(cols, datas, 'myCsvFileName')
-            }],
-            pageSizeOptions: [5, 10, 20, 1000],
-        }}
-
-        editable={{
-            onRowAdd: props.onRowAdd,
-            onRowDelete: props.onRowDelete,
-            onRowUpdate: props.onRowUpdate
-        }}
-    />)
-}
 
 export function StripedTable(props) {
     return (
