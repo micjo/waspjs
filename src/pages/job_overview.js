@@ -250,11 +250,10 @@ export function JobOverview() {
     const root_url = useContext(HiveUrl);
     let [state,] = usePollData(root_url + "/api/job/state", {})
     const nectarTitle = useContext(NectarTitle);
-    useEffect( () => nectarTitle.setTitle("Job Overview"))
+    useEffect( () => nectarTitle.setTitle("Jobs"))
 
     return (
         <div>
-            <h1>Jobs</h1>
             <ScheduleJob/>
             <ScheduleTable schedule={state["schedule"]}/>
             <ProgressTable data={state}/>
