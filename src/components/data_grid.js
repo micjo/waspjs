@@ -222,7 +222,7 @@ export default function CrudGrid(props) {
 
 export function RoDataGrid(props) {
     return (
-        <Box sx={{ height: 400, width: '100%' }}>
+        <Box sx={{ height: 800, width: '100%' }}>
             <DataGrid
                 rows = {props.rows}
                 columns = {props.columns}
