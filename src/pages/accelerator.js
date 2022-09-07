@@ -3,16 +3,7 @@ import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
 import {ToastPopup} from "../components/toast_popup";
 import CrudGrid from "../components/data_grid";
-
-function epochToString(seconds_since_epoch) {
-    // format: YYYY.MM.DD__HH:MM__SS
-    if (seconds_since_epoch === "" || seconds_since_epoch === null) {
-        return ""
-    }
-
-    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
-    return isoDate;
-}
+import {epochToString} from "../components/time_helpers";
 
 function useHeader() {
     const [header, setHeader] = useState([]);

@@ -9,3 +9,12 @@ export function getLocaleOneMonthAgoIsoTime() {
     now.setMonth(now.getMonth() - 1)
     return now.toISOString().slice(0,-1);
 }
+
+export function epochToString(seconds_since_epoch) {
+    // format: YYYY.MM.DD__HH:MM__SS
+    if (seconds_since_epoch === "" || seconds_since_epoch === null) {
+        return ""
+    }
+    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString('nl-BE').replaceAll(',', '');
+    return isoDate;
+}

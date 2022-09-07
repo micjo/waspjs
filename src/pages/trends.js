@@ -1,20 +1,9 @@
 import React, {useContext, useEffect, useState, Suspense} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {delay, getJson} from "../http_helper";
-import {DataGrid, GridToolbar} from "@mui/x-data-grid";
-import Box from "@mui/material/Box";
-import {CircularProgress, Stack} from "@mui/material";
 import {RoDataGrid} from "../components/data_grid";
+import {epochToString} from "../components/time_helpers";
 
-function epochToString(seconds_since_epoch) {
-    // format: YYYY.MM.DD__HH:MM__SS
-    if (seconds_since_epoch === "" || seconds_since_epoch === null) {
-        return ""
-    }
-
-    let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
-    return isoDate;
-}
 
 function useData() {
     const logbookUrl = useContext(LogbookUrl)
