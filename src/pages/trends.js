@@ -4,6 +4,7 @@ import {getJson} from "../http_helper";
 import {DataGrid, GridToolbar} from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
 import {CircularProgress, Stack} from "@mui/material";
+import {RoDataGrid} from "../components/data_grid";
 
 function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
@@ -18,6 +19,7 @@ function epochToString(seconds_since_epoch) {
 function useData() {
     const logbookUrl = useContext(LogbookUrl)
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true)
     useEffect( () => {
         async function fetch_data() {
             let url = `${logbookUrl}/get_trends_last_day`;
@@ -33,8 +35,9 @@ function useData() {
             setData(params)
         }
         fetch_data().then()
+        setLoading(false)
     }, [logbookUrl])
-    return data
+    return [data, loading]
 }
 
 function useHeader() {
@@ -64,26 +67,16 @@ function useHeader() {
 
 export function Trends() {
     const header = useHeader()
-    const data = useData()
+    const [data, loading] = useData()
 
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Trends"))
 
     return (
-        <Box sx={{height: 800}}>
-        <DataGrid
+        <RoDataGrid
             rows={data}
             columns={header}
-            components={{
-                Toolbar: GridToolbar,
-                NoRowsOverlay: () => (
-                    <Stack height="100%" alignItems="center" justifyContent="center">
-                        <CircularProgress />
-                    </Stack>
-                )
-            }}
-
+            loading={loading}
         />
-        </Box>
     );
 }

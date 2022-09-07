@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
 import {deleteData, getJson, postData} from "../http_helper";
 import {ToastPopup} from "../components/toast_popup";
-import CrudGrid from "../components/crud_data_grid";
+import CrudGrid from "../components/data_grid";
 
 
 function epochToString(seconds_since_epoch) {

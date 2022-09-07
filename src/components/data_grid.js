@@ -8,9 +8,6 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Close';
 import {
-    randomCreatedDate,
-    randomTraderName,
-    randomUpdatedDate,
     randomId,
 } from '@mui/x-data-grid-generator';
 import {
@@ -18,60 +15,22 @@ import {
     GridActionsCellItem,
     GridRowModes,
     GridToolbarColumnsButton,
-    GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton, useGridApiRef
-} from "@mui/x-data-grid";
-import {cloneElement, useContext, useEffect, useState} from "react";
-import {getJson} from "../http_helper";
-import {LogbookUrl} from "../App";
-import {Commit} from "@mui/icons-material";
+    GridToolbarContainer, GridToolbarDensitySelector, GridToolbarExport, GridToolbarFilterButton,
+    gridPageCountSelector,
+    gridPageSelector,
+    useGridApiContext,
+    useGridSelector, GridToolbar,
+} from '@mui/x-data-grid';
+import Pagination from '@mui/material/Pagination';
+import {useEffect, useState} from "react";
+import LinearProgress from "@mui/material/LinearProgress";
 
-const initialRows = [
-    {
-        id: randomId(),
-        name: randomTraderName(),
-        age: 25,
-        dateCreated: randomCreatedDate(),
-        lastLogin: randomUpdatedDate(),
-    },
-    {
-        id: randomId(),
-        name: randomTraderName(),
-        age: 36,
-        dateCreated: randomCreatedDate(),
-        lastLogin: randomUpdatedDate(),
-    },
-    {
-        id: randomId(),
-        name: randomTraderName(),
-        age: 19,
-        dateCreated: randomCreatedDate(),
-        lastLogin: randomUpdatedDate(),
-    },
-    {
-        id: randomId(),
-        name: randomTraderName(),
-        age: 28,
-        dateCreated: randomCreatedDate(),
-        lastLogin: randomUpdatedDate(),
-    },
-    {
-        id: randomId(),
-        name: randomTraderName(),
-        age: 23,
-        dateCreated: randomCreatedDate(),
-        lastLogin: randomUpdatedDate(),
-    },
-];
-
-function randomInteger() {
-    return Math.floor(Math.random() * 999999);
-}
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
 
     const handleClick = () => {
-        const id = randomInteger();
+        const id = randomId();
         setRows((oldRows) => [...oldRows, { id, name: '', age: '', isNew: true }]);
         setRowModesModel((oldModel) => ({
             ...oldModel,
@@ -114,6 +73,22 @@ function epochToString(seconds_since_epoch) {
     let isoDate = new Date(seconds_since_epoch * 1000).toLocaleString().replaceAll(',', '');
     return isoDate;
 }
+
+function CustomPagination() {
+    const apiRef = useGridApiContext();
+    const page = useGridSelector(apiRef, gridPageSelector);
+    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
+
+    return (
+        <Pagination
+            color="primary"
+            count={pageCount}
+            page={page + 1}
+            onChange={(event, value) => apiRef.current.setPage(value - 1)}
+        />
+    );
+}
+
 
 export default function CrudGrid(props) {
     const [rows, setRows] = useState([]);
@@ -213,7 +188,7 @@ export default function CrudGrid(props) {
     return (
         <Box
             sx={{
-                height: 500,
+                height: 800,
                 // width: '100%',
                 // '& .actions': {
                 //     color: 'text.secondary',
@@ -233,6 +208,7 @@ export default function CrudGrid(props) {
                 processRowUpdate={processRowUpdate}
                 components={{
                     Toolbar: CustomToolbar,
+                    Pagination: CustomPagination,
                 }}
                 componentsProps={{
                     toolbar: { setRows, setRowModesModel, initialEdit},
@@ -242,3 +218,26 @@ export default function CrudGrid(props) {
         </Box>
     );
 }
+
+
+export function RoDataGrid(props) {
+    return (
+        <Box sx={{ height: 400, width: '100%' }}>
+            <DataGrid
+                rows = {props.rows}
+                columns = {props.columns}
+                pagination
+                pageSize={20}
+                loading={props.loading}
+                components={{
+                    Toolbar: GridToolbar,
+                    Pagination: CustomPagination,
+                    LoadingOverlay: LinearProgress,
+                }}
+            />
+        </Box>
+    );
+}
+
+
+
