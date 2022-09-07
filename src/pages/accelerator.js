@@ -27,7 +27,7 @@ function useHeader() {
                     keys.push({field:key, type:'dateTime', width:200, editable: false})
                 }
                 else {
-                    keys.push({field: key, headerName: key, editable:true})
+                    keys.push({field: key, headerName: key, editable:true, flex:1})
                 }
             }
             setHeader(keys)

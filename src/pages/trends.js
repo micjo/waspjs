@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState, Suspense} from "react";
 import {LogbookUrl, NectarTitle} from "../App";
-import {getJson} from "../http_helper";
+import {delay, getJson} from "../http_helper";
 import {DataGrid, GridToolbar} from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
 import {CircularProgress, Stack} from "@mui/material";
@@ -33,9 +33,9 @@ function useData() {
                 index++
             }
             setData(params)
+            setLoading(false)
         }
         fetch_data().then()
-        setLoading(false)
     }, [logbookUrl])
     return [data, loading]
 }
