@@ -44,7 +44,7 @@ export function UseStatus(props) {
                     await postData(root_url + "/api/service" + stop_query, "");
                 }}/>
                 <ProgressButton text="Logs" callback={async () => {
-                        let response = await fetch(root_url + "/api/service_log?daemon=" + props.id);
+                        let response = await fetch(root_url + "/api/service_log?name=" + props.id);
                         let response_text = await response.text();
                         setText(response_text)
                         setOpen(true)
