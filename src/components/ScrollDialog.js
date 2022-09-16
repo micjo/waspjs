@@ -10,6 +10,13 @@ function NewlineText(props) {
     let lines = []
     let i = 0;
     for(let line of props.text.split("\\n")) {
+    	line = line.replace(/\\"/g, "\"");
+        if( line.charAt( 0 ) === '"' ) {
+            line = line.slice( 1 );
+        }
+        if(line === "\"") {
+            continue;
+        }
         lines.push(<Paper key={i}>{line}</Paper>)
         i++;
     }
