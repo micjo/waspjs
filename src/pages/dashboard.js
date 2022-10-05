@@ -76,7 +76,7 @@ export function Dashboard() {
     let even = true
     for (const [setup_key, setup_value] of Object.entries(context)) {
         let table = []
-        for (const [hardware_key, hardware_value] of Object.entries(setup_value.hardware)) {
+        for (const [hardware_key, hardware_value] of Object.entries(setup_value.drivers)) {
 
             let backgroundColor = even ? grey[200] : 'background.default'
 

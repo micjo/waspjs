@@ -64,7 +64,7 @@ function useHiveUrl() {
     if (devMode === "development") {
         hive_url = "http://localhost:8000"
     } else {
-        hive_url = "https://hive.capitan.imec.be"
+        hive_url = "https://mill.capitan.imec.be"
     }
     return hive_url
 }
@@ -93,7 +93,7 @@ function useHiveConfig(hive_url) {
     const [hwConfig, setHwConfig] = useState("");
     useEffect(() => {
         const getHwConfig = async () => {
-            const [, newHwConfig] = await getJson(hive_url + "/api/hive_config")
+            const [, newHwConfig] = await getJson(hive_url + "/api/config")
             setHwConfig(newHwConfig);
         }
 
@@ -230,7 +230,7 @@ function Navigation() {
             dropDownElements.push(<NavLi to={path} icon={<MonitorHeart/>} key={key + "/detectors"} onClick={hide} label={"Detectors"}/>)
         }
 
-        for (let [hardware_key, hardware_value] of Object.entries(value.hardware)) {
+        for (let [hardware_key, hardware_value] of Object.entries(value.drivers)) {
             const full_key = key + "/" + hardware_key
             const path = "/" + full_key
             routes.push(<Route key={full_key} path={path} element={<SomeHardware hardware_value={hardware_value}/>}/>)
