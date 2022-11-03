@@ -84,7 +84,7 @@ function useLogbookUrl() {
     if (devMode === "development") {
         logbook_url = "http://localhost:8001"
     } else {
-        logbook_url = "https://logbook.capitan.imec.be"
+        logbook_url = "https://db.capitan.imec.be"
     }
     return logbook_url
 }
