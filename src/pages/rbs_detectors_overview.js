@@ -1,11 +1,11 @@
 import React, {useContext, useEffect, useState} from "react";
-import {HiveConfig, HiveUrl, NectarTitle} from "../App";
+import {MillConfig, HiveUrl, NectarTitle} from "../App";
 import {usePollData} from "../components/generic_control";
 import {StripedTable} from "../components/table_templates";
 import {getJson} from "../http_helper";
 
 export function RbsDetectorOverview() {
-    const hiveConfig = useContext(HiveConfig);
+    const hiveConfig = useContext(MillConfig);
     const hiveUrl = useContext(HiveUrl)
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("RBS Detectors"))

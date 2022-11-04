@@ -1,14 +1,15 @@
-import React, {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {BusySpinner,usePollData} from "../components/generic_control";
 import {LoadButton, ProgressButton, SmallProgressButton} from "../components/elements";
 import {postData} from "../http_helper";
 import {HiveUrl, NectarTitle} from "../App";
-import {Button, Chip, Grid} from "@mui/material";
-import {AttachFile, Cancel, PlayArrow} from "@mui/icons-material";
+import {Button, Chip, Grid, Typography, Paper, InputBase, Divider, IconButton} from "@mui/material";
+import {AttachFile, Cancel, PlayArrow, Upload, Play, Telegram} from "@mui/icons-material";
 import ScrollDialog from "../components/ScrollDialog";
 import {LinearWithValueLabel} from "../components/linear_progress_with_label";
 import Box from "@mui/material/Box";
 import {StripedTable} from "../components/table_templates";
+
 
 
 function ScheduleTable(props) {
@@ -49,7 +50,7 @@ function ScheduleTable(props) {
 
 function ScheduleJob() {
     const [job, setJob] = useState({});
-    const [, setFilename] = useState("");
+    const [filename, setFilename] = useState("filename.csv");
     const [scheduleDisable, setScheduleDisable] = useState(true);
     const [text, setText] = useState("")
     const [open, setOpen] = useState(false)
@@ -79,6 +80,7 @@ function ScheduleJob() {
         await postData(url + job?.type, JSON.stringify(job))
         setJob({})
         setFilename("");
+        setScheduleDisable(true);
     }
 
     return (
@@ -86,17 +88,33 @@ function ScheduleJob() {
             <ScrollDialog title={"Error"} text={text} open={open} onClose={() => {
                 setOpen(false)
             }}/>
-            <div className="input-group mt-2 mb-2">
-                <Button size={"small"} variant={"contained"} component="label" endIcon={<AttachFile/>}>
-                    Upload
-                    <input hidden accept="text/csv" multiple type="file"
-                           onClick={(e) => {
-                               e.target.value = null;
-                           }}
-                           onChange={async (e) => await handleFileChange(e)}/>
-                </Button>
-                <ProgressButton disabled={scheduleDisable} text="Schedule" callback={scheduleJob} icon={<PlayArrow/>}/>
-            </div>
+                <h5>Schedule CSV</h5>
+                <Paper
+                    component="form"
+                    sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+                >
+
+                    <InputBase
+                        sx={{ ml: 1, flex: 1 }}
+                        readOnly={true}
+                        disabled={scheduleDisable}
+                        value={filename}
+                        inputProps={{ 'aria-label': 'search google maps' }}
+                    />
+                    <IconButton type="button" sx={{ p: '10px' }} aria-label="search" component="label">
+                        <Upload color="primary"/>
+                        <input hidden accept="text/csv" multiple type="file"
+                               onClick={(e) => {
+                                   e.target.value = null;
+                               }}
+                               onChange={async (e) => await handleFileChange(e)}/>
+                    </IconButton>
+                    <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                    <IconButton color="primary" disabled={scheduleDisable} sx={{ p: '10px' }} aria-label="directions"
+                        onClick={scheduleJob}>
+                        <Telegram />
+                    </IconButton>
+                </Paper>
         </div>
     );
 }
@@ -112,6 +130,7 @@ function ProgressTable(props) {
     let finished_recipes = props.data?.active_job?.finished_recipes;
     let active_recipe = props.data?.active_job?.active_recipe;
     let active_job_id = props.data?.active_job?.job?.name;
+    console.log(props.data)
 
     const [rows, setRows] = useState([])
 
@@ -147,7 +166,6 @@ function ProgressTable(props) {
 
             if (index < all_recipes.length) {
                 let time = new Date(active_recipe.run_time * 1000).toISOString().substr(11, 8);
-                console.log(active_recipe)
                 newRows[index] = {
                     id: index,
                     'progress': parseFloat(active_recipe.progress),

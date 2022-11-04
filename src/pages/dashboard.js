@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {HiveConfig, HiveUrl, NectarTitle} from "../App";
+import {MillConfig, HiveUrl, NectarTitle} from "../App";
 import {ConditionalBadge, usePollData} from "../components/generic_control";
 import {Link} from "react-router-dom";
 import {ProgressButton} from "../components/elements";
@@ -66,7 +66,7 @@ export function UseStatus(props) {
 }
 
 export function Dashboard() {
-    const context = useContext(HiveConfig);
+    const context = useContext(MillConfig);
     const nectarTitle = useContext(NectarTitle);
 
     useEffect( () => nectarTitle.setTitle("Dashboard"))

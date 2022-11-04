@@ -39,7 +39,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import {MonitorHeart, Timeline, Menu, Work, Notes, Dashboard as DashboardIcon, Bolt, Memory} from "@mui/icons-material";
 
-export const HiveConfig = React.createContext({});
+export const MillConfig = React.createContext({});
 export const HiveUrl = React.createContext({});
 export const DocsUrl = React.createContext({});
 export const LogbookUrl = React.createContext({});
@@ -59,7 +59,7 @@ const theme = createTheme({
     }
 });
 
-function useHiveUrl() {
+function useMillUrl() {
     let hive_url;
     if (devMode === "development") {
         hive_url = "http://localhost:8000"
@@ -79,7 +79,7 @@ function useDocsUrl() {
     return hive_url
 }
 
-function useLogbookUrl() {
+function useDbUrl() {
     let logbook_url;
     if (devMode === "development") {
         logbook_url = "http://localhost:8001"
@@ -89,7 +89,7 @@ function useLogbookUrl() {
     return logbook_url
 }
 
-function useHiveConfig(hive_url) {
+function useMillConfig(hive_url) {
     const [hwConfig, setHwConfig] = useState("");
     useEffect(() => {
         const getHwConfig = async () => {
@@ -104,24 +104,24 @@ function useHiveConfig(hive_url) {
 }
 
 export default function App() {
-    let hiveUrl = useHiveUrl()
+    let millUrl = useMillUrl()
     let docsUrl = useDocsUrl()
-    let logbookUrl = useLogbookUrl()
-    let hiveConfig = useHiveConfig(hiveUrl);
+    let dbUrl = useDbUrl()
+    let millConfig = useMillConfig(millUrl);
     const [title, setTitle] = useState("");
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <HiveUrl.Provider value={hiveUrl}>
+            <HiveUrl.Provider value={millUrl}>
                 <NectarTitle.Provider value={{title, setTitle}}>
-                    <LogbookUrl.Provider value={logbookUrl}>
+                    <LogbookUrl.Provider value={dbUrl}>
                         <DocsUrl.Provider value={docsUrl}>
-                        <HiveConfig.Provider value={hiveConfig}>
+                        <MillConfig.Provider value={millConfig}>
                             <div>
                                 <Navigation/>
                             </div>
-                        </HiveConfig.Provider>
+                        </MillConfig.Provider>
                     </DocsUrl.Provider>
                     </LogbookUrl.Provider>
                 </NectarTitle.Provider>
@@ -192,16 +192,15 @@ function NectarAppBar(props) {
 }
 
 function Navigation() {
-    const context = useContext(HiveConfig);
+    const context = useContext(MillConfig);
     const [drawerVisible, setDrawerVisible] = useState(false)
 
     const hide = useCallback(() => setDrawerVisible(false))
     const show = useCallback(() => setDrawerVisible(true))
 
     if (context === "") {
-        return <h1></h1>
+        return <h1>Cannot Reach Mill. Is it running ? (<a href="https://mill.capitan.imec.be">https://mill.capitan.imec.be</a>)</h1>
     }
-
 
     let routes = [<Route path="/" key={"dashboard"} element={<Dashboard/>}/>];
     let navBarElements = [

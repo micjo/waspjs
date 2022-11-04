@@ -58,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "electron": "^21.0.1",
     "react-router-dom": "^6.3.0",
     "serve": "^14.0.1"
   }
