@@ -185,7 +185,7 @@ function NectarAppBar(props) {
                     {nectarTitle.title}
                 </Typography>
                 <Button color="inherit" component={Link} href={docs_url}>Help</Button>
-                <Button color="inherit" component={Link} href={root_url}>Hive</Button>
+                <Button color="inherit" component={Link} href={root_url}>Mill</Button>
             </Toolbar>
         </AppBar>)
 
