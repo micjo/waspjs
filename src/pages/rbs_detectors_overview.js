@@ -25,22 +25,15 @@ export function RbsDetectorOverview() {
         async function fillRows() {
             let newRows = []
             let detectors = hiveConfig?.rbs?.drivers?.caen?.detectors
-            let boards = {}
-            if (caen_data.boards) {
-                for (let board of caen_data?.boards) {
-                    boards[board.id] = board
-                }
-            }
             for (let detector of detectors) {
-                let active_channel = boards[detector.board]?.channels[detector.channel]
+                let active_channel = caen_data["boards"][detector.board]?.channels[detector.channel]
                 newRows.push({
                         "id": detector.identifier,
                         "identifier": detector.identifier,
                         "board": detector.board,
                         "channel": detector.channel,
                         "binning": `(${detector.bins_min}:${detector.bins_max} -> ${detector.bins_width})`,
-                        "trapezoid_rise_time":
-                        active_channel?.trapezoid_rise_time,
+                        "trapezoid_rise_time": active_channel?.trapezoid_rise_time,
                         "trapezoid_flat_top": active_channel?.trapezoid_flat_top
                     }
                 )
