@@ -9,7 +9,7 @@ export function GridTemplate(props)
 
     let key = 0
     for (let row of props.rows) {
-        let backgroundColor = even ? grey[200] : 'background.default'
+        let backgroundColor = even ? grey[200] : 'background.paper'
 
         let grid_elements = row.length;
         let row_width = 12/grid_elements;

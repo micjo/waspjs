@@ -37,13 +37,30 @@ import NestedList from "./components/nested_list";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
-import {MonitorHeart, Timeline, Menu, Work, Notes, Dashboard as DashboardIcon, Bolt, Memory} from "@mui/icons-material";
+import {
+    MonitorHeart,
+    Timeline,
+    Menu,
+    Work,
+    Notes,
+    Dashboard as DashboardIcon,
+    Bolt,
+    Memory,
+    ContentPasteSearch,
+    MenuBook, Settings
+} from "@mui/icons-material";
+import {RbsOverview} from "./pages/rbs_overview";
+import {DayBook} from "./pages/daybook";
+import {Config} from "./pages/config";
 
 export const MillConfig = React.createContext({});
 export const HiveUrl = React.createContext({});
 export const DocsUrl = React.createContext({});
 export const LogbookUrl = React.createContext({});
-export const NectarTitle = React.createContext({title: "", setTitle: (title) => {}});
+export const NectarTitle = React.createContext({
+    title: "", setTitle: (title) => {
+    }
+});
 
 const devMode = process.env.NODE_ENV
 
@@ -55,6 +72,10 @@ const theme = createTheme({
         },
         secondary: {
             main: yellow[500]
+        },
+        background: {
+            default: "#f8f8f8",
+            paper: '#ffffff'
         }
     }
 });
@@ -117,12 +138,12 @@ export default function App() {
                 <NectarTitle.Provider value={{title, setTitle}}>
                     <LogbookUrl.Provider value={dbUrl}>
                         <DocsUrl.Provider value={docsUrl}>
-                        <MillConfig.Provider value={millConfig}>
-                            <div>
-                                <Navigation/>
-                            </div>
-                        </MillConfig.Provider>
-                    </DocsUrl.Provider>
+                            <MillConfig.Provider value={millConfig}>
+                                <div>
+                                    <Navigation/>
+                                </div>
+                            </MillConfig.Provider>
+                        </DocsUrl.Provider>
                     </LogbookUrl.Provider>
                 </NectarTitle.Provider>
             </HiveUrl.Provider>
@@ -147,7 +168,7 @@ function NavLi(props) {
 function SomeHardware(props) {
 
     const nectarTitle = useContext(NectarTitle);
-    useEffect( () => nectarTitle.setTitle(props.hardware_value.title))
+    useEffect(() => nectarTitle.setTitle(props.hardware_value.title))
 
     if (props.hardware_value.type === "aml") {
         return (<Aml hardware_value={props.hardware_value}/>)
@@ -178,7 +199,7 @@ function NectarAppBar(props) {
     return (
         <AppBar position={"sticky"}>
             <Toolbar>
-                <IconButton size={"small"} onClick={() => props.show()} sx={{ mr: 2 }}>
+                <IconButton size={"small"} onClick={() => props.show()} sx={{mr: 2}}>
                     <Menu/>
                 </IconButton>
                 <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
@@ -199,7 +220,8 @@ function Navigation() {
     const show = useCallback(() => setDrawerVisible(true))
 
     if (context === "") {
-        return <h1>Cannot Reach Mill. Is it running ? (<a href="https://mill.capitan.imec.be">https://mill.capitan.imec.be</a>)</h1>
+        return <h1>Cannot Reach Mill. Is it running ? (<a
+            href="https://mill.capitan.imec.be">https://mill.capitan.imec.be</a>)</h1>
     }
 
     let routes = [<Route path="/" key={"dashboard"} element={<Dashboard/>}/>];
@@ -210,8 +232,15 @@ function Navigation() {
     routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
     navBarElements.push(<NavLi to="/job_overview" icon={<Work/>} key="job_overview" onClick={hide} label={"Jobs"}/>)
 
+    routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
+    navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
+
+    routes.push(<Route path="/config" key="config" element={<Config/>}/>);
+    navBarElements.push(<NavLi to="/config" icon={<Settings/>} key="Config" onClick={hide} label={"Config"}/>)
+
     routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
-    navBarElements.push(<NavLi to="/accelerator" key="accelerator" icon={<Bolt/>} onClick={hide} label={"Accelerator"}/>)
+    navBarElements.push(<NavLi to="/accelerator" key="accelerator" icon={<Bolt/>} onClick={hide}
+                               label={"Accelerator"}/>)
 
     routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
     navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
@@ -223,17 +252,23 @@ function Navigation() {
         let dropDownElements = []
 
         if (key === "rbs") {
-            const full_key = key + "/" + "detectors"
-            const path = "/" + full_key
-            routes.push(<Route key={full_key} path={path} element={<RbsDetectorOverview/>}/>);
-            dropDownElements.push(<NavLi to={path} icon={<MonitorHeart/>} key={key + "/detectors"} onClick={hide} label={"Detectors"}/>)
+            const detectors_url = key + "/detectors"
+            routes.push(<Route key={detectors_url} path={"/" + detectors_url} element={<RbsDetectorOverview/>}/>);
+            dropDownElements.push(<NavLi to={"/" + detectors_url} icon={<MonitorHeart/>} key={detectors_url}
+                                         onClick={hide} label={"Detectors"}/>)
+
+            const rbs_overview_url = key + "/overview"
+            routes.push(<Route key={rbs_overview_url} path={"/" + rbs_overview_url} element={<RbsOverview/>}/>);
+            dropDownElements.push(<NavLi to={"/" + rbs_overview_url} icon={<ContentPasteSearch/>} key={rbs_overview_url}
+                                         onClick={hide} label={"Overview"}/>)
         }
 
         for (let [hardware_key, hardware_value] of Object.entries(value.drivers)) {
             const full_key = key + "/" + hardware_key
             const path = "/" + full_key
             routes.push(<Route key={full_key} path={path} element={<SomeHardware hardware_value={hardware_value}/>}/>)
-            dropDownElements.push(<NavLi to={path} icon={<Memory/>} key={full_key} onClick={hide} label={hardware_value.title}/>)
+            dropDownElements.push(<NavLi to={path} icon={<Memory/>} key={full_key} onClick={hide}
+                                         label={hardware_value.title}/>)
         }
         let keyCap = key[0].toUpperCase() + key.slice(1)
         navBarElements.push(<NestedList key={key} label={keyCap} items={dropDownElements}/>)
