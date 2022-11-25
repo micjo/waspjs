@@ -1,5 +1,7 @@
 {
   "name": "mca-react",
+  "productName": "WaspJS",
+  "main": "electron/main.js",
   "version": "0.1.0",
   "private": true,
   "homepage": "",
@@ -37,7 +39,8 @@
     "start": "GENERATE_SOURCEMAP=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "start-electron":"export ELECTRON_START_URL=http://localhost:3000 && electron ."
   },
   "eslintConfig": {
     "extends": [
@@ -58,7 +61,7 @@
     ]
   },
   "devDependencies": {
-    "electron": "^21.0.1",
+    "electron": "^21.3.1",
     "react-router-dom": "^6.3.0",
     "serve": "^14.0.1"
   }
