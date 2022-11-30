@@ -19,6 +19,7 @@ import {BackEndConfig} from "../App";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import {getLocaleFiveHoursAgoIsoTime, getLocaleIsoTime} from "./time_helpers";
 
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -47,9 +48,14 @@ export function PollView(props) {
     const setError = props.setError
     const select = props.select
 
+    let start = getLocaleFiveHoursAgoIsoTime()
+    let end = getLocaleIsoTime()
+    let id = "rbs_current"
+    let step = 1
+
     useEffect(() => {
         const interval = setInterval(async () => {
-            let trends_url = config.urls.db + "/get_trends_last_day"
+            let trends_url = config.urls.db + "/get_trend?start=" + start + "&end=" + end + "&id=" + id + "&step=" + step
             let status, json_response;
             try {
                 [status, json_response] = await getJson(trends_url);
@@ -62,8 +68,8 @@ export function PollView(props) {
                 setError("Dataset requested is too large.")
             } else {
                 let data = []
-                for (let item of json_response) {
-                    data.push({time: item.epoch*1000, value: item.rbs_current});
+                for (let item in json_response["epoch"]) {
+                    data.push({time: json_response["epoch"][item]*1000, value: json_response["rbs_current"][item]});
                 }
                 setData(data)
             }

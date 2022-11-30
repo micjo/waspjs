@@ -10,6 +10,13 @@ export function getLocaleOneMonthAgoIsoTime() {
     return now.toISOString().slice(0,-1);
 }
 
+export function getLocaleFiveHoursAgoIsoTime() {
+    let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    let now = new Date(Date.now() - tzoffset);
+    now.setHours(now.getHours() - 5)
+    return now.toISOString().slice(0,-1);
+}
+
 export function epochToString(seconds_since_epoch) {
     // format: YYYY.MM.DD__HH:MM__SS
     if (seconds_since_epoch === "" || seconds_since_epoch === null) {
