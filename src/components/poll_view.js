@@ -19,7 +19,7 @@ import {BackEndConfig} from "../App";
 import moment from "moment";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import {getLocaleFiveHoursAgoIsoTime, getLocaleIsoTime} from "./time_helpers";
+import {getLocaleOneHourAgoIsoTime, getLocaleIsoTime} from "./time_helpers";
 
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -48,7 +48,7 @@ export function PollView(props) {
     const setError = props.setError
     const select = props.select
 
-    let start = getLocaleFiveHoursAgoIsoTime()
+    let start = getLocaleOneHourAgoIsoTime()
     let end = getLocaleIsoTime()
     let id = "rbs_current"
     let step = 1
@@ -94,6 +94,7 @@ export function PollView(props) {
                     <YAxis dataKey='value' name='Value'/>
 
                     <Line
+                        isAnimationActive={false}
                         dataKey={"value"}
                         type={'natural'}
                         stroke="#82ca9d" strokeWidth={3} dot={false}

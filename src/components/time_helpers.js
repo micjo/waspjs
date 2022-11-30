@@ -10,10 +10,10 @@ export function getLocaleOneMonthAgoIsoTime() {
     return now.toISOString().slice(0,-1);
 }
 
-export function getLocaleFiveHoursAgoIsoTime() {
+export function getLocaleOneHourAgoIsoTime() {
     let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
     let now = new Date(Date.now() - tzoffset);
-    now.setHours(now.getHours() - 5)
+    now.setHours(now.getHours() - 1)
     return now.toISOString().slice(0,-1);
 }
 
