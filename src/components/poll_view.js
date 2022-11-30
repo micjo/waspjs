@@ -75,7 +75,7 @@ export function PollView(props) {
     return (
         <div>
             <ToastPopup text={text} open={open} setOpen={setOpen} severity={"error"}/>
-            <ResponsiveContainer width='95%' height={500}>
+            <ResponsiveContainer width='95%' height={300}>
                 <LineChart data={data}>
                     <CartesianGrid strokeDasharray="3 3"/>
                     <XAxis

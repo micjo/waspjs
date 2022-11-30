@@ -182,7 +182,7 @@ export function RbsOverview() {
                     <Paper variant={"outlined"}><HistogramCaen setError={setError} select={"d01"}/></Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>Trends</h5>
+                    <h5>RBS Current trend</h5>
                     <Paper variant={"outlined"}><PollView setError={setError}/></Paper>
                 </Grid>
             </Grid>
