@@ -126,11 +126,11 @@ export function RbsOverview() {
 
     let positionControl = [
         [`X`, rbs_data?.aml_x_y?.motor_1_position],
-        [`Y`, rbs_data?.aml_x_y?.motor_1_position],
-        [`Phi`, rbs_data?.aml_x_y?.motor_1_position],
-        [`Zeta`, rbs_data?.aml_x_y?.motor_1_position],
-        [`Detector`, rbs_data?.aml_x_y?.motor_1_position],
-        [`Theta`, rbs_data?.aml_x_y?.motor_1_position],
+        [`Y`, rbs_data?.aml_x_y?.motor_2_position],
+        [`Phi`, rbs_data?.aml_phi_zeta?.motor_1_position],
+        [`Zeta`, rbs_data?.aml_phi_zeta?.motor_2_position],
+        [`Detector`, rbs_data?.aml_det_theta?.motor_1_position],
+        [`Theta`, rbs_data?.aml_det_theta?.motor_2_position],
         [`Moving`, aml_moving?.toString()]
     ]
 
