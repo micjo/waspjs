@@ -9,6 +9,7 @@ import {postData, sendRequest, useSendRequestWithData} from "../http_helper";
 import Button from "@mui/material/Button";
 import {HistogramCaen} from "../components/histogram_caen";
 import {ToastPopup} from "../components/toast_popup";
+import {PollView} from "../components/poll_view";
 
 
 const StyledTextField = styled(TextField)(({theme}) => ({
@@ -181,8 +182,8 @@ export function RbsOverview() {
                     <Paper variant={"outlined"}><HistogramCaen setError={setError} select={"d01"}/></Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>Histogram d02</h5>
-                    <Paper variant={"outlined"}><HistogramCaen setError={setError} select={"d02"}/></Paper>
+                    <h5>Trends</h5>
+                    <Paper variant={"outlined"}><PollView setError={setError}/></Paper>
                 </Grid>
             </Grid>
         </Box>

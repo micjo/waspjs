@@ -264,7 +264,7 @@ function Navigation() {
     navBarElements.push(<NavLi to="/job_overview" icon={<Work/>} key="job_overview" onClick={hide} label={"Jobs"}/>)
 
     routes.push(<Route key={"rbs_overview"} path={"/rbs_overview"} element={<RbsOverview/>}/>);
-    navBarElements.push(<NavLi to={"/rbs_overview"} icon={<ContentPasteSearch/>} onClick={hide} label={"RBS Overview"}/>)
+    navBarElements.push(<NavLi to={"/rbs_overview"} key="rbs_overview" icon={<ContentPasteSearch/>} onClick={hide} label={"RBS Overview"}/>)
 
     // routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
     // navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
