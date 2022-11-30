@@ -36,6 +36,21 @@ export function ProgressButton(props) {
     );
 }
 
+export function SimpleNumberInput(props) {
+
+    return (
+        <TextField fullWidth id='outlined-basic' variant='outlined' size='small' sx={{width:"20%"}}
+                   label={props.inputLabel}
+                   onChange={
+                       (e) => {
+                           let text = e.target.value
+                           let value = parseFloat(text)
+                           props.setInput(value)
+                       }
+                   }/>
+    )
+}
+
 export function NumberInput(props) {
     const [input, setInput] = useState("")
     const [disabled, setDisabled] = useState(true)

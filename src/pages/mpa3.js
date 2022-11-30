@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import {HiveUrl} from "../App";
 import {usePollData} from "../components/generic_control";
-import {useSendRequest} from "../http_helper";
+import {useSendRequestWithData} from "../http_helper";
 import {WideProgressButton} from "../components/elements";
 import {Grid} from "@mui/material";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
@@ -14,7 +14,7 @@ export function Mpa3(props) {
     const [data, setData, error, setError] = usePollData(url)
     const [open, setOpen] = useState(false)
     const [text, setText] = useState("")
-    const sendRequest = useSendRequest(url, setData, setError)
+    const sendRequest = useSendRequestWithData(url, setError, setData)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
     useEffect(() => {

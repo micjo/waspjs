@@ -5,7 +5,7 @@ import {HiveUrl} from "../App";
 import {Grid} from "@mui/material";
 import {ToastPopup} from "../components/toast_popup";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
-import {useSendRequest} from "../http_helper";
+import {useSendRequestWithData} from "../http_helper";
 
 export function Aml(props) {
     const root_url = useContext(HiveUrl);
@@ -15,7 +15,7 @@ export function Aml(props) {
     const [data, setData, error, setError] = usePollData(url)
     const [open, setOpen] = useState(false)
     const [text, setText] = useState("")
-    const sendRequest = useSendRequest(url, setData, setError)
+    const sendRequest = useSendRequestWithData(url, setError, setData)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
 

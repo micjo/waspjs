@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {useSendRequest} from "../http_helper";
+import {useSendRequestWithData} from "../http_helper";
 import {usePollData} from "../components/generic_control";
 import {HiveUrl} from "../App";
 import {NumberInput, SelectInput, WideProgressButton, LoadButton, SwitchInput} from "../components/elements";
@@ -14,7 +14,7 @@ export function Motrona(props) {
     const [data, setData, error, setError] = usePollData(url)
     const [open, setOpen] = useState(false)
     const [text, setText] = useState("")
-    const sendRequest = useSendRequest(url, setData, setError)
+    const sendRequest = useSendRequestWithData(url, setError, setData)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
     useEffect(() => {

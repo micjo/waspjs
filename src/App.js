@@ -5,7 +5,7 @@ import {
     NavLink,
     Route,
     Routes,
-    Link as RouterLink, useLocation, useParams
+    Link as RouterLink,
 } from "react-router-dom";
 
 
@@ -20,11 +20,10 @@ import {Mdrive} from "./pages/mdrive";
 import {JobOverview} from "./pages/job_overview";
 import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
-import {Accelerator} from "./pages/accelerator";
 import {Trends} from "./pages/trends";
 import CssBaseline from "@mui/material/CssBaseline";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
-import {blue, grey, yellow} from '@mui/material/colors';
+import {blue, yellow} from '@mui/material/colors';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -36,7 +35,6 @@ import Box from "@mui/material/Box";
 import NestedList from "./components/nested_list";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
 import {
     MonitorHeart,
     Timeline,
@@ -62,6 +60,9 @@ export const NectarTitle = React.createContext({
     }
 });
 
+
+export const BackEndConfig = React.createContext( {});
+
 const devMode = process.env.NODE_ENV
 
 const theme = createTheme({
@@ -79,6 +80,32 @@ const theme = createTheme({
         }
     }
 });
+
+function useBackEndConfig() {
+    let config = {}
+    config["urls"] = {}
+    if (devMode === "development") {
+        config["urls"]["mill"] ="http://localhost:8000"
+        config["urls"]["db"] ="http://localhost:8001"
+        config["urls"]["docs"] ="http://localhost:2000"
+    }
+    else {
+        config["urls"]["mill"] = "https://mill.capitan.imec.be"
+        config["urls"]["db"] = "https://db.capitan.imec.be"
+        config["urls"]["docs"] = "https://wiki.capitan.imec.be"
+    }
+
+    // const [hwConfig, setHwConfig] = useState("");
+    useEffect(() => {
+        const getHwConfig = async () => {
+            const [, newHwConfig] = await getJson(config.urls.mill + "/api/config")
+            config.mill = newHwConfig;
+        }
+        getHwConfig().then();
+    }, [config, config.urls.mill])
+
+    return config;
+}
 
 function useMillUrl() {
     let hive_url;
@@ -131,11 +158,14 @@ export default function App() {
     let millConfig = useMillConfig(millUrl);
     const [title, setTitle] = useState("");
 
+    let context = useBackEndConfig()
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <HiveUrl.Provider value={millUrl}>
                 <NectarTitle.Provider value={{title, setTitle}}>
+                    <BackEndConfig.Provider value={context}>
                     <LogbookUrl.Provider value={dbUrl}>
                         <DocsUrl.Provider value={docsUrl}>
                             <MillConfig.Provider value={millConfig}>
@@ -145,6 +175,7 @@ export default function App() {
                             </MillConfig.Provider>
                         </DocsUrl.Provider>
                     </LogbookUrl.Provider>
+                    </BackEndConfig.Provider>
                 </NectarTitle.Provider>
             </HiveUrl.Provider>
         </ThemeProvider>
@@ -232,21 +263,21 @@ function Navigation() {
     routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
     navBarElements.push(<NavLi to="/job_overview" icon={<Work/>} key="job_overview" onClick={hide} label={"Jobs"}/>)
 
-    routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
-    navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
+    routes.push(<Route key={"rbs_overview"} path={"/rbs_overview"} element={<RbsOverview/>}/>);
+    navBarElements.push(<NavLi to={"/rbs_overview"} icon={<ContentPasteSearch/>} onClick={hide} label={"RBS Overview"}/>)
 
-    routes.push(<Route path="/config" key="config" element={<Config/>}/>);
-    navBarElements.push(<NavLi to="/config" icon={<Settings/>} key="Config" onClick={hide} label={"Config"}/>)
-
-    routes.push(<Route path="/accelerator" key="accelerator" element={<Accelerator/>}/>);
-    navBarElements.push(<NavLi to="/accelerator" key="accelerator" icon={<Bolt/>} onClick={hide}
-                               label={"Accelerator"}/>)
+    // routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
+    // navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
+    //
+    // routes.push(<Route path="/config" key="config" element={<Config/>}/>);
+    // navBarElements.push(<NavLi to="/config" icon={<Settings/>} key="Config" onClick={hide} label={"Config"}/>)
 
     routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
     navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
+
 
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
@@ -257,10 +288,6 @@ function Navigation() {
             dropDownElements.push(<NavLi to={"/" + detectors_url} icon={<MonitorHeart/>} key={detectors_url}
                                          onClick={hide} label={"Detectors"}/>)
 
-            const rbs_overview_url = key + "/overview"
-            routes.push(<Route key={rbs_overview_url} path={"/" + rbs_overview_url} element={<RbsOverview/>}/>);
-            dropDownElements.push(<NavLi to={"/" + rbs_overview_url} icon={<ContentPasteSearch/>} key={rbs_overview_url}
-                                         onClick={hide} label={"Overview"}/>)
         }
 
         for (let [hardware_key, hardware_value] of Object.entries(value.drivers)) {

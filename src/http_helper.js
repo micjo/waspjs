@@ -37,44 +37,6 @@ async function waitForCompleted(url, requestId, retryLimit) {
     return data;
 }
 
-export async function sendRequest(url, request, popup, setData) {
-    let requestId = {"request_id": getUniqueIdentifier()}
-    let fullRequest = {
-        ...requestId,
-        ...request
-    };
-
-    let data = {}
-    try {
-        data = await postData(url, JSON.stringify(fullRequest));
-    } catch (error) {
-        popup("Controller cannot be contacted. Is it running?");
-        return;
-    }
-
-    if (data.status === 404) {
-        popup("Controller cannot be contacted. Is it running?");
-        return;
-    }
-
-    if (data.status !== 200) {
-        let failMessage = await data.text()
-        popup("Failed to process request: Error message:\n " + failMessage.slice(1, -1));
-        return;
-    }
-
-    try {
-        data = await waitForCompleted(url, requestId["request_id"], 50);
-    } catch (error) {
-        popup("Daemon did not complete request");
-    }
-
-    if (!(data["error"] === "Success" || data["error"] === "No error")) {
-        popup(data["error"]);
-    }
-    setData(data);
-}
-
 export async function postData(host, textBody) {
     return fetch(host, {
         method: 'POST',
@@ -102,44 +64,53 @@ export async function getText(url) {
 }
 
 
-export function useSendRequest(url, setData, setError) {
-    return useCallback(async (request) => {
-        async function send() {
-            let requestId = {"request_id": getUniqueIdentifier()}
-            let fullRequest = {...requestId, ...request};
+export async function sendRequest(url, request, setError, setData) {
+        let requestId = {"request_id": getUniqueIdentifier()}
+        let fullRequest = {...requestId, ...request};
 
-            let data = {}
-            try {
-                data = await postData(url, JSON.stringify(fullRequest));
-            } catch (error) {
-                setError("Controller cannot be contacted. Is it running?");
-                return;
-            }
-
-            if (data.status === 404) {
-                setError("Controller cannot be contacted. Is it running?");
-                return;
-            }
-
-            if (data.status !== 200) {
-                let failMessage = await data.text()
-                setError("Failed to process request: Error message:\n " + failMessage.slice(1, -1));
-                return;
-            }
-
-            try {
-                data = await waitForCompleted(url, requestId["request_id"], 50);
-            } catch (error) {
-                setError("Daemon did not complete request");
-            }
-
-            if (!(data["error"] === "Success" || data["error"] === "No error")) {
-                setError(data["error"]);
-            }
-            setData(data);
+        let data = {}
+        try {
+            data = await postData(url, JSON.stringify(fullRequest));
+        } catch (error) {
+            setError("Controller cannot be contacted. Is it running?");
+            return;
         }
-        await send()
-    }, [url, setData, setError])
+
+        if (data.status === 404) {
+            setError("Controller cannot be contacted. Is it running?");
+            return;
+        }
+
+        if (data.status !== 200) {
+            let failMessage = await data.text()
+            setError("Failed to process request: Error message:\n " + failMessage.slice(1, -1));
+            return;
+        }
+
+        try {
+            data = await waitForCompleted(url, requestId["request_id"], 50);
+        } catch (error) {
+            setError("Daemon did not complete request");
+        }
+
+        if (!(data["error"] === "Success" || data["error"] === "No error")) {
+            setError(data["error"]);
+        }
+        if (setData) {setData(data);}
+}
+
+
+export function useSendRequest(url, setError) {
+    return useCallback(async (request) => {
+        await sendRequest(url, request, setError)
+    }, [url, setError])
+}
+
+
+export function useSendRequestWithData(url, setError, setData) {
+    return useCallback(async (request) => {
+        await sendRequest(url, request, setError, setData)
+    }, [url, setError, setData])
 }
 
 

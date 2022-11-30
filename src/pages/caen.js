@@ -1,6 +1,6 @@
 import {usePollData} from "../components/generic_control";
 import React, {useContext, useEffect, useState} from "react";
-import {useSendRequest} from "../http_helper";
+import {useSendRequestWithData} from "../http_helper";
 import {HiveUrl} from "../App";
 import {LoadButton, SwitchInput, WideProgressButton} from "../components/elements";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
@@ -15,7 +15,7 @@ export function Caen(props) {
     const [data, setData, error, setError] = usePollData(url)
     const [open, setOpen] = useState(false)
     const [text, setText] = useState("")
-    const sendRequest = useSendRequest(url, setData, setError)
+    const sendRequest = useSendRequestWithData(url, setError, setData)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
     useEffect(() => {

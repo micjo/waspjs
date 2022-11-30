@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {usePollData} from "../components/generic_control";
 import {HiveUrl} from "../App";
 import {WideProgressButton, NumberInput, SelectInput, SwitchInput} from "../components/elements";
-import {useSendRequest} from "../http_helper";
+import {useSendRequestWithData} from "../http_helper";
 import {Grid} from "@mui/material";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
 import {ToastPopup} from "../components/toast_popup";
@@ -14,7 +14,7 @@ export function Mdrive(props) {
     const [data, setData, error, setError] = usePollData(url)
     const [open, setOpen] = useState(false)
     const [text, setText] = useState("")
-    const sendRequest = useSendRequest(url, setData, setError)
+    const sendRequest = useSendRequestWithData(url, setError, setData)
     const [ignoreDisabled, setIgnoreDisabled] = useState(true)
 
     useEffect(() => {
