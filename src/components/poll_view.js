@@ -96,7 +96,7 @@ export function PollView(props) {
                     <Line
                         isAnimationActive={false}
                         dataKey={"value"}
-                        type={'natural'}
+                        type={'monotone'}
                         stroke="#82ca9d" strokeWidth={3} dot={false}
                     />
                     <Tooltip content={<CustomTooltip />} />
