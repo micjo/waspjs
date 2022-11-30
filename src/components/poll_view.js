@@ -48,13 +48,14 @@ export function PollView(props) {
     const setError = props.setError
     const select = props.select
 
-    let start = getLocaleOneHourAgoIsoTime()
-    let end = getLocaleIsoTime()
-    let id = "rbs_current"
-    let step = 1
 
     useEffect(() => {
         const interval = setInterval(async () => {
+            let start = getLocaleOneHourAgoIsoTime()
+            let end = getLocaleIsoTime()
+            let id = "rbs_current"
+            let step = 1
+
             let trends_url = config.urls.db + "/get_trend?start=" + start + "&end=" + end + "&id=" + id + "&step=" + step
             let status, json_response;
             try {
