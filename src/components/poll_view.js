@@ -32,7 +32,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
                 <Box sx={{padding: "8px 8px 8px 8px", backgroundColor:"white"}}>
-                    <Typography>Current : {payload[0].value[0]} -> {payload[0].value[1]} nA</Typography>
+                    <Typography>{payload[0].value[0]} -> {payload[0].value[1]}</Typography>
                     <Typography sx={{color: "#00adb5"}}>Time: {timestamp}</Typography>
                 </Box>
         );
@@ -58,10 +58,9 @@ export function PollView(props) {
                 console.log("update")
                 let start = getLocaleOneHourAgoIsoTime()
                 let end = getLocaleIsoTime()
-                let id = "rbs_current"
                 let step = 1
 
-                let trends_url = config.urls.db + "/get_trend?start=" + start + "&end=" + end + "&id=" + id + "&step=" + step
+                let trends_url = config.urls.db + "/get_trend?start=" + start + "&end=" + end + "&id=" + props.valueKey + "&step=" + step
                 let status, json_response;
                 try {
                     [status, json_response] = await getJson(trends_url);
@@ -80,7 +79,7 @@ export function PollView(props) {
                             bucket_size = json_response["epoch"].length - index
                         }
                         let time_section = json_response["epoch"].slice(index, index + bucket_size)
-                        let value_section = json_response["rbs_current"].slice(index, index + bucket_size)
+                        let value_section = json_response[props.valueKey].slice(index, index + bucket_size)
                         let lhs_time = time_section[0] * 1000
                         let rhs_time = time_section[bucket_size - 1] * 1000
                         let min = Math.min(...value_section)
@@ -108,8 +107,8 @@ export function PollView(props) {
                     barCategoryGap={0}
                     margin={{
                         top: 20, right: 20, bottom: 20, left: 20,
-                    }}
-                >
+                    }}>
+                    <CartesianGrid strokeDasharray="3 3"/>
                         <XAxis
                             dataKey='time'
                             domain={['auto', 'auto']}
@@ -122,11 +121,6 @@ export function PollView(props) {
                         <Tooltip content={<CustomTooltip />} />
                 </AreaChart>
             </ResponsiveContainer>
-            <Select disabled={true} labelId="select-label" size={"small"} id={"demo"} name="select-input" fullWidth>
-                <MenuItem>d01</MenuItem>
-                <MenuItem>d02</MenuItem>
-                <MenuItem>MD01</MenuItem>
-            </Select>
         </div>
     );
 

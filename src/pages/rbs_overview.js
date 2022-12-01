@@ -90,9 +90,10 @@ function Control(props) {
                 await sendRequest(caen_url, {"clear": true}, props.setError)
             }>Clear Acquisition</Button>
             <Button onClick={async () => {
-                await sendRequest(aml_x_y_url, {"load": true}, props.setError)
-                await sendRequest(aml_phi_zeta_url, {"load": true}, props.setError)
-                await sendRequest(aml_det_theta_url, {"load": true}, props.setError)
+                await Promise.all([
+                    sendRequest(aml_x_y_url, {"load": true}, props.setError),
+                    sendRequest(aml_phi_zeta_url, {"load": true}, props.setError),
+                    sendRequest(aml_det_theta_url, {"load": true}, props.setError)])
             }
             }>Move to load position</Button>
 
@@ -114,7 +115,7 @@ export function RbsOverview() {
     const nectarTitle = useContext(NectarTitle);
     useEffect(() => nectarTitle.setTitle("RBS Overview"))
 
-    const setError = useCallback( (errorMessage) => {
+    const setError = useCallback((errorMessage) => {
         setErrorMessage(errorMessage)
         setOpenDialog(true)
     }, [setErrorMessage, setOpenDialog])
@@ -179,14 +180,14 @@ export function RbsOverview() {
                 </Grid>
                 <Grid item xs={6}>
                     <h5>Histogram d01</h5>
-                        <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
+                    <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
                         <HistogramCaen setError={setError} select={"d01"}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
                     <h5>RBS Current trend</h5>
                     <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
-                        <PollView setError={setError}/></Paper>
+                        <PollView setError={setError} valueKey={"rbs_current"}/></Paper>
                 </Grid>
             </Grid>
         </Box>

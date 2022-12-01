@@ -50,6 +50,7 @@ import {
 import {RbsOverview} from "./pages/rbs_overview";
 import {DayBook} from "./pages/daybook";
 import {Config} from "./pages/config";
+import {ErdOverview} from "./pages/erd_overview";
 
 export const MillConfig = React.createContext({});
 export const HiveUrl = React.createContext({});
@@ -266,6 +267,8 @@ function Navigation() {
     routes.push(<Route key={"rbs_overview"} path={"/rbs_overview"} element={<RbsOverview/>}/>);
     navBarElements.push(<NavLi to={"/rbs_overview"} key="rbs_overview" icon={<ContentPasteSearch/>} onClick={hide} label={"RBS Overview"}/>)
 
+    routes.push(<Route key={"erd_overview"} path={"/erd_overview"} element={<ErdOverview/>}/>);
+    navBarElements.push(<NavLi to={"/erd_overview"} key="erd_overview" icon={<ContentPasteSearch/>} onClick={hide} label={"ERD Overview"}/>)
     // routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
     // navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
     //

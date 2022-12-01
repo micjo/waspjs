@@ -39,7 +39,7 @@ export function ProgressButton(props) {
 export function SimpleNumberInput(props) {
 
     return (
-        <TextField fullWidth id='outlined-basic' variant='outlined' size='small' sx={{width:"20%"}}
+        <TextField fullWidth id='outlined-basic' variant='outlined' size='small' sx={{width:"100%"}}
                    label={props.inputLabel}
                    onChange={
                        (e) => {
@@ -64,6 +64,30 @@ export function NumberInput(props) {
                                (e) => {
                                    let text = e.target.value
                                    setInput(parseFloat(text))
+                                   setDisabled(text === "")
+                               }
+                           }/>
+                <ProgressButton variant='contained' disabled={disabled} color='primary'
+                                callback={async () => await props.callback(input)} text={props.buttonLabel}/>
+            </ButtonGroup>
+        </>
+    )
+}
+
+
+export function TextInput(props) {
+    const [input, setInput] = useState("")
+    const [disabled, setDisabled] = useState(true)
+
+    return (
+        <>
+            <ButtonGroup fullWidth>
+                <TextField fullWidth id='outlined-basic' variant='outlined' size='small'
+                           label={props.inputLabel}
+                           onChange={
+                               (e) => {
+                                   let text = e.target.value.toString()
+                                   setInput(text)
                                    setDisabled(text === "")
                                }
                            }/>
