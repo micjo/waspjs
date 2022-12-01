@@ -90,16 +90,10 @@ export function PollView(props) {
                         if (index + bucket_size > json_response["epoch"]. length) {
                             bucket_size = json_response["epoch"].length - index
                         }
-                        console.log(bucket_size)
-
                         let time_section = json_response["epoch"].slice(index, index + bucket_size)
                         let value_section = json_response["rbs_current"].slice(index, index + bucket_size)
                         let lhs_time = time_section[0] * 1000
                         let rhs_time = time_section[bucket_size - 1] * 1000
-
-
-                        console.log("interval_size: " + (rhs_time - lhs_time).toString())
-                        console.log("lhs: " + lhs_time + ", rhs: " + rhs_time)
                         let min = Math.min(...value_section)
                         let max = Math.max(...value_section)
                         area_data.push({time: lhs_time, value: [min, max]})
