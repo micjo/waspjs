@@ -89,7 +89,7 @@ export function PollView(props) {
                     }
                     setAreaData(area_data)
                 }
-        }, 1000);
+        }, 5000);
         return () => clearInterval(interval);
     }, [setAreaData, config.urls.mill, setError, select]);
 
