@@ -52,12 +52,9 @@ export function PollView(props) {
     const [text, setText] = useState("")
     const setError = props.setError
     const select = props.select
-    const [update, setUpdate] = useState(true)
-
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            if (update) {
                 console.log("update")
                 let start = getLocaleOneHourAgoIsoTime()
                 let end = getLocaleIsoTime()
@@ -76,17 +73,9 @@ export function PollView(props) {
                 } else if (status === 413) {
                     setError("Dataset requested is too large.")
                 } else {
-                    let raw_data = []
-                    for (let item in json_response["epoch"]) {
-                        raw_data.push({
-                            time: json_response["epoch"][item] * 1000,
-                            value: json_response["rbs_current"][item]
-                        });
-                    }
                     let area_data = []
                     let bucket_size = 10
                     for (let index = 0; index < json_response["epoch"].length; index = index + bucket_size) {
-
                         if (index + bucket_size > json_response["epoch"]. length) {
                             bucket_size = json_response["epoch"].length - index
                         }
@@ -101,16 +90,13 @@ export function PollView(props) {
                     }
                     setAreaData(area_data)
                 }
-            }
-
         }, 1000);
         return () => clearInterval(interval);
-    }, [update, setAreaData, config.urls.mill, setError, select]);
+    }, [setAreaData, config.urls.mill, setError, select]);
 
 
     return (
         <div>
-            <Button onClick={async() => setUpdate(false)}>Disable</Button>
             <ToastPopup text={text} open={open} setOpen={setOpen} severity={"error"}/>
             <ResponsiveContainer width='95%' height={300}>
 
@@ -135,36 +121,6 @@ export function PollView(props) {
                     <Area dataKey="value" stroke="#8884d8" fill="#8884d8" isAnimationActive={false}/>
                         <Tooltip content={<CustomTooltip />} />
                 </AreaChart>
-
-
-                {/*<LineChart data={data}>*/}
-                {/*    <CartesianGrid strokeDasharray="3 3"/>*/}
-                {/*    <XAxis*/}
-                {/*        dataKey='time'*/}
-                {/*        domain={['auto', 'auto']}*/}
-                {/*        name='Time'*/}
-                {/*        tickFormatter={(unixTime) => moment(unixTime).format('HH:mm Do')}*/}
-                {/*        type='number'*/}
-                {/*    />*/}
-                {/*    <YAxis dataKey='value' name='Value'/>*/}
-
-                {/*    <Line*/}
-                {/*        isAnimationActive={false}*/}
-                {/*        dataKey={"value"}*/}
-                {/*        type={'monotone'}*/}
-                {/*        stroke="#82ca9d" strokeWidth={3} dot={false}*/}
-                {/*    />*/}
-                {/*    <Tooltip content={<CustomTooltip />} />*/}
-                {/*</LineChart>*/}
-
-                {/*<LineChart data={data} title={"RBS Current"} margin={{top: 50, right: 30, left: 0, bottom: 0}}>*/}
-                {/*    <CartesianGrid strokeDasharray="3 3"/>*/}
-                {/*    <XAxis dataKey="time" domain = {['auto', 'auto']} name = 'Time'*/}
-                {/*           tickFormatter = {(unixTime) => moment(unixTime).format('YYYY.MM.DD HH:mm Do')}*/}
-                {/*           type = 'number'/>*/}
-                {/*    <YAxis/>*/}
-                {/*    <Line type="monotone" isAnimationActive={false} dataKey="y" stroke="#8884d8" dot={false}/>*/}
-                {/*</LineChart>*/}
             </ResponsiveContainer>
             <Select disabled={true} labelId="select-label" size={"small"} id={"demo"} name="select-input" fullWidth>
                 <MenuItem>d01</MenuItem>
