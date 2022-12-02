@@ -134,15 +134,15 @@ export function ErdOverview() {
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>AD1 count rate</h5>
-                    <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "400px"}}>
-                        <PollView setError={setError} valueKey={"erd_ad1_count_rate"}/>
+                    <h5>Trending</h5>
+                    <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
+                        <PollView setError={setError} valueKey={"erd_ad1_count_rate"} keyStart={"erd"}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>AD2 count rate</h5>
-                    <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "400px"}}>
-                        <PollView setError={setError} valueKey={"erd_ad2_count_rate"}/>
+                    <h5>Trending</h5>
+                    <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
+                        <PollView setError={setError} valueKey={"erd_ad2_count_rate"} keyStart={"erd"}/>
                     </Paper>
                 </Grid>
             </Grid>
