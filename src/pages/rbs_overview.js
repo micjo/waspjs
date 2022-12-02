@@ -179,13 +179,13 @@ export function RbsOverview() {
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>Histogram d01</h5>
+                    <h5>Histogram</h5>
                     <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
                         <HistogramCaen setError={setError} initialDetector={"d01"}/>
                     </Paper>
                 </Grid>
                 <Grid item xs={6}>
-                    <h5>RBS Current trend</h5>
+                    <h5>Trending</h5>
                     <Paper variant={"outlined"} sx={{padding: "8px 8px 8px 8px", height: "350px"}}>
                         <PollView setError={setError} valueKey={"rbs_current"} keyStart={"rbs"}/></Paper>
                 </Grid>
