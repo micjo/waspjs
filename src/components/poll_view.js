@@ -77,7 +77,7 @@ export function PollView(props) {
 
             let avKeys = []
             for (let key of keys) {
-                if (key.startsWith(keyStart)) {
+                if (key.startsWith(keyStart) || key.startsWith("any")) {
                     avKeys.push(<MenuItem value={key} key={key}><em>{key}</em></MenuItem>)
                 }
             }
