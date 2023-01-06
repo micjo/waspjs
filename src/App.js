@@ -49,7 +49,7 @@ import {
 } from "@mui/icons-material";
 import {RbsOverview} from "./pages/rbs_overview";
 import {DayBook} from "./pages/daybook";
-import {Config} from "./pages/config";
+import {RecipeMetaConfig} from "./pages/recipe_meta_config";
 import {ErdOverview} from "./pages/erd_overview";
 
 export const MillConfig = React.createContext({});
@@ -159,14 +159,14 @@ export default function App() {
     let millConfig = useMillConfig(millUrl);
     const [title, setTitle] = useState("");
 
-    let context = useBackEndConfig()
+    let backendConfig = useBackEndConfig()
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <HiveUrl.Provider value={millUrl}>
                 <NectarTitle.Provider value={{title, setTitle}}>
-                    <BackEndConfig.Provider value={context}>
+                    <BackEndConfig.Provider value={backendConfig}>
                     <LogbookUrl.Provider value={dbUrl}>
                         <DocsUrl.Provider value={docsUrl}>
                             <MillConfig.Provider value={millConfig}>
@@ -269,11 +269,11 @@ function Navigation() {
 
     routes.push(<Route key={"erd_overview"} path={"/erd_overview"} element={<ErdOverview/>}/>);
     navBarElements.push(<NavLi to={"/erd_overview"} key="erd_overview" icon={<ContentPasteSearch/>} onClick={hide} label={"ERD Overview"}/>)
-    // routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
-    // navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
-    //
-    // routes.push(<Route path="/config" key="config" element={<Config/>}/>);
-    // navBarElements.push(<NavLi to="/config" icon={<Settings/>} key="Config" onClick={hide} label={"Config"}/>)
+    routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
+    navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
+
+    routes.push(<Route path="/recipe_meta_config" key="recipe_meta_config" element={<RecipeMetaConfig/>}/>);
+    navBarElements.push(<NavLi to="/recipe_meta_config" icon={<Settings/>} key="recipe_meta_config" onClick={hide} label={"Recipe Meta Config"}/>)
 
     routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
     navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)

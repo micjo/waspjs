@@ -1,8 +1,8 @@
-import React, {useContext, useEffect, useState} from "react";
-import {HiveUrl, NectarTitle} from "../App";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import {BackEndConfig, HiveUrl, NectarTitle} from "../App";
 import {usePollData} from "../components/generic_control";
 import {NumberInput} from "../components/elements";
-import {postData} from "../http_helper";
+import {getJson, getText, postData} from "../http_helper";
 import {Box, ButtonGroup, Grid, Paper, TextField} from "@mui/material";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
 import {styled} from "@mui/material/styles";
@@ -11,6 +11,7 @@ import Button from "@mui/material/Button";
 import {TextareaAutosize} from "@mui/material";
 import {StripedTable} from "../components/table_templates";
 import {LinearWithValueLabel} from "../components/linear_progress_with_label";
+import {ToastPopup} from "../components/toast_popup";
 
 const StyledPaper = styled(Paper)(({theme}) => ({
     padding: "8px 8px 8px 8px",
@@ -98,63 +99,73 @@ const erd_header = ` % Comments
 `
 
 
-export function Config() {
-    const root_url = useContext(HiveUrl);
+export function RecipeMetaConfig() {
+    const backendConfig = useContext(BackEndConfig);
+    const daybookUrl = backendConfig.urls.db
+    const millUrl = backendConfig.urls.mill
+    const [daybook, setDaybook] = useState({})
+    const [erdMeta, setErdMeta] = useState({})
+    const [rbsMeta, setRbsMeta] = useState({})
+    const [refresh, setRefresh] = useState(false)
+    const [error, setErrorMessage] = useState("")
+    const [openDialog, setOpenDialog] = useState(false)
+
     const nectarTitle = useContext(NectarTitle);
     useEffect( () => nectarTitle.setTitle("Config"))
+
+    const setError = useCallback((errormessage) => {
+        setErrorMessage(errormessage)
+        setOpenDialog(true)
+    }, [setErrorMessage, setOpenDialog])
+
+    useEffect ( () => {
+        const refresh = async () => {
+            let status, json_response, text_response;
+            [status, json_response] = await getJson(daybookUrl + "/daybook_json")
+            setDaybook(json_response)
+            if (status !== 200) {setError("Failed to contact db")}
+
+            [status, text_response] = await getText(millUrl + '/api/erd/recipe_meta_template')
+            console.log(text_response)
+            setErdMeta(text_response)
+            if (status !== 200) {setError("Failed to contact mill")}
+
+            [status, text_response] = await getText(millUrl + '/api/rbs/recipe_meta_template')
+            setRbsMeta(text_response)
+            if (status !== 200) {setError("Failed to contact mill")}
+        }
+        refresh().then()
+    }, [refresh, daybookUrl, millUrl, setError, setDaybook])
+
+
+    let rows = []
+
+    for (const [section,section_value] of Object.entries(daybook)) {
+        for (const [key, value] of Object.entries(section_value)) {
+            rows.push({id:section+"."+key, value:value})
+        }
+    }
 
     const columns = [
         {field: 'id', headerName: "Identifier", flex: true},
         {field: 'value', headerName: "Current Value", flex: true}
     ]
 
-    const rows = [
-        {id:"mill.rbs.x", value:"20"},
-        {id:"mill.rbs.y", value:"25"},
-        {id:"mill.rbs.phi", value:"30"},
-        {id:"mill.rbs.zeta", value:"10"},
-        {id:"mill.rbs.det", value:"170"},
-        {id:"mill.rbs.theta", value:"0.15"},
-        {id:"mill.recipe.measuring_time", value:"0"},
-        {id:"mill.recipe.start_time", value:"0"},
-        {id:"mill.recipe.end_time", value:"0"},
-        {id:"mill.recipe.name", value:""},
-        {id:"mill.erd_recipe.z_start", value:"0"},
-        {id:"mill.erd_recipe.z_end", value:"0"},
-        {id:"mill.erd_recipe.z_increment", value:"0"},
-        {id:"mill.erd_recipe.z_repeat", value:"0"},
-        {id:"mill.rbs.detector", value:"[List] - 1 file created per detector"},
-        {id:"mill.rbs.detector[0].name", value:"d01"},
-        {id:"mill.rbs.detector[0].zeta", value:"0.2"},
-        {id:"mill.rbs.detector[0].omega", value:"5"},
-        {id:"mill.rbs.detector[0].offset", value:"5"},
-        {id:"mill.rbs.detector[0].gain", value:"8"},
-        {id:"mill.rbs.detector[0].fwhm", value:"17.5"},
-        {id:"daybook.acc_beam.focus_voltage", value:"14.0"},
-        {id:"daybook.acc_beam.focus_current", value:"0.15"},
-        {id:"daybook.acc_beam.bias_voltage", value:"22.2"},
-        {id:"daybook.acc_beam.bias_current", value:"0.12"},
-        {id:"daybook.acc_beam.primary_beam", value:"5"},
-        {id:"daybook.acc_beam.energy", value:"6"},
-        {id:"daybook.acc_beam.terminal_voltage", value:"6"},
-    ]
-
     return (<div>
+            <ToastPopup text={error} open={openDialog} setOpen={setOpenDialog} severity={"error"}/>
             <Box sx={{flexGrow: 1}}>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
-                        <h2>RBS Data header</h2>
+                        <h2>RBS Meta Section header</h2>
                         <StyledPaper>
                             <TextareaAutosize
                                 style={{ maxWidth: "100%", height:"600px", marginBottom:"8px"}}
-                            >{rbs_header}
+                                value={rbsMeta}/>
 
-                            </TextareaAutosize>
                             <ButtonGroup variant="outlined">
-                                <Button>Update</Button>
-                                <Button>Download Template</Button>
-                                <Button>Download Filled</Button>
-                                <Button>Upload</Button>
+                                <Button disabled={true}>Download Template</Button>
+                                <Button disabled={true}>Upload Template</Button>
+                                <Button disabled={true}>Download Filled</Button>
                             </ButtonGroup>
                         </StyledPaper>
                     </Grid>
@@ -163,12 +174,11 @@ export function Config() {
                         <StyledPaper>
                             <TextareaAutosize
                                 style={{ maxWidth: "100%", height:"600px", marginBottom:"8px"}}
-                            >{erd_header}</TextareaAutosize>
+                                value={erdMeta}/>
                             <ButtonGroup variant="outlined">
-                                <Button>Update</Button>
-                                <Button>Download Template</Button>
-                                <Button>Download Filled</Button>
-                                <Button>Upload</Button>
+                                <Button disabled={true}>Download Template</Button>
+                                <Button disabled={true}>Upload Template</Button>
+                                <Button disabled={true}>Download Filled</Button>
                             </ButtonGroup>
                         </StyledPaper>
                     </Grid>
