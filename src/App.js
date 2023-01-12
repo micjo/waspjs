@@ -275,8 +275,8 @@ function Navigation() {
     routes.push(<Route path="/recipe_meta_config" key="recipe_meta_config" element={<RecipeMetaConfig/>}/>);
     navBarElements.push(<NavLi to="/recipe_meta_config" icon={<Settings/>} key="recipe_meta_config" onClick={hide} label={"Recipe Meta Config"}/>)
 
-    routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
-    navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
+    // routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
+    // navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
 
     routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
     navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
