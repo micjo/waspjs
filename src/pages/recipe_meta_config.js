@@ -3,7 +3,7 @@ import {BackEndConfig, HiveUrl, NectarTitle} from "../App";
 import {usePollData} from "../components/generic_control";
 import {NumberInput} from "../components/elements";
 import {getJson, getText, postData} from "../http_helper";
-import {Box, ButtonGroup, Grid, Paper, TextField} from "@mui/material";
+import {Box, ButtonGroup, Grid, Paper, TextField, Typography} from "@mui/material";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
 import {styled} from "@mui/material/styles";
 import {DataGrid, gridClasses} from "@mui/x-data-grid";
@@ -30,8 +30,6 @@ function InputField(props) {
 
     return (<TextField multiline value={value} onChange={handleChange} size="small" label={props.label} sx={{"paddingBottom":"8px"}}/>)
 }
-
-
 
 const rbs_header = ` % Comments
  % Title                 := {mill.recipe.name}_{mill.rbs.detector.name}
@@ -93,9 +91,6 @@ const erd_header = ` % Comments
  *
  % Section :=  </raw_data>
  % End comments
-
-
-
 `
 
 
@@ -126,7 +121,6 @@ export function RecipeMetaConfig() {
             if (status !== 200) {setError("Failed to contact db")}
 
             [status, text_response] = await getText(millUrl + '/api/erd/recipe_meta_template')
-            console.log(text_response)
             setErdMeta(text_response)
             if (status !== 200) {setError("Failed to contact mill")}
 
@@ -151,34 +145,82 @@ export function RecipeMetaConfig() {
         {field: 'value', headerName: "Current Value", flex: true}
     ]
 
+    async function handleMetaUpload(e, setup_name) {
+        let data = new FormData();
+        data.append('file', e.target.files[0]);
+
+
+
+        let response = await fetch(millUrl + "/api/" + setup_name + "/recipe_meta_template", {method: 'POST', body: data});
+        let json_job = await response.json();
+
+        if (response.status !== 200) {
+            setError("Invalid toml - ignored")
+        }
+        setRefresh(true)
+    }
+
+    const handleMetaTemplateDownload = (setup_name) => {
+        fetch(millUrl +'/api/' + setup_name + "/recipe_meta_template").then(response => {
+            response.blob().then(blob => {
+                const fileURL = window.URL.createObjectURL(blob);
+                let alink = document.createElement('a');
+                alink.href = fileURL;
+                alink.download = 'rbs_meta_template.toml';
+                alink.click();
+            })
+        })
+    }
+
+    const handleMetaFilledDownload = (setup_name) => {
+        fetch(millUrl +'/api/' + setup_name + "/recipe_meta").then(response => {
+            response.blob().then(blob => {
+                const fileURL = window.URL.createObjectURL(blob);
+                let alink = document.createElement('a');
+                alink.href = fileURL;
+                alink.download = 'rbs_meta.toml';
+                alink.click();
+            })
+        })
+    }
+
     return (<div>
             <ToastPopup text={error} open={openDialog} setOpen={setOpenDialog} severity={"error"}/>
             <Box sx={{flexGrow: 1}}>
                 <Grid container spacing={2}>
                     <Grid item xs={6}>
-                        <h2>RBS Meta Section header</h2>
+                        <h2>RBS meta header</h2>
                         <StyledPaper>
-                            <TextareaAutosize
-                                style={{ maxWidth: "100%", height:"600px", marginBottom:"8px"}}
-                                value={rbsMeta}/>
-
+                                <TextareaAutosize
+                                    disabled
+                                    style={{ maxWidth: "100%", height:"300px", marginBottom:"8px", overflow: 'auto'}}
+                                    value={String(rbsMeta)}/>
                             <ButtonGroup variant="outlined">
-                                <Button disabled={true}>Download Template</Button>
-                                <Button disabled={true}>Upload Template</Button>
-                                <Button disabled={true}>Download Filled</Button>
+                                <Button onClick={ () => handleMetaTemplateDownload("rbs")}>Download Template</Button>
+                                <Button component="label" onClick={(e) => {e.target.value = null;}}
+                                        onChange={async (e) => await handleMetaUpload(e, "rbs")}>
+                                    Upload Template
+                                    <input type="file" hidden/>
+                                </Button>
+                                <Button onClick={ () => handleMetaFilledDownload("rbs")}>Download Filled</Button>
                             </ButtonGroup>
                         </StyledPaper>
                     </Grid>
                     <Grid item xs={6}>
-                        <h2>ERD Data header</h2>
+                        <h2>ERD meta header</h2>
                         <StyledPaper>
                             <TextareaAutosize
-                                style={{ maxWidth: "100%", height:"600px", marginBottom:"8px"}}
-                                value={erdMeta}/>
+                                disabled
+                                style={{ maxWidth: "100%", height:"300px", marginBottom:"8px", overflow: 'auto'}}
+                                value={String(erdMeta)}/>
                             <ButtonGroup variant="outlined">
-                                <Button disabled={true}>Download Template</Button>
-                                <Button disabled={true}>Upload Template</Button>
-                                <Button disabled={true}>Download Filled</Button>
+                                <Button onClick={ () => handleMetaTemplateDownload("erd")}>Download Template</Button>
+                                <Button component="label" onClick={(e) => {e.target.value = null;}}
+                                        onChange={async (e) => await handleMetaUpload(e, "erd")}>
+                                    Upload Template
+                                    <input type="file" hidden/>
+                                </Button>
+                                <Button onClick={ () => handleMetaFilledDownload("erd")}>Download Filled</Button>
                             </ButtonGroup>
                         </StyledPaper>
                     </Grid>

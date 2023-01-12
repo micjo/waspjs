@@ -137,7 +137,6 @@ export function DayBook() {
 
 
     async function handleDayBookUpload(e) {
-        let filename = e.target.files[0].name;
         let data = new FormData();
         data.append('file', e.target.files[0]);
         let response = await fetch(daybookUrl + "/" + 'daybook', {method: 'POST', body: data});
