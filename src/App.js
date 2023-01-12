@@ -226,8 +226,7 @@ function SomeHardware(props) {
 
 function NectarAppBar(props) {
     const nectarTitle = useContext(NectarTitle)
-    const root_url = useContext(HiveUrl);
-    const docs_url = useContext(DocsUrl);
+    const backend_cfg = useContext(BackEndConfig);
     return (
         <AppBar position={"sticky"}>
             <Toolbar>
@@ -237,8 +236,9 @@ function NectarAppBar(props) {
                 <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                     {nectarTitle.title}
                 </Typography>
-                <Button color="inherit" component={Link} href={docs_url}>Help</Button>
-                <Button color="inherit" component={Link} href={root_url}>Mill</Button>
+                <Button color="inherit" component={Link} href={backend_cfg.urls.docs}>Help</Button>
+                <Button color="inherit" component={Link} href={backend_cfg.urls.mill}>Mill</Button>
+                <Button color="inherit" component={Link} href={backend_cfg.urls.db}>Db</Button>
             </Toolbar>
         </AppBar>)
 
