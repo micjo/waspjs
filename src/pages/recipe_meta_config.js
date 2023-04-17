@@ -166,7 +166,7 @@ export function RecipeMetaConfig() {
                 const fileURL = window.URL.createObjectURL(blob);
                 let alink = document.createElement('a');
                 alink.href = fileURL;
-                alink.download = 'rbs_meta_template.toml';
+                alink.download = setup_name + '_meta_template.toml';
                 alink.click();
             })
         })
@@ -178,7 +178,7 @@ export function RecipeMetaConfig() {
                 const fileURL = window.URL.createObjectURL(blob);
                 let alink = document.createElement('a');
                 alink.href = fileURL;
-                alink.download = 'rbs_meta.toml';
+                alink.download = setup_name + '_meta.toml';
                 alink.click();
             })
         })
