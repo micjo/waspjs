@@ -24,7 +24,7 @@ export function StripedTable(props) {
                 density={"compact"}
                 disableColumnMenu={true}
                 disableSelectionOnClick={true}
-                hideFooter={true}
+                hideFooter={false}
                 components={{
                     NoRowsOverlay: () => (
                         <Stack height="100%" alignItems="center" justifyContent="center">
