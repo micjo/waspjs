@@ -47,6 +47,7 @@ export function RbsDetectorOverview() {
             <StripedTable
                 rows={rows}
                 columns={columns}
-                height={600}/>
+                height={600}
+                hideFooter={true}/>
     );
 }

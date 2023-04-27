@@ -35,7 +35,7 @@ function ScheduleTable(props) {
     return (
         <>
             <h5>Scheduled</h5>
-            <StripedTable rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200}/>
+            <StripedTable rows={rows} columns={columns} noRowsText={"Nothing scheduled"} height={200} hideFooter={true}/>
             <Grid container justifyContent="flex-end">
             <LoadButton text={"Cancel"} icon={<Cancel/>} callback={async () => {
                 await postData(url + "abort_schedule");
@@ -198,6 +198,7 @@ function ProgressTable(props) {
                 columns={columns}
                 noRowsText={"Nothing active"}
                 height={300}
+                hideFooter={true}
             />
             <Grid container justifyContent="flex-end">
                 <LoadButton text={"Cancel"} icon={<Cancel/>} callback={async () => {

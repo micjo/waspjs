@@ -137,6 +137,7 @@ export function RecipeMetaConfig() {
     for (const [section,section_value] of Object.entries(daybook)) {
         for (const [key, value] of Object.entries(section_value)) {
             rows.push({id:section+"."+key, value:value})
+            console.log({id:section+"."+key, value:value})
         }
     }
 
@@ -232,6 +233,7 @@ export function RecipeMetaConfig() {
                             height={400}
                             rows={rows}
                             columns = {columns}
+                            hideFooter = {false}
                         />
                     </StyledPaper>
                 </Grid>
