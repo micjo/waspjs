@@ -1,12 +1,11 @@
 import {usePollData} from "../components/generic_control";
-import React, {useCallback, useContext, useEffect, useLayoutEffect, useRef, useState} from "react";
-import {BackEndConfig, HiveUrl, MillConfig, NectarTitle} from "../App";
-import {NumberInput, NumberInputNoButton, ProgressButton, SimpleNumberInput, TextInput} from "../components/elements";
-import {Box, ButtonGroup, Grid, Paper, TextField} from "@mui/material";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import {BackEndConfig, NectarTitle} from "../App";
+import {NumberInput, ProgressButton, SimpleNumberInput, TextInput} from "../components/elements";
+import {Box, ButtonGroup, Grid, Paper} from "@mui/material";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
 import {sendRequest} from "../http_helper";
 import Button from "@mui/material/Button";
-import {HistogramCaen} from "../components/histogram_caen";
 import {ToastPopup} from "../components/toast_popup";
 import {PollView} from "../components/poll_view";
 
@@ -96,7 +95,9 @@ export function ErdOverview() {
 
     let positionStatus = [
         [`Z`, erd_data?.["mdrive_z"]?.["motor_position"]],
+        [`Z Encoder`, erd_data?.["motrona_z_encoder"]?.["charge(nC)"]],
         [`Theta`, erd_data?.["mdrive_theta"]?.["motor_position"]],
+        [`Theta Encoder`, erd_data?.["motrona_theta_encoder"]?.["charge(nC)"]],
         [`Moving`, moving?.toString()]
     ]
 
