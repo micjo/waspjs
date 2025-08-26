@@ -10,7 +10,7 @@ import {
 
 
 import Link from "@material-ui/core/Link";
-import {Dashboard} from "./pages/dashboard";
+import {ToolStatus} from "./pages/tool_status";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
 import {Caen} from "./pages/caen";
@@ -18,9 +18,7 @@ import {getJson} from "./http_helper";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
 import {JobOverview} from "./pages/job_overview";
-// import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
-// import {Trends} from "./pages/trends";
 import CssBaseline from "@mui/material/CssBaseline";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
 import {blue, yellow} from '@mui/material/colors';
@@ -37,20 +35,16 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import { useLocation } from 'react-router-dom';
 import {
-    MonitorHeart,
-    Timeline,
     Menu,
     Work,
-    Notes,
-    Dashboard as DashboardIcon,
-    Bolt,
     Memory,
     ContentPasteSearch,
-    MenuBook, Settings
+    MonitorHeart,
 } from "@mui/icons-material";
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import HomeIcon from '@mui/icons-material/Home';
 import {RbsOverview} from "./pages/rbs_overview";
-import {DayBook} from "./pages/daybook";
-import {RecipeMetaConfig} from "./pages/recipe_meta_config";
+import {Dashboard} from "./pages/daybook";
 import {ErdOverview} from "./pages/erd_overview";
 
 export const MillConfig = React.createContext({});
@@ -268,8 +262,11 @@ function Navigation() {
 
     let routes = [<Route path="/" key={"dashboard"} element={<Dashboard/>}/>];
     let navBarElements = [
-        <NavLi to="/" key={"dashboard"} icon={<DashboardIcon/>} onClick={hide} label={"Dashboard"}/>
+        <NavLi to="/" key={"dashboard"} icon={<HomeIcon/>} onClick={hide} label={"Dashboard"}/>
     ];
+    
+    routes.push(<Route path="/tool-status" key="tool-status" element={<ToolStatus/>}/>);
+    navBarElements.push(<NavLi to="/tool-status" icon={<ChecklistIcon/>} key="ToolStatus" onClick={hide} label={"ToolStatus"}/>)
 
     routes.push(<Route path="/job_overview" key="job_overview" element={<JobOverview/>}/>);
     navBarElements.push(<NavLi to="/job_overview" icon={<Work/>} key="job_overview" onClick={hide} label={"Jobs"}/>)
@@ -279,19 +276,7 @@ function Navigation() {
 
     routes.push(<Route key={"erd_overview"} path={"/erd_overview"} element={<ErdOverview/>}/>);
     navBarElements.push(<NavLi to={"/erd_overview"} key="erd_overview" icon={<ContentPasteSearch/>} onClick={hide} label={"ERD Overview"}/>)
-    routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
-    navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
-
-    // routes.push(<Route path="/recipe_meta_config" key="recipe_meta_config" element={<RecipeMetaConfig/>}/>);
-    // navBarElements.push(<NavLi to="/recipe_meta_config" icon={<Settings/>} key="recipe_meta_config" onClick={hide} label={"Recipe Meta Config"}/>)
-
-    // routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
-    // navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
-
-    // routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
-    // navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
-
-
+    
     for (const [key, value] of Object.entries(context)) {
         let dropDownElements = []
 

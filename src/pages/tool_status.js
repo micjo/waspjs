@@ -65,11 +65,11 @@ export function UseStatus(props) {
     );
 }
 
-export function Dashboard() {
+export function ToolStatus() {
     const context = useContext(MillConfig);
     const nectarTitle = useContext(NectarTitle);
 
-    useEffect( () => nectarTitle.setTitle("Dashboard"))
+    useEffect( () => nectarTitle.setTitle("Tool Status"))
 
     let full_page = []
 

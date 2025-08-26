@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import {NectarTitle} from "../App";
+import { NectarTitle} from "../App";
 import {
   Box,
   Button,
@@ -35,10 +35,10 @@ const DB_API_URL = "https://db.capitan.imec.be";
 const MILL_API_URL = "https://mill.capitan.imec.be";
 
 /**
- * Fetches the current daybook data from the API.
+ * Fetches the current dashboard data from the API.
  */
-const fetchDaybookData = async () => {
-  const url = `${DB_API_URL}/daybook/current`;
+const fetchDashboardData = async () => {
+  const url = `${DB_API_URL}/dashboard/current`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -51,7 +51,7 @@ const fetchDaybookData = async () => {
  * Fetches the list of available activity templates from the API.
  */
 const fetchActivities = async () => {
-  const url = `${DB_API_URL}/daybook/templates`;
+  const url = `${DB_API_URL}/dashboard/templates`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -64,7 +64,7 @@ const fetchActivities = async () => {
  * Fetches a specific data template by name from the API.
  */
 const fetchTemplate = async (templateName) => {
-  const url = `${DB_API_URL}/daybook/templates/${templateName}`;
+  const url = `${DB_API_URL}/dashboard/templates/${templateName}`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -77,7 +77,7 @@ const fetchTemplate = async (templateName) => {
  * Fetches the mapping of updatable fields to their respective API endpoints.
  */
 const fetchUpdatableEndpoints = async () => {
-    const url = `${DB_API_URL}/daybook/endpoints`;
+    const url = `${DB_API_URL}/dashboard/endpoints`;
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,7 +120,6 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   size="small"
                   value={value}
                   onChange={(e) => handleChange(e.target.value)}
-                  sx={{ '& .MuiInputBase-input': { fontSize: '1.2rem' } }}
                 />
               )}
               {type === "text" && (
@@ -130,7 +129,6 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   value={value}
                   multiline
                   onChange={(e) => handleChange(e.target.value)}
-                  sx={{ '& .MuiInputBase-input': { fontSize: '1.2rem' } }}
                 />
               )}
               {type === "timestamp" && (
@@ -139,22 +137,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   fullWidth
                   value={value}
                   disabled
-                  sx={{ '& .MuiInputBase-input': { fontSize: '1.2rem' } }}
                 />
-              )}
-              {type === "selection" && (
-                <Select
-                  size="small"
-                  value={value}
-                  onChange={(e) => handleChange(e.target.value)}
-                  sx={{ '& .MuiSelect-select': { fontSize: '1.2rem' } }}
-                >
-                  {options.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-                </Select>
               )}
               {type === "boolean" && (
                 <FormControlLabel
@@ -166,6 +149,19 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   }
                   label=""
                 />
+              )}
+              {type === "selection" && (
+                <Select
+                  size="small"
+                  value={value}
+                  onChange={(e) => handleChange(e.target.value)}
+                >
+                  {options.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt}
+                    </MenuItem>
+                  ))}
+                </Select>
               )}
               {/* Show the update button only if the field is updatable */}
               {isUpdatable && (
@@ -210,7 +206,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
   );
 }
 
-function DaybookSection({ title, values, isEditing, onChange, onUpdateField, titleColor, updatableFields }) {
+function DashboardSection({ title, values, isEditing, onChange, onUpdateField, titleColor, updatableFields }) {
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
       <Typography variant="body1" fontWeight="bold" sx={{ color: titleColor }}>
@@ -233,15 +229,15 @@ function DaybookSection({ title, values, isEditing, onChange, onUpdateField, tit
   );
 }
 
-export function DayBook() {
+export function Dashboard() {
   const nectarTitle = useContext(NectarTitle);
 
-  useEffect( () => nectarTitle.setTitle("Daybook"))
+  useEffect( () => nectarTitle.setTitle("Dashboard"))
 
-  const [daybook, setDaybook] = useState(null);
+  const [dashboard, setDashboard] = useState(null);
   const [activities, setActivities] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedDaybook, setEditedDaybook] = useState(null);
+  const [editedDashboard, setEditedDashboard] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
   const [activityTitle, setActivityTitle] = useState('');
   const [currentTemplateName, setCurrentTemplateName] = useState('');
@@ -251,6 +247,8 @@ export function DayBook() {
   const [isRefreshSuccessful, setIsRefreshSuccessful] = useState(false);
   // New state to hold the fetched updatable endpoints
   const [updatableEndpoints, setUpdatableEndpoints] = useState({});
+  // New state to control the visibility of the app bar (based on URL query)
+  const [hideAppBar, setHideAppBar] = useState(false);
 
   // New state to manage save feedback
   const [saveStatus, setSaveStatus] = useState({
@@ -264,10 +262,10 @@ export function DayBook() {
     setIsRefreshSuccessful(false);
     setError(null); // Clear any existing errors at the start of the refresh
     try {
-      const data = await fetchDaybookData();
+      const data = await fetchDashboardData();
       const endpoints = await fetchUpdatableEndpoints();
-      setDaybook(data);
-      setEditedDaybook(data);
+      setDashboard(data);
+      setEditedDashboard(data);
       setActivityTitle(data.General?.Activity?.value || '');
       setCurrentTemplateName(data.General?.Activity?.value || '');
       setUpdatableEndpoints(endpoints);
@@ -284,6 +282,8 @@ export function DayBook() {
   useEffect(() => {
     // Initial fetch on component mount
     getData();
+    const params = new URLSearchParams(window.location.search);
+    setHideAppBar(params.get('hide-appbar') === 'true');
   }, []); // Run only on component mount
 
   useEffect(() => {
@@ -312,7 +312,7 @@ export function DayBook() {
   };
 
   const handleChange = (section, key, newField) => {
-    setEditedDaybook((prev) => ({
+    setEditedDashboard((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
@@ -353,7 +353,7 @@ export function DayBook() {
           throw new Error(`Value for key path "${endpointConfig.key}" is undefined.`);
       }
 
-      handleChange(section, key, { ...editedDaybook[section][key], value: newValue });
+      handleChange(section, key, { ...editedDashboard[section][key], value: newValue });
       setError(null);
     } catch (err) {
       setError(`Failed to update ${fullKey}: ${err.message}`);
@@ -376,7 +376,7 @@ export function DayBook() {
       });
       // Wait for all updates to complete
       await Promise.all(updatePromises.map(p => p.catch(e => e)));
-      // After all updates, re-fetch the daybook data to ensure consistency.
+      // After all updates, re-fetch the dashboard data to ensure consistency.
       await getData();
       setSaveStatus({
           open: true,
@@ -399,7 +399,7 @@ export function DayBook() {
     setIsLoading(true);
     try {
       const template = await fetchTemplate(templateName);
-      setEditedDaybook(template);
+      setEditedDashboard(template);
       setActivityTitle(template.General.Activity.value);
       setCurrentTemplateName(templateName);
       setIsPopupOpen(false);
@@ -412,42 +412,42 @@ export function DayBook() {
   };
 
   /**
-   * Saves the current edited daybook data to the API.
+   * Saves the current edited dashboard data to the API.
    * This function sends the data via a POST request to the configured save endpoint.
    */
   const handleSave = async () => {
-    const updatedDaybook = {
-      ...editedDaybook,
+    const updatedDashboard = {
+      ...editedDashboard,
       "General": {
-        ...editedDaybook.General,
+        ...editedDashboard.General,
         "Activity": {
-          ...editedDaybook.General.Activity,
+          ...editedDashboard.General.Activity,
           value: activityTitle
         }
       }
     };
 
     try {
-      const response = await fetch(`${DB_API_URL}/daybook/save`, {
+      const response = await fetch(`${DB_API_URL}/dashboard/save`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedDaybook),
+        body: JSON.stringify(updatedDashboard),
       });
 
       if (!response.ok) {
         // Attempt to read the error text from the response body
         const errorText = await response.text();
-        throw new Error(`Failed to save daybook: ${response.status} ${errorText}`);
+        throw new Error(`Failed to save dashboard: ${response.status} ${errorText}`);
       }
 
       // If save is successful, update the local state and provide feedback
-      setDaybook(updatedDaybook);
+      setDashboard(updatedDashboard);
       setIsEditing(false);
       setSaveStatus({
           open: true,
-          message: 'Daybook saved successfully!',
+          message: 'Dashboard saved successfully!',
           severity: 'success',
       });
     } catch (err) {
@@ -455,7 +455,7 @@ export function DayBook() {
       // Provide user-friendly feedback on failure
       setSaveStatus({
           open: true,
-          message: `Error saving daybook: ${err.message}`,
+          message: `Error saving dashboard: ${err.message}`,
           severity: 'error',
       });
       // Also set the general error state for the main error display
@@ -464,13 +464,13 @@ export function DayBook() {
   };
 
   const handleCancel = () => {
-    setEditedDaybook(daybook);
-    setActivityTitle(daybook.General.Activity.value);
+    setEditedDashboard(dashboard);
+    setActivityTitle(dashboard.General.Activity.value);
     setIsEditing(false);
   };
 
   // Conditional rendering for the initial loading screen
-  if (!daybook && isLoading) {
+  if (!dashboard && isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
         <CircularProgress sx={{ mb: 2 }} />
@@ -481,7 +481,7 @@ export function DayBook() {
         <Button onClick={() => window.location.reload()} variant="outlined" sx={{ mt: 2 }}>Reload</Button>
       </Box>
     );
-  } else if (!daybook && error) {
+  } else if (!dashboard && error) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
         <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
@@ -493,7 +493,7 @@ export function DayBook() {
     );
   }
 
-  const sections = Object.entries(editedDaybook || {});
+  const sections = Object.entries(editedDashboard || {});
   const numColumns = 3;
   const columns = Array.from({ length: numColumns }, () => []);
 
@@ -560,31 +560,37 @@ export function DayBook() {
             )}
           </Box>
           <Box sx={{ width: '33.3%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-            <ButtonGroup>
-              {isEditing ? (
-                <>
-                  <Button variant="contained" onClick={handleSave}>
-                    Save
-                  </Button>
-                  <Button onClick={handleCancel}>Cancel</Button>
-                </>
-              ) : (
-                <Button variant="outlined" onClick={() => setIsEditing(true)}>
-                  Edit
-                </Button>
-              )}
-              <Button variant="outlined" onClick={() => window.location.reload()} disabled={isLoading}>
-                <ReplayIcon sx={{ mr: 1 }} />
-                Reload
-              </Button>
-            </ButtonGroup>
+            {!hideAppBar && (
+              <ButtonGroup>
+                {isEditing ? (
+                  <>
+                    <Button variant="contained" onClick={handleSave}>
+                      Save
+                    </Button>
+                    <Button onClick={handleCancel}>Cancel</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outlined" onClick={() => setIsEditing(true)}>
+                      Edit
+                    </Button>
+                    <Button variant="outlined" onClick={() => window.location.reload()}>
+                      <ReplayIcon sx={{ mr: 1 }} />
+                      Reload
+                    </Button>
+                  </>
+                )}
+              </ButtonGroup>
+            )}
             <Box display="flex" alignItems="center" mt={1}>
               <Typography variant="body2" color="text.secondary">
                 Last Refreshed: {lastRefresh ? lastRefresh.toLocaleTimeString() : 'N/A'}
               </Typography>
-              {isRefreshSuccessful && !isLoading && (
-                <CheckCircleOutlineIcon color="success" sx={{ ml: 0.5 }} />
-              )}
+              {isLoading ? (
+                  <CircularProgress size={20} sx={{ ml: 0.5 }} />
+              ) : isRefreshSuccessful ? (
+                  <CheckCircleOutlineIcon color="success" sx={{ ml: 0.5 }} />
+              ) : null}
             </Box>
           </Box>
         </Box>
@@ -594,14 +600,14 @@ export function DayBook() {
         {columns.map((column, colIndex) => (
           <Box key={colIndex} sx={{ flex: 1 }}>
             {column.map(([section, values]) => (
-              <DaybookSection
+              <DashboardSection
                 key={section}
                 title={section}
-                values={editedDaybook[section]}
+                values={editedDashboard[section]}
                 isEditing={isEditing}
                 onChange={handleChange}
                 onUpdateField={handleUpdateField}
-                titleColor={editedDaybook[section].color}
+                titleColor={editedDashboard[section].color}
                 updatableFields={updatableEndpoints}
               />
             ))}
@@ -650,4 +656,4 @@ export function DayBook() {
   );
 }
 
-export default DayBook;
+export default Dashboard;
