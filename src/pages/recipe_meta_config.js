@@ -1,16 +1,11 @@
 import React, {useCallback, useContext, useEffect, useState} from "react";
-import {BackEndConfig, HiveUrl, NectarTitle} from "../App";
-import {usePollData} from "../components/generic_control";
-import {NumberInput} from "../components/elements";
-import {getJson, getText, postData} from "../http_helper";
-import {Box, ButtonGroup, Grid, Paper, TextField, Typography} from "@mui/material";
-import {GridHeader, GridTemplate} from "../components/grid_helper";
+import {BackEndConfig, NectarTitle} from "../App";
+import {getJson, getText} from "../http_helper";
+import {Box, ButtonGroup, Grid, Paper, TextField} from "@mui/material";
 import {styled} from "@mui/material/styles";
-import {DataGrid, gridClasses} from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import {TextareaAutosize} from "@mui/material";
 import {StripedTable} from "../components/table_templates";
-import {LinearWithValueLabel} from "../components/linear_progress_with_label";
 import {ToastPopup} from "../components/toast_popup";
 
 const StyledPaper = styled(Paper)(({theme}) => ({
@@ -21,15 +16,15 @@ const StyledPaper = styled(Paper)(({theme}) => ({
 }));
 
 
-function InputField(props) {
-    const [value, setValue] = useState(props.initialValue)
+// function InputField(props) {
+//     const [value, setValue] = useState(props.initialValue)
 
-    const handleChange = (event) => {
-        setValue(event.target.value);
-    };
+//     const handleChange = (event) => {
+//         setValue(event.target.value);
+//     };
 
-    return (<TextField multiline value={value} onChange={handleChange} size="small" label={props.label} sx={{"paddingBottom":"8px"}}/>)
-}
+//     return (<TextField multiline value={value} onChange={handleChange} size="small" label={props.label} sx={{"paddingBottom":"8px"}}/>)
+// }
 
 const rbs_header = ` % Comments
  % Title                 := {mill.recipe.name}_{mill.rbs.detector.name}

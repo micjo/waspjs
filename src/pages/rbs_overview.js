@@ -1,11 +1,11 @@
 import {usePollData} from "../components/generic_control";
-import React, {useCallback, useContext, useEffect, useLayoutEffect, useRef, useState} from "react";
-import {BackEndConfig, HiveUrl, MillConfig, NectarTitle} from "../App";
-import {NumberInput, NumberInputNoButton, ProgressButton, SimpleNumberInput} from "../components/elements";
+import React, {useCallback, useContext, useEffect, useState} from "react";
+import {BackEndConfig, NectarTitle} from "../App";
+import {NumberInput, ProgressButton, SimpleNumberInput} from "../components/elements";
 import {Box, ButtonGroup, Grid, Paper, TextField} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import {GridHeader, GridTemplate} from "../components/grid_helper";
-import {postData, sendRequest, useSendRequestWithData} from "../http_helper";
+import {sendRequest} from "../http_helper";
 import Button from "@mui/material/Button";
 import {HistogramCaen} from "../components/histogram_caen";
 import {ToastPopup} from "../components/toast_popup";

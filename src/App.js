@@ -18,9 +18,9 @@ import {getJson} from "./http_helper";
 import {Mpa3} from "./pages/mpa3";
 import {Mdrive} from "./pages/mdrive";
 import {JobOverview} from "./pages/job_overview";
-import {LogView} from "./pages/log_view";
+// import {LogView} from "./pages/log_view";
 import {RbsDetectorOverview} from "./pages/rbs_detectors_overview";
-import {Trends} from "./pages/trends";
+// import {Trends} from "./pages/trends";
 import CssBaseline from "@mui/material/CssBaseline";
 import {createTheme, ThemeProvider} from "@mui/material/styles";
 import {blue, yellow} from '@mui/material/colors';
@@ -35,6 +35,7 @@ import Box from "@mui/material/Box";
 import NestedList from "./components/nested_list";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import { useLocation } from 'react-router-dom';
 import {
     MonitorHeart,
     Timeline,
@@ -227,6 +228,15 @@ function SomeHardware(props) {
 function NectarAppBar(props) {
     const nectarTitle = useContext(NectarTitle)
     const backend_cfg = useContext(BackEndConfig);
+
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const hideAppBar = queryParams.get('hide-appbar') === 'true';
+
+    if (hideAppBar) {
+        return null; // Return null to render nothing
+    }
+
     return (
         <AppBar position={"sticky"}>
             <Toolbar>
@@ -251,10 +261,10 @@ function Navigation() {
     const hide = useCallback(() => setDrawerVisible(false))
     const show = useCallback(() => setDrawerVisible(true))
 
-    if (context === "") {
-        return <h1>Cannot Reach Mill. Is it running ? (<a
-            href="https://mill.capitan.imec.be">https://mill.capitan.imec.be</a>)</h1>
-    }
+    // if (context === "") { //FXIME: development only
+    //     return <h1>Cannot Reach Mill. Is it running ? (<a
+    //         href="https://mill.capitan.imec.be">https://mill.capitan.imec.be</a>)</h1>
+    // }
 
     let routes = [<Route path="/" key={"dashboard"} element={<Dashboard/>}/>];
     let navBarElements = [
@@ -272,14 +282,14 @@ function Navigation() {
     routes.push(<Route path="/daybook" key="daybook" element={<DayBook/>}/>);
     navBarElements.push(<NavLi to="/daybook" icon={<MenuBook/>} key="DayBook" onClick={hide} label={"Daybook"}/>)
 
-    routes.push(<Route path="/recipe_meta_config" key="recipe_meta_config" element={<RecipeMetaConfig/>}/>);
-    navBarElements.push(<NavLi to="/recipe_meta_config" icon={<Settings/>} key="recipe_meta_config" onClick={hide} label={"Recipe Meta Config"}/>)
+    // routes.push(<Route path="/recipe_meta_config" key="recipe_meta_config" element={<RecipeMetaConfig/>}/>);
+    // navBarElements.push(<NavLi to="/recipe_meta_config" icon={<Settings/>} key="recipe_meta_config" onClick={hide} label={"Recipe Meta Config"}/>)
 
     // routes.push(<Route path="/trends" key="trends" element={<Trends/>}/>);
     // navBarElements.push(<NavLi to="/trends" key="trends" icon={<Timeline/>} onClick={hide} label={"Trends"}/>)
 
-    routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
-    navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
+    // routes.push(<Route path="/log_view" key="log_view" element={<LogView/>}/>);
+    // navBarElements.push(<NavLi to="/log_view" key="log_view" icon={<Notes/>} onClick={hide} label={"Logbook"}/>)
 
 
     for (const [key, value] of Object.entries(context)) {
