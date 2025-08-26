@@ -1,5 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
-import { NectarTitle} from "../App";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,7 +11,6 @@ import {
   FormControlLabel,
   Select,
   MenuItem,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -25,7 +23,6 @@ import {
   Snackbar,
   Alert
 } from "@mui/material";
-import SyncIcon from '@mui/icons-material/Sync';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ReplayIcon from '@mui/icons-material/Replay';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
@@ -86,8 +83,23 @@ const fetchUpdatableEndpoints = async () => {
     return data;
 };
 
-function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable }) {
+function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) {
   const { type, value, unit, options } = field;
+
+  // Find the endpoint information for this field
+  const endpointInfo = updatableEndpoints[`${label}.${field.key}`];
+  const warningBounds = endpointInfo ? endpointInfo['warning-bounds'] : null;
+  const errorBounds = endpointInfo ? endpointInfo['error-bounds'] : null;
+
+  // Determine the color based on bounds
+  let textColor = 'text.primary';
+  if (value !== undefined && typeof value === 'number') {
+    if (errorBounds && (value < errorBounds[0] || value > errorBounds[1])) {
+      textColor = 'error.main'; // Red for error
+    } else if (warningBounds && (value < warningBounds[0] || value > warningBounds[1])) {
+      textColor = 'warning.main'; // Orange for warning
+    }
+  }
 
   const handleChange = (newVal) => {
     onChange(label, { ...field, value: newVal });
@@ -99,8 +111,11 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
   const totalXs = labelXs + valueXs;
   const remainingXs = 12 - totalXs;
   const unitXs = remainingXs;
-
   const isTimestamp = type === "timestamp";
+
+  // Check if the field is updatable and disable editing if not
+  const isUpdatable = !!updatableEndpoints[`${label}.${field.key}`];
+  const isDisabled = !isUpdatable || !isEditing;
 
   return (
     <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
@@ -120,6 +135,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   size="small"
                   value={value}
                   onChange={(e) => handleChange(e.target.value)}
+                  disabled={isDisabled}
                 />
               )}
               {type === "text" && (
@@ -129,6 +145,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   value={value}
                   multiline
                   onChange={(e) => handleChange(e.target.value)}
+                  disabled={isDisabled}
                 />
               )}
               {type === "timestamp" && (
@@ -145,6 +162,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                     <Checkbox
                       checked={!!value}
                       onChange={(e) => handleChange(e.target.checked)}
+                      disabled={isDisabled}
                     />
                   }
                   label=""
@@ -155,6 +173,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   size="small"
                   value={value}
                   onChange={(e) => handleChange(e.target.value)}
+                  disabled={isDisabled}
                 >
                   {options.map((opt) => (
                     <MenuItem key={opt} value={opt}>
@@ -163,21 +182,12 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
                   ))}
                 </Select>
               )}
-              {/* Show the update button only if the field is updatable */}
-              {isUpdatable && (
-                <IconButton
-                  size="small"
-                  onClick={() => onUpdate(label)}
-                >
-                  <SyncIcon />
-                </IconButton>
-              )}
             </>
           ) : (
             <>
-              {/* Display the value in view mode */}
+              {/* Display the value in view mode with conditional color */}
               {type === "integer" && (
-                <Typography variant="body2">{value}</Typography>
+                <Typography variant="body2" color={textColor}>{value}</Typography>
               )}
               {type === "text" && <Typography variant="body2">{value}</Typography>}
               {type === "timestamp" && <Typography variant="body2">{value}</Typography>}
@@ -206,7 +216,7 @@ function KeyValueRow({ label, field, isEditing, onChange, onUpdate, isUpdatable 
   );
 }
 
-function DashboardSection({ title, values, isEditing, onChange, onUpdateField, titleColor, updatableFields }) {
+function DashboardSection({ title, values, isEditing, onChange, titleColor, updatableEndpoints }) {
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
       <Typography variant="body1" fontWeight="bold" sx={{ color: titleColor }}>
@@ -221,8 +231,7 @@ function DashboardSection({ title, values, isEditing, onChange, onUpdateField, t
             field={field}
             isEditing={isEditing}
             onChange={(k, updatedField) => onChange(title, k, updatedField)}
-            onUpdate={(k) => onUpdateField(title, k)}
-            isUpdatable={!!updatableFields[`${title}.${key}`]}
+            updatableEndpoints={updatableEndpoints}
           />
         ))}
     </Paper>
@@ -230,10 +239,6 @@ function DashboardSection({ title, values, isEditing, onChange, onUpdateField, t
 }
 
 export function Dashboard() {
-  const nectarTitle = useContext(NectarTitle);
-
-  useEffect( () => nectarTitle.setTitle("Dashboard"))
-
   const [dashboard, setDashboard] = useState(null);
   const [activities, setActivities] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -319,80 +324,6 @@ export function Dashboard() {
         [key]: newField,
       },
     }));
-  };
-
-  const handleUpdateField = async (section, key) => {
-    // Get the full key path (e.g., "Beam.Energy")
-    const fullKey = `${section}.${key}`;
-    const endpointConfig = updatableEndpoints[fullKey];
-
-    if (!endpointConfig || typeof endpointConfig.url !== 'string' || typeof endpointConfig.key !== 'string') {
-      setError(`No valid update endpoint found for ${fullKey}`);
-      return;
-    }
-
-    try {
-      const url = `${MILL_API_URL}${endpointConfig.url}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch live data from ${url}. Status: ${response.status}`);
-      }
-      const data = await response.json();
-      
-      // Handle nested keys by splitting the key path
-      const keyPath = endpointConfig.key.split('.');
-      let newValue = data;
-      for (const k of keyPath) {
-        if (typeof newValue !== 'object' || newValue === null || !(k in newValue)) {
-          throw new Error(`Invalid key path: "${endpointConfig.key}". Key "${k}" not found.`);
-        }
-        newValue = newValue[k];
-      }
-      
-      if (newValue === undefined) {
-          throw new Error(`Value for key path "${endpointConfig.key}" is undefined.`);
-      }
-
-      handleChange(section, key, { ...editedDashboard[section][key], value: newValue });
-      setError(null);
-    } catch (err) {
-      setError(`Failed to update ${fullKey}: ${err.message}`);
-    }
-  };
-  
-  const handleUpdateAllFields = async () => {
-    setIsLoading(true);
-    try {
-      // Create a list of all updatable field promises
-      const updatePromises = Object.keys(updatableEndpoints).map(async fullKey => {
-        const [section, key] = fullKey.split('.');
-        try {
-          // Await each update to ensure they happen in order and prevent race conditions
-          await handleUpdateField(section, key);
-        } catch (err) {
-          console.error(`Error updating field ${fullKey}: ${err.message}`);
-          // Do not re-throw, just log the error and continue with the next field
-        }
-      });
-      // Wait for all updates to complete
-      await Promise.all(updatePromises.map(p => p.catch(e => e)));
-      // After all updates, re-fetch the dashboard data to ensure consistency.
-      await getData();
-      setSaveStatus({
-          open: true,
-          message: 'All updatable fields have been refreshed!',
-          severity: 'success',
-      });
-    } catch (err) {
-      console.error('Update all failed:', err);
-      setSaveStatus({
-          open: true,
-          message: `Error updating all fields: ${err.message}`,
-          severity: 'error',
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleLoadTemplate = async (templateName) => {
@@ -511,17 +442,7 @@ export function Dashboard() {
       >
         <Box sx={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Box sx={{ width: '33.3%', display: 'flex', justifyContent: 'flex-start', gap: 1 }}>
-            {isEditing && (
-              <>
-                <Button variant="outlined" onClick={handleFetchActivities}>
-                  Load Template
-                </Button>
-                <Button variant="outlined" onClick={handleUpdateAllFields} disabled={isLoading}>
-                    <AutorenewIcon sx={{ mr: 1 }} />
-                    Update All
-                </Button>
-              </>
-            )}
+            {/* The load template button has been moved to the right */}
           </Box>
           <Box sx={{ width: '33.3%', textAlign: 'center' }}>
             {isEditing ? (
@@ -568,6 +489,9 @@ export function Dashboard() {
                       Save
                     </Button>
                     <Button onClick={handleCancel}>Cancel</Button>
+                    <Button variant="outlined" onClick={handleFetchActivities}>
+                      Load Template
+                    </Button>
                   </>
                 ) : (
                   <>
@@ -606,9 +530,8 @@ export function Dashboard() {
                 values={editedDashboard[section]}
                 isEditing={isEditing}
                 onChange={handleChange}
-                onUpdateField={handleUpdateField}
                 titleColor={editedDashboard[section].color}
-                updatableFields={updatableEndpoints}
+                updatableEndpoints={updatableEndpoints}
               />
             ))}
           </Box>

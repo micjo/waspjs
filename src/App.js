@@ -44,7 +44,7 @@ import {
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import HomeIcon from '@mui/icons-material/Home';
 import {RbsOverview} from "./pages/rbs_overview";
-import {Dashboard} from "./pages/daybook";
+import {Dashboard} from "./pages/dashboard";
 import {ErdOverview} from "./pages/erd_overview";
 
 export const MillConfig = React.createContext({});
