@@ -31,5 +31,16 @@ cd build
 python run.py
 ```
 
+## Raspberry Pi Daybook
 
+The pi is configured to open the chromium browser in kiosk mode.
+Exit it using ctrl+alt+F4. Then enter the username and password.
+- X-server makes sure a basic UI system is present on the `Raspberry Pi Lite Os` (which doesnt have Ui by default).
+- Openbox serves as a minimal window manager.
+- Chromium is the webbrowser.
+- Unclutter removes the mouse cursor.
 
+Configuration files:
+- `~/.bash_profile`: runs `startx`, makes the Pi start X + Openbox + Chromium in kiosk mode as soon as it boots.
+- `~/.config/openbox/autostart`: defines the url to be opened in Chromium: `https://waspjs.capitan.imec.be/daybook?no-appbar=true`
+- Some additional configurations were set to disable screen blanking, that is the pi going to sleep after a long time of no activity (which is expected, since no HID-devices are connected to the pi).
