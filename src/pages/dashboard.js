@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -84,7 +84,7 @@ const fetchUpdatableEndpoints = async () => {
 };
 
 function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) {
-  const { type, value, unit, options } = field;
+  const { type, value, unit, options, min, max } = field; // Destructure min and max
 
   // Find the endpoint information for this field
   const endpointInfo = updatableEndpoints[`${label}.${field.key}`];
@@ -93,11 +93,24 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
 
   // Determine the color based on bounds
   let textColor = 'text.primary';
+  let errorText = null;
+  let isFieldInError = false;
+
   if (value !== undefined && typeof value === 'number') {
-    if (errorBounds && (value < errorBounds[0] || value > errorBounds[1])) {
-      textColor = 'error.main'; // Red for error
+    // Check for min/max bounds from the field itself (NEW)
+    if ((min !== undefined && value < min) || (max !== undefined && value > max)) {
+        textColor = 'error.main'; // Red for out of min/max bounds
+        isFieldInError = true;
+        errorText = `Value out of range [${min !== undefined ? min : '-∞'}, ${max !== undefined ? max : '∞'}]`;
+    } 
+    // Existing checks for warning/error bounds from endpointInfo, only if not already in min/max error
+    else if (errorBounds && (value < errorBounds[0] || value > errorBounds[1])) {
+      textColor = 'error.main'; // Red for API error bounds
+      isFieldInError = true;
+      errorText = `Value out of API error bounds [${errorBounds[0]}, ${errorBounds[1]}]`;
     } else if (warningBounds && (value < warningBounds[0] || value > warningBounds[1])) {
-      textColor = 'warning.main'; // Orange for warning
+      textColor = 'warning.main'; // Orange for API warning bounds
+      errorText = `Value out of API warning bounds [${warningBounds[0]}, ${warningBounds[1]}]`;
     }
   }
 
@@ -105,7 +118,7 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
     onChange(label, { ...field, value: newVal });
   };
 
-  const isUnitField = type === "integer" || type === "boolean" || type === "selection";
+  const isUnitField = type === "number" || type === "boolean" || type === "selection";
   const labelXs = 6;
   const valueXs = isUnitField ? 3 : 6;
   const totalXs = labelXs + valueXs;
@@ -113,9 +126,7 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
   const unitXs = remainingXs;
   const isTimestamp = type === "timestamp";
 
-  // Check if the field is updatable and disable editing if not
-  const isUpdatable = !!updatableEndpoints[`${label}.${field.key}`];
-  const isDisabled = !isUpdatable || !isEditing;
+  const isDisabled = field.disabled;
 
   return (
     <Grid container spacing={1} alignItems="center" sx={{ mb: 1 }}>
@@ -125,17 +136,20 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
         </Typography>
       </Grid>
       <Grid item xs={isTimestamp ? 6 : valueXs}>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" gap={0.5}> {/* Adjusted for helperText */}
           {isEditing ? (
             <>
               {/* Conditional rendering for different input types */}
-              {type === "integer" && (
+              {type === "number" && (
                 <TextField
                   type="number"
                   size="small"
                   value={value}
                   onChange={(e) => handleChange(e.target.value)}
-                  disabled={isDisabled}
+                  disabled={isDisabled} // Now only depends on field.disabled
+                  error={isFieldInError} // Show error state for TextField
+                  helperText={isFieldInError ? errorText : null} // Show error message
+                  sx={{ width: '100%' }} // Ensure TextField takes full available width
                 />
               )}
               {type === "text" && (
@@ -145,7 +159,7 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
                   value={value}
                   multiline
                   onChange={(e) => handleChange(e.target.value)}
-                  disabled={isDisabled}
+                  disabled={isDisabled} // Now only depends on field.disabled
                 />
               )}
               {type === "timestamp" && (
@@ -153,7 +167,7 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
                   size="small"
                   fullWidth
                   value={value}
-                  disabled
+                  disabled // Timestamps are always disabled for editing
                 />
               )}
               {type === "boolean" && (
@@ -162,7 +176,7 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
                     <Checkbox
                       checked={!!value}
                       onChange={(e) => handleChange(e.target.checked)}
-                      disabled={isDisabled}
+                      disabled={isDisabled} // Now only depends on field.disabled
                     />
                   }
                   label=""
@@ -173,7 +187,8 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
                   size="small"
                   value={value}
                   onChange={(e) => handleChange(e.target.value)}
-                  disabled={isDisabled}
+                  disabled={isDisabled} // Now only depends on field.disabled
+                  sx={{ width: '100%' }} // Ensure Select takes full available width
                 >
                   {options.map((opt) => (
                     <MenuItem key={opt} value={opt}>
@@ -182,11 +197,15 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
                   ))}
                 </Select>
               )}
+              {/* Display error text if in error state and not a number field or if number field has no specific input component */}
+              {!['number', 'text', 'timestamp', 'boolean', 'selection'].includes(type) && isFieldInError && (
+                <Typography variant="caption" color="error.main">{errorText}</Typography>
+              )}
             </>
           ) : (
             <>
               {/* Display the value in view mode with conditional color */}
-              {type === "integer" && (
+              {type === "number" && (
                 <Typography variant="body2" color={textColor}>{value}</Typography>
               )}
               {type === "text" && <Typography variant="body2">{value}</Typography>}
@@ -198,6 +217,10 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
               )}
               {type === "selection" && (
                 <Typography variant="body2">{value}</Typography>
+              )}
+              {/* Display error text in view mode */}
+              {errorText && (
+                <Typography variant="caption" color="error.main">{errorText}</Typography>
               )}
             </>
           )}
@@ -215,6 +238,8 @@ function KeyValueRow({ label, field, isEditing, onChange, updatableEndpoints }) 
     </Grid>
   );
 }
+
+// Rest of the components remain the same
 
 function DashboardSection({ title, values, isEditing, onChange, titleColor, updatableEndpoints }) {
   return (
@@ -480,7 +505,7 @@ export function Dashboard() {
               </>
             )}
           </Box>
-          <Box sx={{ width: '33.3%', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <Box sx={{ width: '33.3%', display: 'flex', flexDirection:"column", alignItems: 'flex-end' }}>
             {!hideAppBar && (
               <ButtonGroup>
                 {isEditing ? (
