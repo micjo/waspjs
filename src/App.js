@@ -10,6 +10,7 @@ import {
 
 
 import Link from "@material-ui/core/Link";
+import {Dashboard} from "./components/Dashboard";
 import {ToolStatus} from "./pages/tool_status";
 import {Aml} from "./pages/aml";
 import {Motrona} from "./pages/motrona";
@@ -44,7 +45,7 @@ import {
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import HomeIcon from '@mui/icons-material/Home';
 import {RbsOverview} from "./pages/rbs_overview";
-import {Dashboard} from "./pages/dashboard";
+
 import {ErdOverview} from "./pages/erd_overview";
 
 export const MillConfig = React.createContext({});
