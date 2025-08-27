@@ -22,7 +22,7 @@ import TemplatePopup from "./ui/TemplatePopup";
 export function Dashboard() {
     const nectarTitle = useContext(NectarTitle);
 
-    useEffect(() => nectarTitle.setTitle("Tool Status"))
+    useEffect(() => nectarTitle.setTitle("Dashboard"))
 
     const [dashboard, setDashboard] = useState(null);
     const [activities, setActivities] = useState([]);

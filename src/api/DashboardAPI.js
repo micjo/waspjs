@@ -1,5 +1,4 @@
 // src/api/DashboardAPI.js
-
 const DB_API_URL = "https://db.capitan.imec.be";
 
 class DashboardAPI {
@@ -7,37 +6,23 @@ class DashboardAPI {
     this.baseUrl = DB_API_URL;
   }
 
-  /**
-   * Fetches the current dashboard data.
-   */
   async fetchDashboardData() {
     return this._fetchData('/dashboard/current');
   }
 
-  /**
-   * Fetches the list of available activity templates.
-   */
   async fetchActivities() {
     return this._fetchData('/dashboard/templates');
   }
 
-  /**
-   * Fetches a specific data template by name.
-   */
   async fetchTemplate(templateName) {
     return this._fetchData(`/dashboard/templates/${templateName}`);
   }
 
-  /**
-   * Saves the current dashboard data via a POST request.
-   */
   async saveDashboard(dashboardData) {
     const url = `${this.baseUrl}/dashboard/save`;
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dashboardData),
     });
 
@@ -49,9 +34,10 @@ class DashboardAPI {
     return response.json();
   }
 
-  /**
-   * A private helper method to handle common fetch logic.
-   */
+  async fetchHistory(identifier) {
+    return this._fetchData(`/dashboard/history/${identifier}`);
+  }
+
   async _fetchData(endpoint) {
     const url = `${this.baseUrl}${endpoint}`;
     const response = await fetch(url);
@@ -62,4 +48,6 @@ class DashboardAPI {
   }
 }
 
-export default new DashboardAPI();
+const api = new DashboardAPI();
+
+export default api;
