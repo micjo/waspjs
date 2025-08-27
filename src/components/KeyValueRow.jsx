@@ -30,15 +30,12 @@ function KeyValueRow({ label, field, isEditing, onChange }) {
     let isFieldInError = false;
     let iconToDisplay = null;
 
-    if (min === undefined || max === undefined) {
-        textColor = "warning.main";
-        errorText = "No error bounds were set for this `KeyValueRow`.";
-        iconToDisplay = <WarningAmberIcon fontSize="small" color="warning" />;
-    }
-    if (field === undefined){
-        textColor = "warning.main";
-        errorText = "The identifier of this field was `undefined`.";
-    }
+    // if (min === undefined || max === undefined) {
+    //     textColor = "warning.main";
+    //     errorText = "No error bounds were set for this `KeyValueRow`.";
+    //     iconToDisplay = <WarningAmberIcon fontSize="small" color="warning" />;
+    // }
+
     if (value !== undefined && typeof value === 'number') {
         if ((min !== undefined && value < min) || (max !== undefined && value > max)) {
             textColor = 'error.main';
@@ -65,7 +62,7 @@ function KeyValueRow({ label, field, isEditing, onChange }) {
                 container
                 spacing={1}
                 alignItems="center"
-                sx={{ mb: 1, p: 1, borderRadius: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+                sx={{ mb: 0.5, p: 0.5, borderRadius: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
                 onClick={isEditing ? null : handleOpenModal}
             >
                 <Grid item xs={labelXs}>
@@ -136,8 +133,6 @@ function KeyValueRow({ label, field, isEditing, onChange }) {
                 onClose={handleCloseModal}
                 label={label}
                 field={field}
-                errorText={errorText}
-                isFieldInError={isFieldInError}
             />
         </>
     );

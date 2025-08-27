@@ -18,6 +18,7 @@ import DashboardAPI from '../api/DashboardAPI';
 import DashboardSection from "./DashboardSection";
 import LoadingState from "./ui/LoadingState";
 import TemplatePopup from "./ui/TemplatePopup";
+import KeyValueDetailsModal from './KeyValueDetailsModal';
 
 export function Dashboard() {
     const nectarTitle = useContext(NectarTitle);
@@ -37,6 +38,15 @@ export function Dashboard() {
     const [isRefreshSuccessful, setIsRefreshSuccessful] = useState(false);
     const [hideAppBar, setHideAppBar] = useState(false);
     const [saveStatus, setSaveStatus] = useState({ open: false, message: '', severity: 'success' });
+    const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
+
+    const handleOpenTitleModal = () => {
+        setIsTitleModalOpen(true);
+    };
+
+    const handleCloseTitleModal = () => {
+        setIsTitleModalOpen(false);
+    };
 
     const getData = async () => {
         setIsLoading(true);
@@ -148,7 +158,7 @@ export function Dashboard() {
     }
 
     const sections = Object.entries(editedDashboard || {});
-    const numColumns = 3;
+    const numColumns = 4;
     const columns = Array.from({ length: numColumns }, () => []);
     sections.forEach((section, index) => {
         columns[index % numColumns].push(section);
@@ -177,9 +187,17 @@ export function Dashboard() {
                             </>
                         ) : (
                             <>
-                                <Typography variant="h4" sx={{ p: 1, mb: 1, borderRadius: '4px' }}>
-                                    {activityTitle}
-                                </Typography>
+                                <Box
+                                    onClick={handleOpenTitleModal}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        '&:hover': { textDecoration: 'underline' }
+                                    }}
+                                >
+                                    <Typography variant="h4" sx={{ p: 1, mb: 1, borderRadius: '4px' }}>
+                                        {activityTitle}
+                                    </Typography>
+                                </Box>
                                 {currentTemplateName && (
                                     <Typography variant="body2" color="text.secondary" sx={{ mt: -1.5, mb: 1.5 }}>
                                         Template: {currentTemplateName}
@@ -202,8 +220,8 @@ export function Dashboard() {
                                         <Button variant="outlined" onClick={() => setIsEditing(true)}>Edit</Button>
                                         <Button variant="outlined" onClick={() => window.location.reload()}>
                                             <ReplayIcon sx={{ mr: 1 }} />
-                      Reload
-                    </Button>
+                                            Reload
+                                        </Button>
                                     </>
                                 )}
                             </ButtonGroup>
@@ -246,6 +264,15 @@ export function Dashboard() {
                 onSelectTemplate={handleLoadTemplate}
                 isLoading={isLoading}
             />
+
+            {dashboard?.General?.Activity && (
+                <KeyValueDetailsModal
+                    open={isTitleModalOpen}
+                    onClose={handleCloseTitleModal}
+                    label={"Activity Title"}
+                    field={dashboard.General.Activity}
+                />
+            )}
 
             <Snackbar
                 open={saveStatus.open || !!error}
