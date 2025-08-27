@@ -27,7 +27,7 @@ class DashboardAPI {
   async fetchTemplate(templateName) {
     return this._fetchData(`/dashboard/templates/${templateName}`);
   }
-  
+
   /**
    * Saves the current dashboard data via a POST request.
    */
