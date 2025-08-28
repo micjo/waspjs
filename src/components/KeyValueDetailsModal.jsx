@@ -211,7 +211,7 @@ function KeyValueDetailsModal({ open, onClose, label, field, issues = [] }) {
                                             >
                                                 {new Date(
                                                     entry.timestamp
-                                                ).toLocaleString()}
+                                                ).toLocaleString("en-GB")}
                                             </Typography>
                                             <Typography
                                                 variant="body1"

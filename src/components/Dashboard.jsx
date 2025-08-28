@@ -158,7 +158,7 @@ export function Dashboard() {
     }
 
     const sections = Object.entries(editedDashboard || {});
-    const numColumns = 4;
+    const numColumns = 5;
     const columns = Array.from({ length: numColumns }, () => []);
     sections.forEach((section, index) => {
         columns[index % numColumns].push(section);
