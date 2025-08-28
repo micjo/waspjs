@@ -39,7 +39,7 @@ const modalStyle = {
     gap: 2,
 };
 
-function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldInError }) {
+function KeyValueDetailsModal({ open, onClose, label, field, issues = [] }) {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -79,11 +79,23 @@ function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldI
                     Details for "{label}"
                 </Typography>
                 
-                {/* Display Field Errors/Warnings */}
-                {errorText && (
-                    <Alert severity={isFieldInError ? "error" : "warning"} sx={{ mb: 2 }}>
-                        {errorText}
-                    </Alert>
+                {/* Display all field warnings/errors passed from KeyValueRow */}
+                {issues.length > 0 && (
+                    <Box sx={{ mb: 2 }}>
+                        {issues.map((issue, idx) => (
+                            <Alert
+                                key={idx}
+                                severity={
+                                    issue.icon?.props?.color === "error"
+                                        ? "error"
+                                        : "warning"
+                                }
+                                sx={{ mb: 1 }}
+                            >
+                                {issue.message}
+                            </Alert>
+                        ))}
+                    </Box>
                 )}
 
                 {/* Display API Errors */}
@@ -96,7 +108,11 @@ function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldI
                 {/* Display API Warnings */}
                 {warnings.length > 0 && (
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        <Typography variant="body2" component="ul" sx={{ listStyleType: 'none', p: 0, m: 0 }}>
+                        <Typography
+                            variant="body2"
+                            component="ul"
+                            sx={{ listStyleType: "none", p: 0, m: 0 }}
+                        >
                             {warnings.map((w, i) => (
                                 <li key={i}>{w}</li>
                             ))}
@@ -106,15 +122,21 @@ function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldI
 
                 <Card variant="outlined">
                     <CardContent>
-                        <Typography variant="body1" fontWeight="bold">Current Value:</Typography>
-                        <Typography variant="h6">{field?.value} {field?.unit}</Typography>
+                        <Typography variant="body1" fontWeight="bold">
+                            Current Value:
+                        </Typography>
+                        <Typography variant="h6">
+                            {field?.value} {field?.unit}
+                        </Typography>
                     </CardContent>
                 </Card>
 
                 {explanation && (
                     <Card variant="outlined">
                         <CardContent>
-                            <Typography variant="body1" fontWeight="bold">Explanation:</Typography>
+                            <Typography variant="body1" fontWeight="bold">
+                                Explanation:
+                            </Typography>
                             <Typography variant="body2">{explanation}</Typography>
                         </CardContent>
                     </Card>
@@ -122,25 +144,42 @@ function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldI
 
                 <Card variant="outlined">
                     <CardContent>
-                        <Typography variant="body1" fontWeight="bold" gutterBottom>
+                        <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            gutterBottom
+                        >
                             History
                         </Typography>
                         {loading ? (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    p: 4,
+                                }}
+                            >
                                 <CircularProgress />
                             </Box>
                         ) : history.length > 0 ? (
                             field?.type === "number" ? (
-                                <Box sx={{ width: '100%', height: 300 }}>
+                                <Box sx={{ width: "100%", height: 300 }}>
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={history}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis
                                                 dataKey="timestamp"
-                                                tickFormatter={(ts) => new Date(ts).toLocaleTimeString()}
+                                                tickFormatter={(ts) =>
+                                                    new Date(ts).toLocaleDateString()
+                                                }
                                             />
                                             <YAxis />
-                                            <RechartsTooltip formatter={(value) => [`${value} ${field?.unit}`, "Value"]} />
+                                            <RechartsTooltip
+                                                formatter={(value) => [
+                                                    `${value} ${field?.unit}`,
+                                                    "Value",
+                                                ]}
+                                            />
                                             <Line
                                                 type="monotone"
                                                 dataKey="value"
@@ -152,29 +191,55 @@ function KeyValueDetailsModal({ open, onClose, label, field, errorText, isFieldI
                                     </ResponsiveContainer>
                                 </Box>
                             ) : (
-                                <Box sx={{ maxHeight: 200, overflowY: 'auto', p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+                                <Box
+                                    sx={{
+                                        maxHeight: 200,
+                                        overflowY: "auto",
+                                        p: 1,
+                                        bgcolor: "grey.100",
+                                        borderRadius: 1,
+                                    }}
+                                >
                                     {history.map((entry, index) => (
                                         <Box key={index} sx={{ mb: 1 }}>
-                                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                                                {new Date(entry.timestamp).toLocaleString()}
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    fontSize: "0.8rem",
+                                                    color: "text.secondary",
+                                                }}
+                                            >
+                                                {new Date(
+                                                    entry.timestamp
+                                                ).toLocaleString()}
                                             </Typography>
-                                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                                                {typeof entry.value === 'number' ? entry.value.toFixed(2) : entry.value}
+                                            <Typography
+                                                variant="body1"
+                                                sx={{ fontWeight: "medium" }}
+                                            >
+                                                {typeof entry.value === "number"
+                                                    ? entry.value.toFixed(2)
+                                                    : entry.value}
                                             </Typography>
                                         </Box>
                                     ))}
                                 </Box>
                             )
                         ) : (
-                            <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                            <Typography
+                                variant="body2"
+                                sx={{ fontStyle: "italic" }}
+                            >
                                 No history available.
                             </Typography>
                         )}
                     </CardContent>
                 </Card>
 
-                <CardActions sx={{ justifyContent: 'flex-end', pr: 0 }}>
-                    <Button onClick={onClose} variant="contained">Close</Button>
+                <CardActions sx={{ justifyContent: "flex-end", pr: 0 }}>
+                    <Button onClick={onClose} variant="contained">
+                        Close
+                    </Button>
                 </CardActions>
             </Box>
         </Modal>
