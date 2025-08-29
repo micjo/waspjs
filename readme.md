@@ -7,7 +7,7 @@ lab infrastructure.
 
 To install all required packages through node:
 ```
-npm install
+npm install --legacy-peer-deps
 ```
 
 To build a production deployment package:
@@ -30,6 +30,14 @@ cp run.py build/
 cd build
 python run.py
 ```
+
+To build and deploy these files to a running http server (e.g. nginx):
+```
+npm run build && cp -a build/* /usr/share/nginx/html/waspjs && systemctl restart nginx
+```
+
+Mak esure this folder is referenced in your nginx config.
+You might have to refresh your webpage and clear the cache (ctrl + f5 in most browsers).
 
 ## Raspberry Pi Daybook
 
