@@ -17,6 +17,13 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import DashboardAPI from '../api/DashboardAPI';
 import DashboardSection from "./DashboardSection";
 import LoadingState from "./ui/LoadingState";
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+
 import TemplatePopup from "./ui/TemplatePopup";
 import KeyValueDetailsModal from './KeyValueDetailsModal';
 
@@ -40,6 +47,11 @@ export function Dashboard() {
     const [saveStatus, setSaveStatus] = useState({ open: false, message: '', severity: 'success' });
     const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
 
+    const [isFavoriteDialogOpen, setIsFavoriteDialogOpen] = useState(false);
+    const [favoriteFileName, setFavoriteFileName] = useState('');
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
     const handleOpenTitleModal = () => {
         setIsTitleModalOpen(true);
     };
@@ -47,6 +59,47 @@ export function Dashboard() {
     const handleCloseTitleModal = () => {
         setIsTitleModalOpen(false);
     };
+
+    const handleOpenFavoriteDialog = () => {
+        setFavoriteFileName(''); // reset each time
+        setIsFavoriteDialogOpen(true);
+    };
+    
+    const handleCloseFavoriteDialog = () => {
+        setIsFavoriteDialogOpen(false);
+    };
+    
+    const handleSaveFavorite = async () => {
+        const favoritePayload = {
+            ...editedDashboard,
+            "General": {
+                ...editedDashboard.General,
+                "Activity": {
+                    ...editedDashboard.General.Activity,
+                    value: activityTitle
+                }
+            },
+            favoriteFileName
+        };
+    
+        try {
+            await fetch("https://db.capitan.imec.be/dashboard/add_to_favorites", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(favoritePayload)
+            });
+    
+            setIsFavorite(true);
+            setSaveStatus({ open: true, message: 'Added to favorites!', severity: 'success' });
+            handleCloseFavoriteDialog();
+        } catch (err) {
+            console.error("Add to favorites failed:", err);
+            setSaveStatus({ open: true, message: `Error adding to favorites: ${err.message}`, severity: 'error' });
+        }
+    };
+    
 
     const getData = async () => {
         setIsLoading(true);
@@ -134,7 +187,8 @@ export function Dashboard() {
                 }
             }
         };
-
+    
+        setIsSaving(true);  // start loading
         try {
             await DashboardAPI.saveDashboard(updatedDashboard);
             setDashboard(updatedDashboard);
@@ -144,6 +198,8 @@ export function Dashboard() {
             console.error('Save failed:', err);
             setSaveStatus({ open: true, message: `Error saving dashboard: ${err.message}`, severity: 'error' });
             setError(err.message);
+        } finally {
+            setIsSaving(false);  // stop loading
         }
     };
 
@@ -157,11 +213,19 @@ export function Dashboard() {
         return <LoadingState isLoading={isLoading} error={error} />;
     }
 
-    const sections = Object.entries(editedDashboard || {});
     const numColumns = 5;
     const columns = Array.from({ length: numColumns }, () => []);
-    sections.forEach((section, index) => {
-        columns[index % numColumns].push(section);
+    const sections = Object.entries(editedDashboard || {});
+
+    sections.forEach(([sectionName, sectionData]) => {
+        // Use column attribute if defined, otherwise default to 0
+        const colIndex = sectionData.column ?? 0;
+        if (colIndex >= 0 && colIndex < numColumns) {
+            columns[colIndex].push([sectionName, sectionData]);
+        } else {
+            // fallback to first column if column value is invalid
+            columns[0].push([sectionName, sectionData]);
+        }
     });
 
     return (
@@ -211,16 +275,26 @@ export function Dashboard() {
                             <ButtonGroup>
                                 {isEditing ? (
                                     <>
-                                        <Button variant="contained" onClick={handleSave}>Save</Button>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleSave}
+                                            disabled={isSaving}
+                                            startIcon={isSaving ? <CircularProgress size={20} /> : null}
+                                        >
+                                            {isSaving ? "Saving..." : "Save"}
+                                        </Button>
                                         <Button onClick={handleCancel}>Cancel</Button>
                                         <Button variant="outlined" onClick={handleFetchActivities}>Load Template</Button>
                                     </>
                                 ) : (
                                     <>
                                         <Button variant="outlined" onClick={() => setIsEditing(true)}>Edit</Button>
-                                        <Button variant="outlined" onClick={() => window.location.reload()}>
-                                            <ReplayIcon sx={{ mr: 1 }} />
-                                            Reload
+                                        <Button
+                                            variant="outlined"
+                                            onClick={handleOpenFavoriteDialog}
+                                            startIcon={isFavorite ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
+                                        >
+                                            Favorite
                                         </Button>
                                     </>
                                 )}
@@ -273,6 +347,26 @@ export function Dashboard() {
                     field={dashboard.General.Activity}
                 />
             )}
+
+            <Dialog open={isFavoriteDialogOpen} onClose={handleCloseFavoriteDialog}>
+                <DialogTitle>Add to Favorites</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        sx={{ width: "300px" }}
+                        label="Filename"
+                        fullWidth
+                        variant="outlined"
+                        value={favoriteFileName}
+                        onChange={(e) => setFavoriteFileName(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseFavoriteDialog}>Cancel</Button>
+                    <Button onClick={handleSaveFavorite} disabled={!favoriteFileName.trim()}>Save</Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar
                 open={saveStatus.open || !!error}

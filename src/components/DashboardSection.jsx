@@ -11,7 +11,7 @@ function DashboardSection({ title, values, isEditing, onChange, titleColor }) {
                 {title}
             </Typography>
             {Object.entries(values)
-                .filter(([key]) => key !== 'color' && key !== 'Activity')
+                .filter(([key]) => key !== 'color' && key !== 'Activity' && key !== 'column')
                 .map(([key, field]) => (
                     <KeyValueRow
                         key={key}
